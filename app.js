@@ -122,9 +122,11 @@
     groups.forEach(g => { if (groupMet(u, g)) met++; });
     return { met, total: groups.length };
   }
-  // "Finished" = crafted, i.e. explicitly marked done.
+  // "Finished" = a one-shot mission upgrade marked done. Repeatable key-item
+  // crafts are never "finished" (you keep crafting more), so they never count
+  // here — this keeps "Remove finished" and the "hide done" filter away from them.
   function isFinished(u) {
-    return !!state.done[u.id];
+    return !u.repeatable && !!state.done[u.id];
   }
 
   // ---- rendering -----------------------------------------------------------
@@ -588,7 +590,10 @@
     const total = UP.length;
     const done = UP.filter(u => state.done[u.id]).length;
     const planned = UP.filter(u => state.plan[u.id]).length;
-    els.stats.innerHTML = "<b>" + done + "</b>/" + total + " completed · <b>" + planned + "</b> planned";
+    let html = "<b>" + done + "</b>/" + total + " completed · <b>" + planned + "</b> planned";
+    const crafted = Object.values(state.crafted || {}).reduce((a, b) => a + (b || 0), 0);
+    if (crafted > 0) html += " · <b>" + crafted + "</b> crafted";
+    els.stats.innerHTML = html;
     els.foot.textContent = total + " upgrades tracked";
   }
 
