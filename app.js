@@ -35,7 +35,7 @@
     // `tools` is a GLOBAL registry of owned tool qualities (keyed `id::level`).
     // Tool qualities are permanent island gear, so ownership is shared across
     // every upgrade rather than tracked per-upgrade like materials.
-    return { done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: {}, groupsCollapsed: {} };
+    return { done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: {}, groupsCollapsed: {}, crafted: {} };
   }
   function load() {
     try {
@@ -84,6 +84,16 @@
       alts.forEach(a => delete state.qty[qtyKey(u, gi, a.id)]);
     }
     render();
+  }
+  // Clear all tracked component state (have flags + per-alternative quantities)
+  // for one upgrade. Used after a repeatable craft is tallied so gathering can
+  // restart for the next copy. Tool qualities (state.tools) are intentionally
+  // NOT cleared — they are permanent island gear.
+  function resetComponents(u) {
+    u.components.forEach((_alts, gi) => {
+      delete state.have[haveKey(u, "comp", gi)];
+      _alts.forEach(a => delete state.qty[qtyKey(u, gi, a.id)]);
+    });
   }
   // Global tool-quality ownership (shared across all upgrades).
   function toolKey(q) { return q.id + "::" + q.level; }
