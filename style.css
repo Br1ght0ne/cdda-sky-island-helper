@@ -98,6 +98,11 @@ h1 .accent { color: var(--accent); }
 .plan-btn { border: 1px solid var(--border); background: var(--panel2); color: var(--muted); border-radius: 20px; padding: 3px 11px; font-size: 12px; cursor: pointer; white-space: nowrap; }
 .plan-btn.on { background: var(--accent2); color: #fff; border-color: var(--accent2); }
 
+/* Repeatable key-item crafts: a tally/reset button replaces the done checkbox. */
+.craft-btn { border: 1px solid var(--border); background: var(--panel2); color: var(--muted); border-radius: 20px; padding: 3px 11px; font-size: 12px; cursor: not-allowed; white-space: nowrap; }
+.craft-btn.ready { background: var(--good-bg); color: var(--good); border-color: var(--good); cursor: pointer; }
+.craft-btn.ready:hover { background: var(--good); color: #06150d; }
+
 .card-body { display: none; padding: 0 14px 14px 44px; }
 .card.open .card-body { display: block; }
 .pbar { height: 4px; background: var(--panel2); border-radius: 4px; overflow: hidden; margin: 0 0 12px; }
@@ -148,6 +153,13 @@ h1 .accent { color: var(--accent); }
 .count { color: var(--shard); font-variant-numeric: tabular-nums; font-weight: 600; }
 .or { color: var(--muted); font-style: italic; margin: 0 3px; }
 .tag { font-size: 11px; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; margin-left: 6px; }
+.crafted-tag {
+  display: inline-block; margin-left: 8px; font-weight: 600; font-size: 12px;
+  color: var(--good); background: var(--good-bg);
+  border: 1px solid rgba(78,203,141,.35); border-radius: 20px; padding: 1px 9px;
+  vertical-align: middle; white-space: nowrap; cursor: pointer;
+}
+.crafted-tag:hover { border-color: var(--good); }
 .desc { color: var(--muted); font-size: 13px; white-space: pre-wrap; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
 
 /* shopping list */

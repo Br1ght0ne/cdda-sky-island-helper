@@ -35,7 +35,7 @@
     // `tools` is a GLOBAL registry of owned tool qualities (keyed `id::level`).
     // Tool qualities are permanent island gear, so ownership is shared across
     // every upgrade rather than tracked per-upgrade like materials.
-    return { done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: {}, groupsCollapsed: {} };
+    return { done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: {}, groupsCollapsed: {}, crafted: {} };
   }
   function load() {
     try {
@@ -85,6 +85,16 @@
     }
     render();
   }
+  // Clear all tracked component state (have flags + per-alternative quantities)
+  // for one upgrade. Used after a repeatable craft is tallied so gathering can
+  // restart for the next copy. Tool qualities (state.tools) are intentionally
+  // NOT cleared — they are permanent island gear.
+  function resetComponents(u) {
+    u.components.forEach((_alts, gi) => {
+      delete state.have[haveKey(u, "comp", gi)];
+      _alts.forEach(a => delete state.qty[qtyKey(u, gi, a.id)]);
+    });
+  }
   // Global tool-quality ownership (shared across all upgrades).
   function toolKey(q) { return q.id + "::" + q.level; }
   function qualOwned(q) { return !!state.tools[toolKey(q)]; }
@@ -112,9 +122,11 @@
     groups.forEach(g => { if (groupMet(u, g)) met++; });
     return { met, total: groups.length };
   }
-  // "Finished" = crafted, i.e. explicitly marked done.
+  // "Finished" = a one-shot mission upgrade marked done. Repeatable key-item
+  // crafts are never "finished" (you keep crafting more), so they never count
+  // here — this keeps "Remove finished" and the "hide done" filter away from them.
   function isFinished(u) {
-    return !!state.done[u.id];
+    return !u.repeatable && !!state.done[u.id];
   }
 
   // ---- rendering -----------------------------------------------------------
@@ -199,18 +211,41 @@
     const top = document.createElement("div");
     top.className = "card-top";
 
-    const doneWrap = document.createElement("label");
-    doneWrap.className = "card-done";
-    doneWrap.title = "Mark upgrade completed";
-    const doneCb = document.createElement("input");
-    doneCb.type = "checkbox";
-    doneCb.checked = done;
-    doneCb.addEventListener("click", e => e.stopPropagation());
-    doneCb.addEventListener("change", () => {
-      if (doneCb.checked) state.done[u.id] = true; else delete state.done[u.id];
-      render();
-    });
-    doneWrap.appendChild(doneCb);
+    // Top-left control: a "Mark complete" checkbox for one-shot mission
+    // upgrades, or a "Craft" button (tally + reset) for repeatable key-item crafts.
+    let doneWrap, doneCb = null, craftBtn = null;
+    if (u.repeatable) {
+      doneWrap = document.createElement("div");
+      doneWrap.className = "card-done";
+      const ready = prog.total > 0 && prog.met === prog.total;
+      craftBtn = document.createElement("button");
+      craftBtn.type = "button";
+      craftBtn.className = "craft-btn" + (ready ? " ready" : "");
+      craftBtn.textContent = "Craft";
+      craftBtn.disabled = !ready;
+      craftBtn.title = ready ? "Tally one craft and reset ingredients"
+                             : "Gather all ingredients first";
+      craftBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        state.crafted[u.id] = (state.crafted[u.id] || 0) + 1;
+        resetComponents(u);
+        render();
+      });
+      doneWrap.appendChild(craftBtn);
+    } else {
+      doneWrap = document.createElement("label");
+      doneWrap.className = "card-done";
+      doneWrap.title = "Mark upgrade completed";
+      doneCb = document.createElement("input");
+      doneCb.type = "checkbox";
+      doneCb.checked = done;
+      doneCb.addEventListener("click", e => e.stopPropagation());
+      doneCb.addEventListener("change", () => {
+        if (doneCb.checked) state.done[u.id] = true; else delete state.done[u.id];
+        render();
+      });
+      doneWrap.appendChild(doneCb);
+    }
 
     const main = document.createElement("div");
     main.className = "card-main";
@@ -222,6 +257,21 @@
       key.className = "card-key";
       key.textContent = "Craft: " + u.key_name;
       title.appendChild(key);
+    }
+    const craftedN = state.crafted[u.id] || 0;
+    if (craftedN > 0) {
+      const tag = document.createElement("span");
+      tag.className = "crafted-tag";
+      tag.textContent = "Crafted: " + craftedN;
+      tag.title = "Click to reset this craft count to 0";
+      tag.addEventListener("click", e => {
+        e.stopPropagation();
+        if (confirm('Reset crafted count for "' + u.name + '" to 0?')) {
+          delete state.crafted[u.id];
+          render();
+        }
+      });
+      title.appendChild(tag);
     }
     const eff = document.createElement("div");
     eff.className = "card-effect";
@@ -540,7 +590,10 @@
     const total = UP.length;
     const done = UP.filter(u => state.done[u.id]).length;
     const planned = UP.filter(u => state.plan[u.id]).length;
-    els.stats.innerHTML = "<b>" + done + "</b>/" + total + " completed · <b>" + planned + "</b> planned";
+    let html = "<b>" + done + "</b>/" + total + " completed · <b>" + planned + "</b> planned";
+    const crafted = Object.values(state.crafted || {}).reduce((a, b) => a + (b || 0), 0);
+    if (crafted > 0) html += " · <b>" + crafted + "</b> crafted";
+    els.stats.innerHTML = html;
     els.foot.textContent = total + " upgrades tracked";
   }
 
