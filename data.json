@@ -1,10 +1,11 @@
 {
   "generated_from": "CleverRaven/cataclysm-dda data/mods/Sky_Island",
   "guide_base": "https://cdda-guide.nornagon.net",
-  "count": 84,
+  "count": 107,
   "upgrades": [
     {
       "id": "SKYISLAND_UPGRADE_rankup1",
+      "repeatable": false,
       "key_item": "upgradekey_rankup1",
       "name": "Island Rank Up 1",
       "key_name": "Proof of Determination",
@@ -68,6 +69,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_rankup2",
+      "repeatable": false,
       "key_item": "upgradekey_rankup2",
       "name": "Island Rank Up 2",
       "key_name": "Proof of Mastery",
@@ -131,6 +133,7 @@
     },
     {
       "id": "SKYISLAND_bunker_temperature_adaptation",
+      "repeatable": false,
       "key_item": "buildkey_climatecontrol",
       "name": "Construct: Climate Control",
       "key_name": "Lukewarm Sphere",
@@ -249,6 +252,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_sunblock",
+      "repeatable": false,
       "key_item": "upgradekey_sunblock",
       "name": "Upgrade: Personal sunblock",
       "key_name": "Solar Refractor",
@@ -357,6 +361,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_radblock",
+      "repeatable": false,
       "key_item": "upgradekey_radblock",
       "name": "Upgrade: Personal Radiation Shield",
       "key_name": "Focused Scrubber",
@@ -421,6 +426,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_windblock",
+      "repeatable": false,
       "key_item": "upgradekey_windblock",
       "name": "Upgrade: Personal windblock",
       "key_name": "Wind Redirector",
@@ -502,6 +508,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_island_steady",
+      "repeatable": false,
       "key_item": "upgradekey_island_steady",
       "name": "Upgrade: Island-Side Resilience",
       "key_name": "Unyielding Sinew",
@@ -570,6 +577,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_personal_temperature_adaptation",
+      "repeatable": false,
       "key_item": "upgradekey_temperature_control",
       "name": "Upgrade: Personal temperature adjustement",
       "key_name": "Climate Self-Injector",
@@ -672,6 +680,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_base1",
+      "repeatable": false,
       "key_item": "buildkey_base1",
       "name": "Construct: Bunker Entrance",
       "key_name": "Mouth of the Island",
@@ -746,6 +755,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_bigroom1",
+      "repeatable": false,
       "key_item": "buildkey_bigroom1",
       "name": "Construct: Main Room 1",
       "key_name": "Miner's Cameo",
@@ -863,6 +873,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_bigroom2",
+      "repeatable": false,
       "key_item": "buildkey_bigroom2",
       "name": "Construct: Main Room 2",
       "key_name": "Hollow Carver",
@@ -958,6 +969,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_bigroom3",
+      "repeatable": false,
       "key_item": "buildkey_bigroom3",
       "name": "Construct: Main Room 3",
       "key_name": "Warped Reinforcement",
@@ -1089,6 +1101,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_bigroom4",
+      "repeatable": false,
       "key_item": "buildkey_bigroom4",
       "name": "Construct: Main Room 4",
       "key_name": "Cavernous Soul",
@@ -1194,6 +1207,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_centralskylight2",
+      "repeatable": false,
       "key_item": "buildkey_centralskylight2",
       "name": "Construct: Central Skylight 2",
       "key_name": "Glass Figurine",
@@ -1291,6 +1305,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_centralskylight3",
+      "repeatable": false,
       "key_item": "buildkey_centralskylight3",
       "name": "Construct: Central Skylight 3",
       "key_name": "Crystalline Mirror",
@@ -1426,6 +1441,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_centralskylight4",
+      "repeatable": false,
       "key_item": "buildkey_centralskylight4",
       "name": "Construct: Central Skylight 4",
       "key_name": "Transparent Cube",
@@ -1549,6 +1565,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_south_greenhouse1",
+      "repeatable": false,
       "key_item": "buildkey_south_greenhouse_1",
       "name": "Construct: South Greenhouse 1",
       "key_name": "Miner's Cameo (South)",
@@ -1641,6 +1658,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_south_greenhouse2",
+      "repeatable": false,
       "key_item": "buildkey_south_greenhouse_2",
       "name": "Construct: South Greenhouse 2",
       "key_name": "Hollow Carver (South)",
@@ -1733,6 +1751,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_south_greenhouse3",
+      "repeatable": false,
       "key_item": "buildkey_south_greenhouse_3",
       "name": "Construct: South Greenhouse 3",
       "key_name": "Warped Reinforcement (South)",
@@ -1827,6 +1846,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_south_greenhouse4",
+      "repeatable": false,
       "key_item": "buildkey_south_greenhouse_4",
       "name": "Construct: South Greenhouse 4",
       "key_name": "Cavernous Soul (South)",
@@ -1921,6 +1941,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_south_greenhouse_skylight1",
+      "repeatable": false,
       "key_item": "buildkey_south_greenhouse_skylight_1",
       "name": "Construct: South Greenhouse Skylight 1",
       "key_name": "Glass Figurine (South)",
@@ -2026,6 +2047,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_south_greenhouse_skylight2",
+      "repeatable": false,
       "key_item": "buildkey_south_greenhouse_skylight_2",
       "name": "Construct: South Greenhouse Skylight 2",
       "key_name": "Crystalline Mirror (South)",
@@ -2131,6 +2153,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_westroom1",
+      "repeatable": false,
       "key_item": "buildkey_westroom1",
       "name": "Construct: West Room 1",
       "key_name": "Miner's Cameo (West)",
@@ -2248,6 +2271,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_westroom2",
+      "repeatable": false,
       "key_item": "buildkey_westroom2",
       "name": "Construct: West Room 2",
       "key_name": "Hollow Carver (West)",
@@ -2343,6 +2367,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_westroom3",
+      "repeatable": false,
       "key_item": "buildkey_westroom3",
       "name": "Construct: West Room 3",
       "key_name": "Warped Reinforcement (West)",
@@ -2474,6 +2499,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_westroom4",
+      "repeatable": false,
       "key_item": "buildkey_westroom4",
       "name": "Construct: West Room Gallery",
       "key_name": "Crystalline Glass (West)",
@@ -2588,6 +2614,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_west_side_rooms",
+      "repeatable": false,
       "key_item": "buildkey_west_side_rooms",
       "name": "Construct: West Side Rooms",
       "key_name": "Inverted Cube (West)",
@@ -2731,6 +2758,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_northroom1",
+      "repeatable": false,
       "key_item": "buildkey_northroom1",
       "name": "Construct: North Room 1",
       "key_name": "Miner's Cameo (North)",
@@ -2841,6 +2869,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_northroom2",
+      "repeatable": false,
       "key_item": "buildkey_northroom2",
       "name": "Construct: North Room 2",
       "key_name": "Hollow Carver (North)",
@@ -2949,6 +2978,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_northroom3",
+      "repeatable": false,
       "key_item": "buildkey_northroom3",
       "name": "Construct: north Room 3",
       "key_name": "Warped Reinforcement (north)",
@@ -3071,6 +3101,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_northroom4",
+      "repeatable": false,
       "key_item": "buildkey_northroom4",
       "name": "Construct: North Room Gallery",
       "key_name": "Cavernous Soul (North)",
@@ -3189,6 +3220,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_north_side_rooms",
+      "repeatable": false,
       "key_item": "buildkey_north_side_rooms",
       "name": "Construct: North Side Rooms",
       "key_name": "Inverted Cube (North)",
@@ -3332,6 +3364,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_eastroom1",
+      "repeatable": false,
       "key_item": "buildkey_eastroom1",
       "name": "Construct: East Room 1",
       "key_name": "Miner's Cameo (East)",
@@ -3449,6 +3482,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_eastroom2",
+      "repeatable": false,
       "key_item": "buildkey_eastroom2",
       "name": "Construct: East Room 2",
       "key_name": "Hollow Carver (East)",
@@ -3544,6 +3578,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_eastroom3",
+      "repeatable": false,
       "key_item": "buildkey_eastroom3",
       "name": "Construct: East Room 3",
       "key_name": "Warped Reinforcement (East)",
@@ -3675,6 +3710,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_eastroom4",
+      "repeatable": false,
       "key_item": "buildkey_eastroom4",
       "name": "Construct: east Room Gallery",
       "key_name": "Crystalline Glass (East)",
@@ -3789,6 +3825,7 @@
     },
     {
       "id": "SKYISLAND_BUILD_east_side_rooms",
+      "repeatable": false,
       "key_item": "buildkey_east_side_rooms",
       "name": "Construct: East Side Rooms",
       "key_name": "Inverted Cube (East)",
@@ -3932,6 +3969,7 @@
     },
     {
       "id": "SKYISLAND_merchant_stall",
+      "repeatable": false,
       "key_item": "buildkey_merchant_stall",
       "name": "Construct: Merchant Stall",
       "key_name": "Jangling Pouch",
@@ -4023,6 +4061,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_landing1",
+      "repeatable": false,
       "key_item": "upgradekey_landing1",
       "name": "Upgrade: Landing 1",
       "key_name": "Landing Pad",
@@ -4083,6 +4122,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_landing2",
+      "repeatable": false,
       "key_item": "upgradekey_landing2",
       "name": "Upgrade: Landing 2",
       "key_name": "Safety Net",
@@ -4183,6 +4223,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_landing3",
+      "repeatable": false,
       "key_item": "upgradekey_landing3",
       "name": "Upgrade: Landing 3",
       "key_name": "Warped Parachute",
@@ -4251,6 +4292,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_landing4",
+      "repeatable": false,
       "key_item": "upgradekey_landing4",
       "name": "Upgrade: Landing 4",
       "key_name": "Ethereal Cushion",
@@ -4333,6 +4375,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_landing5",
+      "repeatable": false,
       "key_item": "upgradekey_landing5",
       "name": "Upgrade: Landing 5",
       "key_name": "Grace of the Island",
@@ -4421,6 +4464,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_landing6",
+      "repeatable": false,
       "key_item": "upgradekey_landing6",
       "name": "Upgrade: Landing 6",
       "key_name": "Familiarity Gemstone",
@@ -4521,6 +4565,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_landing7",
+      "repeatable": false,
       "key_item": "upgradekey_landing7",
       "name": "Upgrade: Landing 7",
       "key_name": "Warm Welcome",
@@ -4595,6 +4640,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_landing8",
+      "repeatable": false,
       "key_item": "upgradekey_landing8",
       "name": "Upgrade: Landing 8",
       "key_name": "Emissary's Herald",
@@ -4905,6 +4951,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_landing_water_walking",
+      "repeatable": false,
       "key_item": "upgradekey_landing_waterwalking",
       "name": "Upgrade: Landing Boost: Waterwalking",
       "key_name": "Cloaking Buoyancy",
@@ -4977,6 +5024,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_landing_flight",
+      "repeatable": false,
       "key_item": "upgradekey_landing_flight",
       "name": "Upgrade: Landing Boost: Flight",
       "key_name": "Inverted Gravity Bubble",
@@ -5045,6 +5093,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_landing_phase",
+      "repeatable": false,
       "key_item": "upgradekey_landing_phase",
       "name": "Upgrade: Landing Boost: Phasing",
       "key_name": "Universal Access Pass",
@@ -5133,6 +5182,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_scouting1",
+      "repeatable": false,
       "key_item": "upgradekey_scouting1",
       "name": "Upgrade: Scouting 1",
       "key_name": "Scouting Lens",
@@ -5229,6 +5279,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_scouting2",
+      "repeatable": false,
       "key_item": "upgradekey_scouting2",
       "name": "Upgrade: Scouting 2",
       "key_name": "Scouting Scope",
@@ -5330,6 +5381,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_scouting3",
+      "repeatable": false,
       "key_item": "upgradekey_scouting3",
       "name": "Upgrade: Scouting 3",
       "key_name": "Vision Amplifier",
@@ -5434,6 +5486,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_scouting4",
+      "repeatable": false,
       "key_item": "upgradekey_scouting4",
       "name": "Upgrade: Scouting 4",
       "key_name": "Third Eye Charm",
@@ -5522,6 +5575,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_scouting5",
+      "repeatable": false,
       "key_item": "upgradekey_scouting5",
       "name": "Upgrade: Scouting 5",
       "key_name": "Eye of the Island",
@@ -5604,6 +5658,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_scouting6",
+      "repeatable": false,
       "key_item": "upgradekey_scouting6",
       "name": "Upgrade: Scouting 6",
       "key_name": "Warpforged Telescope",
@@ -5686,6 +5741,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_scouting7",
+      "repeatable": false,
       "key_item": "upgradekey_scouting7",
       "name": "Upgrade: Scouting 7",
       "key_name": "Agglomerated Oculus",
@@ -5784,6 +5840,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_scouting8",
+      "repeatable": false,
       "key_item": "upgradekey_scouting8",
       "name": "Upgrade: Scouting 8",
       "key_name": "Other Eye of the Island",
@@ -5846,6 +5903,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_scoutingclairvoyance1",
+      "repeatable": false,
       "key_item": "upgradekey_scoutingclairvoyance1",
       "name": "Upgrade: Scouting Clairvoyance 1",
       "key_name": "Higher Viewpoint",
@@ -5914,6 +5972,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_scoutingclairvoyance2",
+      "repeatable": false,
       "key_item": "upgradekey_scoutingclairvoyance2",
       "name": "Upgrade: Scouting Clairvoyance 2",
       "key_name": "All-Seeing Effigy",
@@ -6000,6 +6059,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_stability1",
+      "repeatable": false,
       "key_item": "upgradekey_stability1",
       "name": "Upgrade: Stability 1",
       "key_name": "Warped Tincture",
@@ -6082,6 +6142,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_stability2",
+      "repeatable": false,
       "key_item": "upgradekey_stability2",
       "name": "Upgrade: Stability 2",
       "key_name": "Surreal Shield",
@@ -6180,6 +6241,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_stability3",
+      "repeatable": false,
       "key_item": "upgradekey_stability3",
       "name": "Upgrade: Stability 3",
       "key_name": "Warpstream Plating",
@@ -6308,6 +6370,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_stability4",
+      "repeatable": false,
       "key_item": "upgradekey_stability4",
       "name": "Upgrade: Stability 4",
       "key_name": "Fortitude of the Island",
@@ -6382,6 +6445,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_stability5",
+      "repeatable": false,
       "key_item": "upgradekey_stability5",
       "name": "Upgrade: Stability 5",
       "key_name": "Explorer's Ward",
@@ -6450,6 +6514,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_stability6",
+      "repeatable": false,
       "key_item": "upgradekey_stability6",
       "name": "Upgrade: Stability 6",
       "key_name": "Island-Bound Armor",
@@ -6548,6 +6613,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_stability7",
+      "repeatable": false,
       "key_item": "upgradekey_stability7",
       "name": "Upgrade: Stability 7",
       "key_name": "Triune Anchor",
@@ -6642,6 +6708,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_raidlength1",
+      "repeatable": false,
       "key_item": "upgradekey_raidlength1",
       "name": "Unlock: Large Expeditions",
       "key_name": "Warped Hourglass",
@@ -6708,6 +6775,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_raidlength2",
+      "repeatable": false,
       "key_item": "upgradekey_raidlength2",
       "name": "Unlock: Extended Expeditions",
       "key_name": "Watch of Flowing Time",
@@ -6768,6 +6836,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_slaughter",
+      "repeatable": false,
       "key_item": "upgradekey_slaughter",
       "name": "Unlock: Slaughter Missions",
       "key_name": "Vengeance of the Island",
@@ -6790,6 +6859,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_bonusmissions1",
+      "repeatable": false,
       "key_item": "upgradekey_bonusmissions1",
       "name": "Unlock: Expedition Missions",
       "key_name": "Warped Decree",
@@ -6876,6 +6946,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_bonusmissions2",
+      "repeatable": false,
       "key_item": "upgradekey_bonusmissions2",
       "name": "Unlock: Two Missions per Expedition",
       "key_name": "Order's Blade",
@@ -6970,6 +7041,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_bonusmissions3",
+      "repeatable": false,
       "key_item": "upgradekey_bonusmissions3",
       "name": "Unlock: Three Missions per Expedition",
       "key_name": "Hand of the Island",
@@ -7148,6 +7220,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_bonusmissions4",
+      "repeatable": false,
       "key_item": "upgradekey_bonusmissions4",
       "name": "Unlock: Four Missions per Expedition",
       "key_name": "Petrified Duty's Call",
@@ -7234,6 +7307,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_bonusmissions5",
+      "repeatable": false,
       "key_item": "upgradekey_bonusmissions5",
       "name": "Unlock: Five Missions per Expedition",
       "key_name": "Oath of the Island's Enforcer",
@@ -7281,6 +7355,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_hardmissions1",
+      "repeatable": false,
       "key_item": "upgradekey_hardmissions1",
       "name": "Unlock: Harder Missions",
       "key_name": "Ordinator's Sigil",
@@ -7371,6 +7446,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_hardmissions2",
+      "repeatable": false,
       "key_item": "upgradekey_hardmissions2",
       "name": "Unlock: Hardest Missions",
       "key_name": "Will of the Island",
@@ -7451,6 +7527,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_exit1",
+      "repeatable": false,
       "key_item": "upgradekey_exit1",
       "name": "Unlock: Two Exits per Expedition",
       "key_name": "Escape Charm",
@@ -7527,6 +7604,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_exit2",
+      "repeatable": false,
       "key_item": "upgradekey_exit2",
       "name": "Unlock: Three Exits per Expedition",
       "key_name": "Blindfold of Egress",
@@ -7599,6 +7677,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_exit3",
+      "repeatable": false,
       "key_item": "upgradekey_exit3",
       "name": "Unlock: Four Exits per Expedition",
       "key_name": "Thrice-Sided Door",
@@ -7665,6 +7744,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_exit4",
+      "repeatable": false,
       "key_item": "upgradekey_exit4",
       "name": "Unlock: Five Exits per Expedition",
       "key_name": "Intangible Door Stopper",
@@ -7731,6 +7811,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_basementsunlock",
+      "repeatable": false,
       "key_item": "upgradekey_basementsunlock",
       "name": "Unlock Start Location: Basements",
       "key_name": "Basement Locator",
@@ -7801,6 +7882,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_roofsunlock",
+      "repeatable": false,
       "key_item": "upgradekey_roofsunlock",
       "name": "Unlock Start Location: Roofs",
       "key_name": "Rooftop Locator",
@@ -8018,6 +8100,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_labsunlock",
+      "repeatable": false,
       "key_item": "upgradekey_labsunlock",
       "name": "Unlock Start Location: Labs",
       "key_name": "Laboratory Locator",
@@ -8098,6 +8181,7 @@
     },
     {
       "id": "SKYISLAND_UPGRADE_challenge_mode",
+      "repeatable": false,
       "key_item": "upgradekey_challenge_mode",
       "name": "Unlock: Challenge Mode",
       "key_name": "Eternal Obelisk",
@@ -8241,25 +8325,1203 @@
       ],
       "qualities": [],
       "tools": []
+    },
+    {
+      "id": "craft:warp_grassbag",
+      "repeatable": true,
+      "key_item": "warp_grassbag",
+      "name": "warped grass seeds",
+      "key_name": "warped grass seeds",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "While these are certainly imbued with warp, they don't seem to have any supernatural powers beyond just growing quickly.  A nice option if you want to re-plant grass on your island, for decoration's sake.",
+      "description": "While these are certainly imbued with warp, they don't seem to have any supernatural powers beyond just growing quickly.  A nice option if you want to re-plant grass on your island, for decoration's sake.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 1,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_wood_floor_tokens",
+      "repeatable": true,
+      "key_item": "warp_wood_floor_tokens",
+      "name": "wood-floor tokens",
+      "key_name": "wood-floor tokens",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "A group of small squares of wood, smooth and polished.  You can use them to transform a section of flooring into interlocking wooden planks.",
+      "description": "A group of small squares of wood, smooth and polished.  You can use them to transform a section of flooring into interlocking wooden planks.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 1,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "2x4",
+            "count": 25,
+            "name": "plank",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_flagstone_floor_tokens",
+      "repeatable": true,
+      "key_item": "warp_flagstone_floor_tokens",
+      "name": "flagstone tokens",
+      "key_name": "flagstone tokens",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "A group of small stone stones, rough to the touch.  You can use them to transform a section of flooring into mortared flagstones.",
+      "description": "A group of small stone stones, rough to the touch.  You can use them to transform a section of flooring into mortared flagstones.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 1,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "rock_large",
+            "count": 25,
+            "name": "large rock",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_sand_floor_tokens",
+      "repeatable": true,
+      "key_item": "warp_sand_floor_tokens",
+      "name": "sand tokens",
+      "key_name": "sand tokens",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "A group of small yellow stones, gritty to the touch yet seemingly nothing ever rubs off.  You can use them to transform a section of flooring into fine sand.",
+      "description": "A group of small yellow stones, gritty to the touch yet seemingly nothing ever rubs off.  You can use them to transform a section of flooring into fine sand.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 1,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "material_sand",
+            "count": 2500,
+            "name": "sand",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_flesh_floor_tokens",
+      "repeatable": true,
+      "key_item": "warp_flesh_floor_tokens",
+      "name": "flesh tokens",
+      "key_name": "flesh tokens",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "A group of small pieces of skin and meat, warm to the touch and fortunately never decaying.  You can use them to transform a section of flooring or wall into living flesh.",
+      "description": "A group of small pieces of skin and meat, warm to the touch and fortunately never decaying.  You can use them to transform a section of flooring or wall into living flesh.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 1,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "any_blood",
+            "count": 6,
+            "name": "Any Blood (any)",
+            "list": true,
+            "expand": [
+              {
+                "id": "animal_blood",
+                "label": "1 animal blood"
+              },
+              {
+                "id": "mutant_blood",
+                "label": "1 mutant blood"
+              },
+              {
+                "id": "blood",
+                "label": "1 Blood"
+              },
+              {
+                "id": "mutant_human_blood",
+                "label": "1 mutant human blood"
+              },
+              {
+                "id": "demihuman_blood",
+                "label": "1 demihuman blood"
+              },
+              {
+                "id": "blood_tainted",
+                "label": "1 tainted blood"
+              },
+              {
+                "id": "blood_tainted_human",
+                "label": "1 tainted human blood"
+              }
+            ],
+            "tip": "1 animal blood OR 1 mutant blood OR 1 Blood OR 1 mutant human blood OR 1 demihuman blood OR 1 tainted blood OR 1 tainted human blood"
+          }
+        ],
+        [
+          {
+            "id": "meat_offal",
+            "count": 2,
+            "name": "Meat Offal (any)",
+            "list": true,
+            "expand": [
+              {
+                "id": "heart",
+                "label": "4 of raw heart pieces"
+              },
+              {
+                "id": "human_heart",
+                "label": "4 of raw human heart pieces"
+              },
+              {
+                "id": "demihuman_heart",
+                "label": "4 of raw demihuman heart pieces"
+              },
+              {
+                "id": "mutant_heart",
+                "label": "4 of raw mutant heart pieces"
+              },
+              {
+                "id": "mutant_human_heart",
+                "label": "4 of raw mutant humanoid heart pieces"
+              },
+              {
+                "id": "lung",
+                "label": "4 of raw lung pieces"
+              },
+              {
+                "id": "human_lung",
+                "label": "4 of raw human lung pieces"
+              },
+              {
+                "id": "demihuman_lung",
+                "label": "4 of raw demihuman lung pieces"
+              },
+              {
+                "id": "mutant_bug_lungs",
+                "label": "4 of raw mutant lung pieces"
+              },
+              {
+                "id": "mutant_lung",
+                "label": "4 of raw mutant lung pieces"
+              },
+              {
+                "id": "liver",
+                "label": "4 of raw liver pieces"
+              },
+              {
+                "id": "human_liver",
+                "label": "4 of raw human liver pieces"
+              },
+              {
+                "id": "demihuman_liver",
+                "label": "4 of raw demihuman liver pieces"
+              },
+              {
+                "id": "canned_liver",
+                "label": "4 %s in jars"
+              },
+              {
+                "id": "mutant_liver",
+                "label": "4 of raw mutant liver pieces"
+              },
+              {
+                "id": "kidney",
+                "label": "4 of raw kidney pieces"
+              },
+              {
+                "id": "human_kidney",
+                "label": "4 of raw human kidney pieces"
+              },
+              {
+                "id": "demihuman_kidney",
+                "label": "4 of raw demihuman kidney pieces"
+              },
+              {
+                "id": "mutant_kidney",
+                "label": "4 of raw mutant kidney pieces"
+              },
+              {
+                "id": "sweetbread",
+                "label": "4 of raw sweetbread pieces"
+              },
+              {
+                "id": "human_sweetbread",
+                "label": "4 of raw human sweetbread pieces"
+              },
+              {
+                "id": "demihuman_sweetbread",
+                "label": "4 of raw demihuman sweetbread pieces"
+              },
+              {
+                "id": "offal",
+                "label": "1 raw offal"
+              },
+              {
+                "id": "mutant_bug_organs",
+                "label": "1 mutant organs"
+              }
+            ],
+            "tip": "4 of raw heart pieces OR 4 of raw human heart pieces OR 4 of raw demihuman heart pieces OR 4 of raw mutant heart pieces OR 4 of raw mutant humanoid heart pieces OR 4 of raw lung pieces OR 4 of raw human lung pieces OR 4 of raw demihuman lung pieces OR 4 of raw mutant lung pieces OR 4 of raw mutant lung pieces OR 4 of raw liver pieces OR 4 of raw human liver pieces OR 4 of raw demihuman liver pieces OR 4 %s in jars OR 4 of raw mutant liver pieces OR 4 of raw kidney pieces OR 4 of raw human kidney pieces OR 4 of raw demihuman kidney pieces OR 4 of raw mutant kidney pieces OR 4 of raw sweetbread pieces OR 4 of raw human sweetbread pieces OR 4 of raw demihuman sweetbread pieces OR 1 raw offal OR 1 mutant organs"
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_waterwalking_stone",
+      "repeatable": true,
+      "key_item": "warp_waterwalking_stone",
+      "name": "flotation stone",
+      "key_name": "flotation stone",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "This smooth, whorled stone seems cool and wet to the touch, but when you take your hand off it your skin is perfectly dry.  If you activate it, you will be able to walk on the surface of water for three minutes.",
+      "description": "This smooth, whorled stone seems cool and wet to the touch, but when you take your hand off it your skin is perfectly dry.  If you activate it, you will be able to walk on the surface of water for three minutes.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 3,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_vortex_token",
+      "repeatable": true,
+      "key_item": "warp_vortex_token",
+      "name": "vortex token",
+      "key_name": "vortex token",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "This irregular purplish lump seems to slowly pull in air even while you hold it in your hand.  If you have one with you when you activate the return obelisk and the obelisk is correctly configured, it will drag the entire contents of the room with you back up to your island.",
+      "description": "This irregular purplish lump seems to slowly pull in air even while you hold it in your hand.  If you have one with you when you activate the return obelisk and the obelisk is correctly configured, it will drag the entire contents of the room with you back up to your island.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 15,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_skyward_beacon",
+      "repeatable": true,
+      "key_item": "warp_skyward_beacon",
+      "name": "skyward beacon",
+      "key_name": "skyward beacon",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "This smooth purplish sphere seems like it wants to rise right out of your hand.  If you activate it, you will return directly to the island with everything you are carrying.",
+      "description": "This smooth purplish sphere seems like it wants to rise right out of your hand.  If you activate it, you will return directly to the island with everything you are carrying.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 10,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warpextender",
+      "repeatable": true,
+      "key_item": "warpextender",
+      "name": "earthbound pill",
+      "key_name": "earthbound pill",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "This pseudomagical pill extends the amount of time you can stay earthside by 4 pulses, or about 50% of a normal trip.  They're precious, but should help buy time for a difficult extract.  However, the air of the lower world destabilizes its structure and it will only last a single trip to the surface",
+      "description": "This pseudomagical pill extends the amount of time you can stay earthside by 4 pulses, or about 50% of a normal trip.  They're precious, but should help buy time for a difficult extract.  However, the air of the lower world destabilizes its structure and it will only last a single trip to the surface",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 3,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "clay_lump",
+            "count": 3,
+            "name": "lump of clay",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "rock",
+            "count": 1,
+            "name": "rocks",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_healing_salve",
+      "repeatable": true,
+      "key_item": "warp_healing_salve",
+      "name": "healing salve",
+      "key_name": "healing salve",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "A lump of purplish goo, smooth but yielding, sculptable like clay.  If you rub it on a wound, it will immediately heal some of the damage you have taken, but the air of the lower world destabilizes its structure and it will only last a single trip to the surface.",
+      "description": "A lump of purplish goo, smooth but yielding, sculptable like clay.  If you rub it on a wound, it will immediately heal some of the damage you have taken, but the air of the lower world destabilizes its structure and it will only last a single trip to the surface.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 1,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "bandages",
+            "count": 1,
+            "name": "bandage",
+            "list": false
+          },
+          {
+            "id": "bandages_makeshift",
+            "count": 2,
+            "name": "makeshift bandage",
+            "list": false
+          },
+          {
+            "id": "bandages_makeshift_bleached",
+            "count": 2,
+            "name": "bleached makeshift bandage",
+            "list": false
+          },
+          {
+            "id": "bandages_makeshift_boiled",
+            "count": 2,
+            "name": "boiled makeshift bandage",
+            "list": false
+          },
+          {
+            "id": "adhesive_bandages",
+            "count": 5,
+            "name": "adhesive bandage",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warphome",
+      "repeatable": true,
+      "key_item": "warphome",
+      "name": "homeward mote",
+      "key_name": "homeward mote",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "Taking this rare and valuable artifact with you on an expedition is essentially buying life insurance.  If you die with this mote in your inventory, you will instead be restored to full health and brought home, WITH all items and equipment carried.  But this effect will only last for a single expedition.  Even if you extract safely, any and all motes carried on your person when you return home will be DESTROYED.",
+      "description": "Though visibly little more than a glowing dustbunny, this strange ethereal mote of warp essence reveals, on closer inspection, something more.  A tiny, twisting, half-visible thread of shimmering bluish-purple trails away into the sky and far out of sight, unimpeded by any obstacles.\n\nTaking this rare and valuable artifact with you on an expedition is essentially buying life insurance.  If you die with this mote in your inventory, you will instead be restored to full health and brought home, WITH all items and equipment carried.  But this effect will only last for a single expedition.  Even if you extract safely, any and all motes carried on your person when you return home will be DESTROYED.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 20,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warphaulbag",
+      "repeatable": true,
+      "key_item": "warphaulbag",
+      "name": "warped hauler's harness",
+      "key_name": "warped hauler's harness",
+      "group": "Repeatable Crafts",
+      "category": "Warp Gear",
+      "effect": "A looped pair of shimmering blue-black straps that can be worn over the shoulders like a harness.  They can snugly fit a single item of nearly any size in comfort, and any burdens carried here feel three quarters as heavy.  Ideal for squeezing one more bulky item home through the exit when your hands are already full, or even some container packed full of other items!  Just beware you don't break your back doing it.",
+      "description": "A looped pair of shimmering blue-black straps that can be worn over the shoulders like a harness.  They can snugly fit a single item of nearly any size in comfort, and any burdens carried here feel three quarters as heavy.  Ideal for squeezing one more bulky item home through the exit when your hands are already full, or even some container packed full of other items!  Just beware you don't break your back doing it.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 10,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warphaulbag_tier2",
+      "repeatable": true,
+      "key_item": "warphaulbag_tier2",
+      "name": "warped hauler's harness mk II",
+      "key_name": "warped hauler's harness mk II",
+      "group": "Repeatable Crafts",
+      "category": "Warp Gear",
+      "effect": "A looped pair of shimmering blue-black straps that can be worn over the shoulders like a harness.  They can snugly fit a single item of nearly any size in comfort, and any burdens carried here feel half as heavy.  Ideal for squeezing one more bulky item home through the exit when your hands are already full, or even some container packed full of other items!  Just beware you don't break your back doing it.",
+      "description": "A looped pair of shimmering blue-black straps that can be worn over the shoulders like a harness.  They can snugly fit a single item of nearly any size in comfort, and any burdens carried here feel half as heavy.  Ideal for squeezing one more bulky item home through the exit when your hands are already full, or even some container packed full of other items!  Just beware you don't break your back doing it.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 20,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warphaulbag_tier3",
+      "repeatable": true,
+      "key_item": "warphaulbag_tier3",
+      "name": "warped hauler's harness mk III",
+      "key_name": "warped hauler's harness mk III",
+      "group": "Repeatable Crafts",
+      "category": "Warp Gear",
+      "effect": "A looped pair of shimmering blue-black straps that can be worn over the shoulders like a harness.  They can snugly fit a single item of nearly any size in comfort, and any burdens carried here feel a quarter as heavy.  Ideal for squeezing one more bulky item home through the exit when your hands are already full, or even some container packed full of other items!  Just beware you don't break your back doing it.",
+      "description": "A looped pair of shimmering blue-black straps that can be worn over the shoulders like a harness.  They can snugly fit a single item of nearly any size in comfort, and any burdens carried here feel a quarter as heavy.  Ideal for squeezing one more bulky item home through the exit when your hands are already full, or even some container packed full of other items!  Just beware you don't break your back doing it.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 30,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_carrier",
+      "repeatable": true,
+      "key_item": "warp_carrier",
+      "name": "warped animal carrier",
+      "key_name": "warped animal carrier",
+      "group": "Repeatable Crafts",
+      "category": "Warp Gear",
+      "effect": "A hand-sized cage with a shimmering portal at its aperture.  Despite being shaped more like a cat carrier, the power of warp enables it to capture creatures far bigger than you.  This may be your best bet for bringing animals home to your island sanctuary.  Activate to capture an adjacent animal, or to release a carried animal.",
+      "description": "A hand-sized cage with a shimmering portal at its aperture.  Despite being shaped more like a cat carrier, the power of warp enables it to capture creatures far bigger than you.  This may be your best bet for bringing animals home to your island sanctuary.  Activate to capture an adjacent animal, or to release a carried animal.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 12,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_autodoc_inert",
+      "repeatable": true,
+      "key_item": "warp_autodoc_inert",
+      "name": "Autodoc copyplate (inert)",
+      "key_name": "Autodoc copyplate (inert)",
+      "group": "Repeatable Crafts",
+      "category": "Warp Tools",
+      "effect": "This strange obsidian-colored plate is capable of mimicking the advanced tech found within a modern Autodoc, and can be used to create a working copy at your sanctuary.  However, it is inert in its current state and must first be imprinted on a working Autodoc.  To do so, find an Autodoc during an expedition and use the construction menu to imprint this plate.",
+      "description": "This strange obsidian-colored plate is capable of mimicking the advanced tech found within a modern Autodoc, and can be used to create a working copy at your sanctuary.  However, it is inert in its current state and must first be imprinted on a working Autodoc.  To do so, find an Autodoc during an expedition and use the construction menu to imprint this plate.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 30,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_labs_catalyst",
+      "repeatable": true,
+      "key_item": "warp_labs_catalyst",
+      "name": "Labs Catalyst",
+      "key_name": "Labs Catalyst",
+      "group": "Repeatable Crafts",
+      "category": "Warp Upgrades",
+      "effect": "A bit of warp power, a magnetic stripe keycard from a dangerous place, and a little hope, blended well.  This item is required to begin a Labs expedition, and is consumed when leaving.",
+      "description": "A bit of warp power, a magnetic stripe keycard from a dangerous place, and a little hope, blended well.  This item is required to begin a Labs expedition, and is consumed when leaving.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 15,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "id_science",
+            "count": 1,
+            "name": "science ID card",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "microscope_dissecting",
+            "count": 1,
+            "name": "dissecting microscope",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:item_merchant_attractor",
+      "repeatable": true,
+      "key_item": "item_merchant_attractor",
+      "name": "lucre lure",
+      "key_name": "lucre lure",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "This irregular purplish lump shines like gold and is as heavy as gold too.  Activating it will attract a merchant to your trade stall when you next return from an expedition, whenever that should be.",
+      "description": "This irregular purplish lump shines like gold and is as heavy as gold too.  Activating it will attract a merchant to your trade stall when you next return from an expedition, whenever that should be.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 10,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "coin_penny",
+            "count": 1,
+            "name": "penny",
+            "list": false
+          },
+          {
+            "id": "coin_nickel",
+            "count": 1,
+            "name": "nickel",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "coin_dime",
+            "count": 1,
+            "name": "dime",
+            "list": false
+          },
+          {
+            "id": "coin_quarter",
+            "count": 1,
+            "name": "quarter",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "money_one",
+            "count": 1,
+            "name": "one-dollar bill",
+            "list": false
+          },
+          {
+            "id": "money_five",
+            "count": 1,
+            "name": "five-dollar bill",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "money_ten",
+            "count": 1,
+            "name": "ten-dollar bill",
+            "list": false
+          },
+          {
+            "id": "money_twenty",
+            "count": 1,
+            "name": "twenty-dollar bill",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "money_fifty",
+            "count": 1,
+            "name": "fifty-dollar bill",
+            "list": false
+          },
+          {
+            "id": "money_hundred",
+            "count": 1,
+            "name": "hundred-dollar bill",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_folded_infinitree",
+      "repeatable": true,
+      "key_item": "warp_folded_infinitree",
+      "name": "infinity tree sapling",
+      "key_name": "infinity tree sapling",
+      "group": "Repeatable Crafts",
+      "category": "Warp Tools",
+      "effect": "A fragile little wisp of a sapling.  Its leaves shake and quiver, shimmering with strange energies.  Activate this on your island to place an infinity tree, which can be used as a catalyst to turn material tokens into wooden resources.",
+      "description": "A fragile little wisp of a sapling.  Its leaves shake and quiver, shimmering with strange energies.  Activate this on your island to place an infinity tree, which can be used as a catalyst to turn material tokens into wooden resources.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 3,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "2x4",
+            "count": 2,
+            "name": "plank",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "stick_long",
+            "count": 1,
+            "name": "long stick",
+            "list": false
+          },
+          {
+            "id": "stick",
+            "count": 2,
+            "name": "stick",
+            "list": false
+          },
+          {
+            "id": "twig",
+            "count": 6,
+            "name": "twig",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "leaves",
+            "count": 8,
+            "name": "handful of leaves",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "splinter",
+            "count": 4,
+            "name": "splintered wood",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_folded_infinitystone",
+      "repeatable": true,
+      "key_item": "warp_folded_infinitystone",
+      "name": "infinity stone source",
+      "key_name": "infinity stone source",
+      "group": "Repeatable Crafts",
+      "category": "Warp Tools",
+      "effect": "A crackling little cluster of pebbles that spark as they knock together, tumbling about from forces unseen.  Activate this on your island to place an infinity stone, which can be used as a catalyst to turn material tokens into stony and earthen resources.",
+      "description": "A crackling little cluster of pebbles that spark as they knock together, tumbling about from forces unseen.  Activate this on your island to place an infinity stone, which can be used as a catalyst to turn material tokens into stony and earthen resources.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 3,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "rock",
+            "count": 10,
+            "name": "rocks",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "clay_lump",
+            "count": 5,
+            "name": "lump of clay",
+            "list": false
+          },
+          {
+            "id": "material_sand",
+            "count": 20,
+            "name": "sand",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "rock_flaking",
+            "count": 4,
+            "name": "flaking rock",
+            "list": false
+          },
+          {
+            "id": "rock_large",
+            "count": 1,
+            "name": "large rock",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "material_soil",
+            "count": 2,
+            "name": "soil",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warp_folded_infinityore",
+      "repeatable": true,
+      "key_item": "warp_folded_infinityore",
+      "name": "infinity ore crucible",
+      "key_name": "infinity ore crucible",
+      "group": "Repeatable Crafts",
+      "category": "Warp Tools",
+      "effect": "A miniature tangle of metal that resembles a dust bunny made of barbed wire.  It twists in upon itself endlessly, folding and unfolding in ways that don't seem possible.  Activate this on your island to place an infinity ore, which can be used as a catalyst to turn material tokens into metal resources.",
+      "description": "A miniature tangle of metal that resembles a dust bunny made of barbed wire.  It twists in upon itself endlessly, folding and unfolding in ways that don't seem possible.  Activate this on your island to place an infinity ore, which can be used as a catalyst to turn material tokens into metal resources.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 3,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "scrap",
+            "count": 20,
+            "name": "scrap metal",
+            "list": false
+          },
+          {
+            "id": "steel_chunk_any",
+            "count": 4,
+            "name": "Steel Chunk Any (any)",
+            "list": true,
+            "expand": [
+              {
+                "id": "steel_chunk",
+                "label": "1 chunk of steel"
+              },
+              {
+                "id": "budget_steel_chunk",
+                "label": "1 chunk of budget steel"
+              },
+              {
+                "id": "chunk_cast_iron",
+                "label": "1 cast iron chunk"
+              },
+              {
+                "id": "lc_steel_chunk",
+                "label": "1 chunk of mild steel"
+              },
+              {
+                "id": "mc_steel_chunk",
+                "label": "1 chunk of medium steel"
+              },
+              {
+                "id": "hc_steel_chunk",
+                "label": "1 chunk of high steel"
+              },
+              {
+                "id": "ch_steel_chunk",
+                "label": "1 chunk of hardened steel"
+              },
+              {
+                "id": "qt_steel_chunk",
+                "label": "1 chunk of tempered steel"
+              }
+            ],
+            "tip": "1 chunk of steel OR 1 chunk of budget steel OR 1 cast iron chunk OR 1 chunk of mild steel OR 1 chunk of medium steel OR 1 chunk of high steel OR 1 chunk of hardened steel OR 1 chunk of tempered steel"
+          },
+          {
+            "id": "steel_lump_any",
+            "count": 1,
+            "name": "Steel Lump Any (any)",
+            "list": true,
+            "expand": [
+              {
+                "id": "steel_lump",
+                "label": "1 lump of steel"
+              },
+              {
+                "id": "budget_steel_lump",
+                "label": "1 lump of budget steel"
+              },
+              {
+                "id": "lump_cast_iron",
+                "label": "1 cast iron lump"
+              },
+              {
+                "id": "lc_steel_lump",
+                "label": "1 lump of mild steel"
+              },
+              {
+                "id": "mc_steel_lump",
+                "label": "1 lump of medium steel"
+              },
+              {
+                "id": "hc_steel_lump",
+                "label": "1 lump of high steel"
+              },
+              {
+                "id": "ch_steel_lump",
+                "label": "1 lump of hardened steel"
+              },
+              {
+                "id": "qt_steel_lump",
+                "label": "1 lump of tempered steel"
+              }
+            ],
+            "tip": "1 lump of steel OR 1 lump of budget steel OR 1 cast iron lump OR 1 lump of mild steel OR 1 lump of medium steel OR 1 lump of high steel OR 1 lump of hardened steel OR 1 lump of tempered steel"
+          }
+        ],
+        [
+          {
+            "id": "pipe",
+            "count": 2,
+            "name": "pipe",
+            "list": false
+          },
+          {
+            "id": "wire",
+            "count": 6,
+            "name": "wire",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "nuts_bolts",
+            "count": 4,
+            "name": "nut and bolt",
+            "list": false
+          },
+          {
+            "id": "pipe_fittings",
+            "count": 4,
+            "name": "set of pipe fittings",
+            "list": false
+          },
+          {
+            "id": "sheet_metal_small",
+            "count": 10,
+            "name": "small mild steel sheet",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "nail",
+            "count": 40,
+            "name": "nails",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warped_autodoc_upgrader_1",
+      "repeatable": true,
+      "key_item": "warped_autodoc_upgrader_1",
+      "name": "warped autodoc enhancer",
+      "key_name": "warped autodoc enhancer",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "A small device, so complex you can't entirely tell what it does.  You can see a miniature chair, a bed, some kind of machine, a computer console, a tangle of mechanical arms, all changing from moment to moment.  When used on an existing autodoc mark XI, you can upgrade it to a more advanced XXII model.",
+      "description": "A small device, so complex you can't entirely tell what it does.  You can see a miniature chair, a bed, some kind of machine, a computer console, a tangle of mechanical arms, all changing from moment to moment.  When used on an existing autodoc mark XI, you can upgrade it to a more advanced XXII model.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 20,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "ether",
+            "count": 150,
+            "name": "ether",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "xanax",
+            "count": 8,
+            "name": "fast-acting sedative",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "record_patient",
+            "count": 1,
+            "name": "patient treatment records",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "medical_sample",
+            "count": 2,
+            "name": "medical sample",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "vacutainer",
+            "count": 1,
+            "name": "blood draw kit",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "gloves_medical",
+            "count": 6,
+            "name": "medical gloves (pair)",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "stethoscope",
+            "count": 2,
+            "name": "stethoscope",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "craft:warped_autodoc_upgrader_2",
+      "repeatable": true,
+      "key_item": "warped_autodoc_upgrader_2",
+      "name": "warped autodoc augmenter",
+      "key_name": "warped autodoc augmenter",
+      "group": "Repeatable Crafts",
+      "category": "Warp Items",
+      "effect": "A small device, so complex you can't entirely tell what it does.  You can see a miniature chair, a bed, some kind of machine, a computer console, a tangle of mechanical arms, all changing from moment to moment.  When used on an advanced autodoc mark XXII, you can upgrade it to its most advanced XXXIII form.",
+      "description": "A small device, so complex you can't entirely tell what it does.  You can see a miniature chair, a bed, some kind of machine, a computer console, a tangle of mechanical arms, all changing from moment to moment.  When used on an advanced autodoc mark XXII, you can upgrade it to its most advanced XXXIII form.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 40,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "oxycodone",
+            "count": 10,
+            "name": "oxycodone",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "record_patient",
+            "count": 3,
+            "name": "patient treatment records",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "diazepam",
+            "count": 5,
+            "name": "Diazepam Withdrawal",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "morphine",
+            "count": 10,
+            "name": "morphine",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "medical_sample",
+            "count": 10,
+            "name": "medical sample",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "badge_doctor",
+            "count": 1,
+            "name": "doctor badge",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "software_medical",
+            "count": 1,
+            "name": "MediSoft",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
     }
   ],
   "quality_items": {
-    "JACK::1": {
+    "BOIL::2": {
       "examples": [
         {
-          "id": "nose_plate",
-          "name": "nose plate"
+          "id": "pot_copper",
+          "name": "%s by electrolysis"
         },
         {
-          "id": "jack_makeshift",
-          "name": "makeshift jack"
+          "id": "aluminum_pan",
+          "name": "aluminum frying pan"
         },
         {
-          "id": "jack_small",
-          "name": "scissor jack"
+          "id": "keg",
+          "name": "aluminum keg"
         }
       ],
-      "total": 8
+      "total": 61
+    },
+    "SMOOTH::1": {
+      "examples": [
+        {
+          "id": "wood_smoother",
+          "name": "wooden smoother"
+        },
+        {
+          "id": "metal_smoother",
+          "name": "metallic smoother"
+        }
+      ],
+      "total": 2
     },
     "FABRIC_CUT::2": {
       "examples": [
@@ -8273,36 +9535,6 @@
         }
       ],
       "total": 2
-    },
-    "CHEM::2": {
-      "examples": [
-        {
-          "id": "chemistry_set_basic",
-          "name": "basic chemistry set"
-        },
-        {
-          "id": "chemistry_set",
-          "name": "chemistry set"
-        }
-      ],
-      "total": 2
-    },
-    "HAMMER::2": {
-      "examples": [
-        {
-          "id": "exodii_prybar",
-          "name": "breacher"
-        },
-        {
-          "id": "halligan",
-          "name": "Halligan bar"
-        },
-        {
-          "id": "iceaxe",
-          "name": "ice axe"
-        }
-      ],
-      "total": 11
     },
     "DRILL::1": {
       "examples": [
@@ -8321,56 +9553,86 @@
       ],
       "total": 5
     },
-    "WELD::1": {
+    "CHEM::2": {
       "examples": [
         {
-          "id": "welder_crude",
-          "name": "makeshift arc welder"
+          "id": "chemistry_set_basic",
+          "name": "basic chemistry set"
         },
         {
-          "id": "welder",
-          "name": "arc welder"
-        },
-        {
-          "id": "welding_kit",
-          "name": "high-temperature welding kit"
-        }
-      ],
-      "total": 4
-    },
-    "SAW_M::2": {
-      "examples": [
-        {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
-        },
-        {
-          "id": "large_repairkit",
-          "name": "gunsmith repair kit"
-        },
-        {
-          "id": "hacksaw",
-          "name": "hacksaw"
-        }
-      ],
-      "total": 5
-    },
-    "MOP::1": {
-      "examples": [
-        {
-          "id": "mop_folded",
-          "name": "collapsible mop"
-        },
-        {
-          "id": "mop",
-          "name": "mop"
+          "id": "chemistry_set",
+          "name": "chemistry set"
         }
       ],
       "total": 2
     },
-    "PISTOL::1": {
-      "examples": [],
-      "total": 0
+    "WINNOW::1": {
+      "examples": [
+        {
+          "id": "fan",
+          "name": "desk fan"
+        },
+        {
+          "id": "hair_dryer",
+          "name": "hair dryer"
+        },
+        {
+          "id": "leather_bellow",
+          "name": "leather bellow"
+        }
+      ],
+      "total": 8
+    },
+    "STRAIN::1": {
+      "examples": [
+        {
+          "id": "sieve_steel_makeshift",
+          "name": "makeshift sieve"
+        },
+        {
+          "id": "colander_steel",
+          "name": "mesh colander"
+        },
+        {
+          "id": "sieve_steel",
+          "name": "sieve"
+        }
+      ],
+      "total": 5
+    },
+    "HAMMER::2": {
+      "examples": [
+        {
+          "id": "exodii_prybar",
+          "name": "breacher"
+        },
+        {
+          "id": "halligan",
+          "name": "Halligan bar"
+        },
+        {
+          "id": "iceaxe",
+          "name": "ice axe"
+        }
+      ],
+      "total": 11
+    },
+    "GLARE::1": {
+      "examples": [
+        {
+          "id": "outsert_breach",
+          "name": "breach outsert lens"
+        },
+        {
+          "id": "welding_mask_crude",
+          "name": "crude welding mask"
+        },
+        {
+          "id": "eclipse_glasses",
+          "name": "eclipse glasses"
+        }
+      ],
+      "total": 8
     },
     "HOSE::1": {
       "examples": [
@@ -8389,7 +9651,7 @@
       ],
       "total": 3
     },
-    "SCREW_FINE::1": {
+    "SAW_M::2": {
       "examples": [
         {
           "id": "small_repairkit",
@@ -8400,76 +9662,98 @@
           "name": "gunsmith repair kit"
         },
         {
-          "id": "robofac_gun_kit",
-          "name": "Hub 01 HWP maintenance kit"
+          "id": "hacksaw",
+          "name": "hacksaw"
+        }
+      ],
+      "total": 5
+    },
+    "BUTCHER::16": {
+      "examples": [
+        {
+          "id": "crash_axe",
+          "name": "crash axe"
+        },
+        {
+          "id": "knife_rm42",
+          "name": "F-S fighting knife"
+        },
+        {
+          "id": "ch_kukri",
+          "name": "hardened steel kukri"
+        }
+      ],
+      "total": 25
+    },
+    "MOP::1": {
+      "examples": [
+        {
+          "id": "mop_folded",
+          "name": "collapsible mop"
+        },
+        {
+          "id": "mop",
+          "name": "mop"
+        }
+      ],
+      "total": 2
+    },
+    "HAMMER_FINE::1": {
+      "examples": [
+        {
+          "id": "hammer_peen",
+          "name": "ball-peen hammer"
+        },
+        {
+          "id": "hammer_bronze",
+          "name": "bronze hammer"
+        },
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
         }
       ],
       "total": 6
     },
-    "WRENCH_FINE::1": {
+    "BLOW_HOT_AIR::1": {
       "examples": [
         {
-          "id": "wrench",
-          "name": "adjustable wrench"
-        },
-        {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
-        },
-        {
-          "id": "large_repairkit",
-          "name": "gunsmith repair kit"
+          "id": "hair_dryer",
+          "name": "hair dryer"
         }
       ],
-      "total": 8
+      "total": 1
     },
-    "BOIL::2": {
+    "PRY::2": {
       "examples": [
         {
-          "id": "pot_copper",
-          "name": "%s by electrolysis"
+          "id": "crowbar_warhammer",
+          "name": "bec de crowbar"
         },
         {
-          "id": "aluminum_pan",
-          "name": "aluminum frying pan"
+          "id": "claw_bar",
+          "name": "claw bar"
         },
         {
-          "id": "keg",
-          "name": "aluminum keg"
+          "id": "crash_axe",
+          "name": "crash axe"
         }
       ],
-      "total": 61
+      "total": 10
     },
-    "SCREW::1": {
+    "SAW_W::2": {
       "examples": [
         {
-          "id": "camping_multitool",
-          "name": "camping multitool"
+          "id": "bow_saw",
+          "name": "bow saw"
         },
         {
-          "id": "cordless_drill",
-          "name": "cordless drill"
+          "id": "saw_bronze",
+          "name": "bronze wood saw"
         },
         {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
-        }
-      ],
-      "total": 14
-    },
-    "STRAIN::1": {
-      "examples": [
-        {
-          "id": "sieve_steel_makeshift",
-          "name": "makeshift sieve"
-        },
-        {
-          "id": "colander_steel",
-          "name": "mesh colander"
-        },
-        {
-          "id": "sieve_steel",
-          "name": "sieve"
+          "id": "misc_repairkit",
+          "name": "miscellaneous repair kit"
         }
       ],
       "total": 5
@@ -8491,22 +9775,64 @@
       ],
       "total": 13
     },
-    "GLARE::1": {
+    "WRENCH_FINE::1": {
       "examples": [
         {
-          "id": "outsert_breach",
-          "name": "breach outsert lens"
+          "id": "wrench",
+          "name": "adjustable wrench"
         },
         {
-          "id": "welding_mask_crude",
-          "name": "crude welding mask"
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
         },
         {
-          "id": "eclipse_glasses",
-          "name": "eclipse glasses"
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
         }
       ],
       "total": 8
+    },
+    "PISTOL::1": {
+      "examples": [],
+      "total": 0
+    },
+    "WELD::1": {
+      "examples": [
+        {
+          "id": "welder_crude",
+          "name": "makeshift arc welder"
+        },
+        {
+          "id": "welder",
+          "name": "arc welder"
+        },
+        {
+          "id": "welding_kit",
+          "name": "high-temperature welding kit"
+        }
+      ],
+      "total": 4
+    },
+    "SHOTGUN::1": {
+      "examples": [],
+      "total": 0
+    },
+    "SCREW::1": {
+      "examples": [
+        {
+          "id": "camping_multitool",
+          "name": "camping multitool"
+        },
+        {
+          "id": "cordless_drill",
+          "name": "cordless drill"
+        },
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        }
+      ],
+      "total": 14
     },
     "SEW::3": {
       "examples": [
@@ -8542,49 +9868,6 @@
       ],
       "total": 5
     },
-    "SMOOTH::1": {
-      "examples": [
-        {
-          "id": "wood_smoother",
-          "name": "wooden smoother"
-        },
-        {
-          "id": "metal_smoother",
-          "name": "metallic smoother"
-        }
-      ],
-      "total": 2
-    },
-    "BLOW_HOT_AIR::1": {
-      "examples": [
-        {
-          "id": "hair_dryer",
-          "name": "hair dryer"
-        }
-      ],
-      "total": 1
-    },
-    "SAW_W::2": {
-      "examples": [
-        {
-          "id": "bow_saw",
-          "name": "bow saw"
-        },
-        {
-          "id": "saw_bronze",
-          "name": "bronze wood saw"
-        },
-        {
-          "id": "misc_repairkit",
-          "name": "miscellaneous repair kit"
-        }
-      ],
-      "total": 5
-    },
-    "SHOTGUN::1": {
-      "examples": [],
-      "total": 0
-    },
     "WRENCH::2": {
       "examples": [
         {
@@ -8619,70 +9902,36 @@
       ],
       "total": 4
     },
-    "PRY::2": {
+    "SCREW_FINE::1": {
       "examples": [
-        {
-          "id": "crowbar_warhammer",
-          "name": "bec de crowbar"
-        },
-        {
-          "id": "claw_bar",
-          "name": "claw bar"
-        },
-        {
-          "id": "crash_axe",
-          "name": "crash axe"
-        }
-      ],
-      "total": 10
-    },
-    "HAMMER_FINE::1": {
-      "examples": [
-        {
-          "id": "hammer_peen",
-          "name": "ball-peen hammer"
-        },
-        {
-          "id": "hammer_bronze",
-          "name": "bronze hammer"
-        },
         {
           "id": "small_repairkit",
           "name": "firearm repair kit"
+        },
+        {
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
+        },
+        {
+          "id": "robofac_gun_kit",
+          "name": "Hub 01 HWP maintenance kit"
         }
       ],
       "total": 6
     },
-    "BUTCHER::16": {
+    "JACK::1": {
       "examples": [
         {
-          "id": "crash_axe",
-          "name": "crash axe"
+          "id": "nose_plate",
+          "name": "nose plate"
         },
         {
-          "id": "knife_rm42",
-          "name": "F-S fighting knife"
+          "id": "jack_makeshift",
+          "name": "makeshift jack"
         },
         {
-          "id": "ch_kukri",
-          "name": "hardened steel kukri"
-        }
-      ],
-      "total": 25
-    },
-    "WINNOW::1": {
-      "examples": [
-        {
-          "id": "fan",
-          "name": "desk fan"
-        },
-        {
-          "id": "hair_dryer",
-          "name": "hair dryer"
-        },
-        {
-          "id": "leather_bellow",
-          "name": "leather bellow"
+          "id": "jack_small",
+          "name": "scissor jack"
         }
       ],
       "total": 8
