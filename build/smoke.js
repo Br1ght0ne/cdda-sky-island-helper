@@ -95,7 +95,7 @@ const countCards = () => { let n=0; (function w(x){ if(typeof x.className==="str
 const countHeads = () => { let n=0; (function w(x){ if(typeof x.className==="string" && x.className.indexOf("group-head")===0) n++; (x.children||[]).forEach(w); })(list); return n; };
 expandAll.dispatch("click");
 let es = JSON.parse(storeBacking["skyisland.tracker.v1"]);
-assert(Object.keys(es.open).length === 84 && Object.keys(es.groupsCollapsed || {}).length === 0, "expand all opens every section + upgrade");
+assert(Object.keys(es.open).length === window.SKYISLAND_DATA.upgrades.length && Object.keys(es.groupsCollapsed || {}).length === 0, "expand all opens every section + upgrade (" + window.SKYISLAND_DATA.upgrades.length + ")");
 collapseAll.dispatch("click");
 es = JSON.parse(storeBacking["skyisland.tracker.v1"]);
 assert(Object.keys(es.open).length === 0, "collapse all closes every upgrade");
@@ -212,6 +212,63 @@ setTimeout(() => {
   const cleared = JSON.parse(storeBacking["skyisland.tracker.v1"]);
   assert(Object.keys(cleared.plan).length === 0 && Object.keys(cleared.have).length === 0 &&
          Object.keys(cleared.done).length === 0, "reset clears all progress");
+
+  // Repeatable key-item crafts: Craft button is disabled until all ingredient
+  // groups are met; pressing it tallies +1 crafted and clears have/qty for that
+  // upgrade; global tool qualities survive; the Crafted:N tag appears.
+  const tree = window.SKYISLAND_DATA.upgrades.find(u => u.id === "craft:warp_folded_infinitree");
+  assert(!!tree && tree.repeatable === true, "repeatable craft extracted (infinity tree sapling)");
+  // Building a fresh isolated state so the craft assertions don't depend on the
+  // rest of the run's mutations. State only ever changes via app.js's own entry
+  // points (Import replaces `state` via Object.assign(blankState(), parsed) then
+  // renders+saves) — writing straight to the mock localStorage backing store
+  // would NOT reach the in-memory `state` object app.js actually reads from.
+  const impBtn2 = actions.children.find(c => c._text === "Import");
+  promptReturn = JSON.stringify({ done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: { [tree.id]: true }, crafted: {} });
+  impBtn2.dispatch("click");
+  searchEl.value = ""; searchEl.dispatch("input");
+  // find the tree's card: a "card" container (not "card-title"/"card-done"/etc,
+  // same exact-match convention as countCards() above) whose text includes tree.name
+  function findCardByName(name) {
+    const cards = [];
+    (function walk(n){ if (typeof n.className === "string" && (n.className === "card" || n.className.indexOf("card ") === 0)) cards.push(n); (n.children || []).forEach(walk); })(list);
+    return cards.find(c => (function walk2(n){
+      if (n._text && n._text.indexOf(name) >= 0) return true;
+      for (const ch of n.children || []) if (walk2(ch)) return true;
+      return false;
+    })(c));
+  }
+  let treeCard = findCardByName(tree.name);
+  assert(!!treeCard, "infinity tree card rendered");
+  const craftBtnOf = card => (function walk(n){ if(n.tagName==="button" && n.className && n.className.indexOf("craft-btn")===0) return n; for(const c of n.children||[]){const r=walk(c); if(r) return r;} return null; })(card);
+  let craftBtn = craftBtnOf(treeCard);
+  assert(!!craftBtn, "tree card has a Craft button");
+  assert(craftBtn.disabled === true, "Craft button disabled before ingredients met");
+  // Met every component group via the have-flag (set state.have for each group),
+  // fed back in through another Import so app.js's own `state` picks it up.
+  const haveAll = {};
+  tree.components.forEach((_alts, gi) => { haveAll[tree.id + "::comp::" + gi] = true; });
+  promptReturn = JSON.stringify({ done: {}, plan: {}, have: haveAll, qty: {}, tools: {}, open: { [tree.id]: true }, crafted: {} });
+  impBtn2.dispatch("click");
+  searchEl.dispatch("input");
+  treeCard = findCardByName(tree.name);
+  craftBtn = craftBtnOf(treeCard);
+  assert(craftBtn.disabled === false, "Craft button enabled after all ingredient groups met");
+  // Seed a global tool-quality so we can prove it survives the craft.
+  const ownQualBefore = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).tools || {}).length;
+  craftBtn.dispatch("click");
+  const afterCraft = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  assert((afterCraft.crafted[tree.id] || 0) === 1, "pressing Craft tallies crafted:1");
+  assert(Object.keys(afterCraft.have).filter(k => k.indexOf(tree.id + "::comp::") === 0).length === 0,
+    "Craft clears the upgrade's have flags");
+  assert(Object.keys(afterCraft.qty).filter(k => k.indexOf(tree.id + "::comp::") === 0).length === 0,
+    "Craft clears the upgrade's per-alternative quantities");
+  assert(Object.keys(afterCraft.tools || {}).length === ownQualBefore,
+    "global tool qualities survive a Craft");
+  // Crafted:N tag now appears in the title.
+  treeCard = findCardByName(tree.name);
+  const hasTag = (function walk(n){ if(typeof n.className==="string" && n.className==="crafted-tag" && /Crafted: 1/.test(n._text)) return true; for(const c of n.children||[]){if(walk(c)) return true;} return false; })(treeCard);
+  assert(hasTag, "Crafted:1 tag appears near the name after a craft");
 
   console.log(process.exitCode ? "\nSMOKE TEST FAILED" : "\nAll smoke checks passed");
 }, 10);
