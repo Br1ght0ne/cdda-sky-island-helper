@@ -19,8 +19,7 @@
       <div class="toolbar">
         <input type="search" id="search" placeholder="Search upgrades or items…" autocomplete="off">
         <label class="chk"><input type="checkbox" id="hide-done"> Hide completed</label>
-        <label class="chk"><input type="checkbox" id="only-plan"> Only planned</label>
-        <button id="clear-plan" class="btn ghost" type="button">Clear plan</button>
+        <label class="chk"><input type="checkbox" id="only-plan"> Only in plan</label>
       </div>
       <div id="stats" class="stats"></div>
       <div id="list"></div>
@@ -28,7 +27,13 @@
 
     <aside>
       <div class="panel sticky">
-        <h2>Shopping list</h2>
+        <div class="panel-head">
+          <h2>Plan</h2>
+          <div class="panel-actions" id="plan-actions">
+            <button id="remove-finished" class="btn ghost tiny" type="button" title="Remove crafted (completed) upgrades from your plan">Remove finished</button>
+            <button id="clear-plan" class="btn ghost tiny" type="button">Clear</button>
+          </div>
+        </div>
         <p class="hint" id="plan-hint">Click <strong>＋ Plan</strong> on any upgrade to add its materials here.</p>
         <div id="shopping"></div>
       </div>

@@ -26,15 +26,15 @@ Just open `index.html` in a browser. No server, no build step, no internet.
   also lists a few **example items** that provide it at the required level or
   higher (sourced from the game data), e.g. "*Hammering lvl 2 — e.g. breacher,
   Halligan bar, ice axe and 8 more*".
-- **The shopping list is interactive and linked**: ticking a material there
-  marks it gathered for every planned upgrade that needs it, and that instantly
+- **The Plan panel is interactive and linked**: ticking a material there marks
+  it gathered for every planned upgrade that needs it, and that instantly
   reflects back in the cards (and vice-versa) — one shared state, no framework.
-- **Plan housekeeping**: *Clear plan* empties it; *Remove finished* drops every
-  planned upgrade you've completed or fully gathered, so only outstanding work
-  stays in the shopping list.
+- **Plan housekeeping** (buttons in the Plan panel header): *Clear* empties the
+  plan; *Remove finished* drops every planned upgrade you've marked crafted, so
+  only outstanding work stays in the plan.
 - **Mark upgrades complete** with the big checkbox on the left.
-- **Plan** button on each upgrade feeds a live **shopping list** in the sidebar
-  that aggregates every still-missing material across your planned upgrades
+- **Plan** button on each upgrade feeds the live **Plan panel** in the sidebar,
+  which aggregates every still-missing material across your planned upgrades
   (warp shards get their own running total).
 - **Every item is a link** to the [CDDA Guide](https://cdda-guide.nornagon.net)
   — materials/tools open `/item/<id>`, tool qualities open `/tool_quality/<id>`.

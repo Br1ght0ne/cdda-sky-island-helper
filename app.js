@@ -16,6 +16,8 @@
     hideDone: document.getElementById("hide-done"),
     onlyPlan: document.getElementById("only-plan"),
     clearPlan: document.getElementById("clear-plan"),
+    removeFinished: document.getElementById("remove-finished"),
+    planActions: document.getElementById("plan-actions"),
     shopping: document.getElementById("shopping"),
     planHint: document.getElementById("plan-hint"),
     stats: document.getElementById("stats"),
@@ -437,6 +439,7 @@
   function renderShopping() {
     const planned = UP.filter(u => state.plan[u.id]);
     els.planHint.style.display = planned.length ? "none" : "block";
+    els.planActions.style.display = planned.length ? "flex" : "none";
     els.shopping.innerHTML = "";
     if (!planned.length) return;
 
@@ -587,20 +590,6 @@
   }
 
   function addToolbarButtons() {
-    // Sits right after the HTML "Clear plan" button.
-    const removeFinished = document.createElement("button");
-    removeFinished.type = "button"; removeFinished.className = "btn ghost"; removeFinished.textContent = "Remove finished";
-    removeFinished.title = "Remove crafted (completed) upgrades from your plan";
-    removeFinished.addEventListener("click", () => {
-      const finished = UP.filter(u => state.plan[u.id] && isFinished(u));
-      if (!finished.length) { alert("No finished upgrades in your plan."); return; }
-      if (confirm("Remove " + finished.length + " finished upgrade(s) from your plan?")) {
-        finished.forEach(u => delete state.plan[u.id]);
-        render();
-      }
-    });
-    els.toolbar.appendChild(removeFinished);
-
     const expand = document.createElement("button");
     expand.type = "button"; expand.className = "btn ghost"; expand.textContent = "Expand all";
     expand.addEventListener("click", () => setAllOpen(true));
@@ -731,6 +720,14 @@
   els.clearPlan.addEventListener("click", () => {
     if (Object.keys(state.plan).length && confirm("Clear all planned upgrades?")) {
       state.plan = {}; render();
+    }
+  });
+  els.removeFinished.addEventListener("click", () => {
+    const finished = UP.filter(u => state.plan[u.id] && isFinished(u));
+    if (!finished.length) { alert("No crafted upgrades in your plan yet."); return; }
+    if (confirm("Remove " + finished.length + " crafted upgrade(s) from your plan?")) {
+      finished.forEach(u => delete state.plan[u.id]);
+      render();
     }
   });
   addToolbarButtons();

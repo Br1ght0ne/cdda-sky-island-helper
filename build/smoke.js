@@ -175,8 +175,8 @@ searchEl.value = ""; searchEl.dispatch("input"); // reset filter
 // Remove finished from plan: rank-up #1 was planned and marked done earlier,
 // so it should be dropped from the plan (checked before import replaces state).
 const planBeforeRm = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length;
-const rmFin = toolbar.children.find(c => c._text === "Remove finished");
-assert(!!rmFin, "Remove finished button present");
+const rmFin = registry["remove-finished"]; // now lives in the Plan panel, not the toolbar
+assert(!!rmFin && rmFin._listeners.click, "Remove finished button wired in plan panel");
 rmFin.dispatch("click");
 assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length < planBeforeRm,
   "remove finished drops completed upgrades from the plan");
