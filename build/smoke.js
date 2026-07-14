@@ -122,6 +122,19 @@ const haveBefore = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).
 shopChecks[0].checked = true; shopChecks[0].dispatch("change");
 assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).have).length > haveBefore, "ticking a shopping line marks its contributing groups met");
 
+// Tool qualities are a GLOBAL registry: ticking one syncs everywhere.
+const qualRows = () => { const r=[]; (function w(n){ if(n.tagName==="div" && typeof n.className==="string" && n.className.indexOf("req qual")===0) r.push(n); (n.children||[]).forEach(w); })(list); return r; };
+const qidOf = row => { let id=null; (function w(n){ if(id) return; if(n.tagName==="a" && n.href && n.href.indexOf("/tool_quality/")>=0) id=n.href.split("/tool_quality/")[1]; (n.children||[]).forEach(w); })(row); return id; };
+const cbOf = row => (row.children||[]).find(c => c.tagName==="input");
+let qrows = qualRows();
+assert(qrows.length > 0, "tool-quality rows rendered (" + qrows.length + ")");
+const byQ = {}; qrows.forEach(r => { const q=qidOf(r); (byQ[q]=byQ[q]||[]).push(r); });
+const sharedQ = Object.keys(byQ).find(q => byQ[q].length >= 2);
+assert(!!sharedQ, "a tool quality is shared by multiple upgrades (" + sharedQ + " ×" + (sharedQ?byQ[sharedQ].length:0) + ")");
+cbOf(byQ[sharedQ][0]).checked = true; cbOf(byQ[sharedQ][0]).dispatch("change");
+assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).tools || {}).length >= 1, "owning a quality persists to global state.tools");
+assert(qualRows().filter(r => qidOf(r)===sharedQ).every(r => cbOf(r).checked === true), "checking a quality syncs to every upgrade that needs it");
+
 // Guide links: item + tool_quality namespaces, and text is a span, not a label.
 const anchors = [];
 (function walk(n){ if(n.tagName==="a" && n.href) anchors.push(n); (n.children||[]).forEach(walk); })(list);

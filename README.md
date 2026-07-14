@@ -19,6 +19,10 @@ Just open `index.html` in a browser. No server, no build step, no internet.
     separately. The whole line auto-checks the moment any one alternative
     reaches its required quantity. Tool qualities & tools keep a simple checkbox.
   A progress bar and `met/total` badge update live.
+- **Tool qualities are a shared, global registry**: since the tools that provide
+  them live permanently on the island, ticking e.g. *Hammering lvl 2* once marks
+  it satisfied in **every** upgrade that needs it (and unticking clears it
+  everywhere). Kept separate from per-upgrade material progress.
 - **The shopping list is interactive and linked**: ticking a material there
   marks it gathered for every planned upgrade that needs it, and that instantly
   reflects back in the cards (and vice-versa) — one shared state, no framework.

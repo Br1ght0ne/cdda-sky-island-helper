@@ -26,7 +26,10 @@
   let state = load();
 
   function blankState() {
-    return { done: {}, plan: {}, have: {}, qty: {}, open: {} };
+    // `tools` is a GLOBAL registry of owned tool qualities (keyed `id::level`).
+    // Tool qualities are permanent island gear, so ownership is shared across
+    // every upgrade rather than tracked per-upgrade like materials.
+    return { done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: {} };
   }
   function load() {
     try {
@@ -76,8 +79,17 @@
     }
     render();
   }
+  // Global tool-quality ownership (shared across all upgrades).
+  function toolKey(q) { return q.id + "::" + q.level; }
+  function qualOwned(q) { return !!state.tools[toolKey(q)]; }
+  function setQualOwned(q, on) {
+    if (on) state.tools[toolKey(q)] = true; else delete state.tools[toolKey(q)];
+    render();
+  }
   function groupMet(u, g) {
-    return g.section === "comp" ? compMet(u, g.idx, g.alts) : isHave(u, g.section, g.idx);
+    if (g.section === "comp") return compMet(u, g.idx, g.alts);
+    if (g.section === "qual") return !!state.done[u.id] || qualOwned(g.qual);
+    return isHave(u, g.section, g.idx);
   }
   function reqGroups(u) {
     // Flattened list of every checkable requirement across sections.
@@ -227,9 +239,8 @@
       u.components.forEach((alts, i) => body.appendChild(componentRow(u, i, alts)));
     }
     if (u.qualities.length) {
-      body.appendChild(sectionLabel("Tool qualities"));
-      u.qualities.forEach((q, i) =>
-        body.appendChild(reqRow(u, "qual", i, [guideLink("tool_quality", q.id, q.name, q.tip), textNode(" "), tagNode("lvl " + q.level)])));
+      body.appendChild(sectionLabel("Tool qualities (shared — kept on the island)"));
+      u.qualities.forEach(q => body.appendChild(qualityRow(u, q)));
     }
     if (u.tools.length) {
       body.appendChild(sectionLabel("Tools"));
@@ -359,6 +370,26 @@
     const text = document.createElement("span");
     text.className = "req-text";
     (Array.isArray(contentNodes) ? contentNodes : [contentNodes]).forEach(n => text.appendChild(n));
+    row.appendChild(cb); row.appendChild(text);
+    return row;
+  }
+
+  // A tool-quality row bound to the GLOBAL registry: ticking it here reflects in
+  // every other upgrade that needs the same quality (they're kept on the island).
+  function qualityRow(u, q) {
+    const owned = qualOwned(q);
+    const row = document.createElement("div");
+    row.className = "req qual" + (owned ? " have" : "");
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = owned;
+    cb.title = "You own a tool with this quality — shared across all upgrades";
+    cb.addEventListener("change", () => setQualOwned(q, cb.checked));
+    const text = document.createElement("span");
+    text.className = "req-text";
+    text.appendChild(guideLink("tool_quality", q.id, q.name));
+    text.appendChild(textNode(" "));
+    text.appendChild(tagNode("lvl " + q.level));
     row.appendChild(cb); row.appendChild(text);
     return row;
   }
