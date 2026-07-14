@@ -132,11 +132,13 @@ let labels = 0;
 (function walk(n){ if(n.tagName==="label" && n.htmlFor) labels++; (n.children||[]).forEach(walk); })(list);
 assert(labels === 0, "requirement rows no longer use click-to-toggle labels");
 
-// Tooltips: LIST refs expand as a span[data-tip], real items carry descriptions.
+// Tooltips: only item-group (LIST) refs carry a data-tip, and it's the expansion.
 const tipped = [];
 (function walk(n){ const t=n.getAttribute&&n.getAttribute("data-tip"); if(t) tipped.push(n); (n.children||[]).forEach(walk); })(list);
-assert(tipped.some(n => n.tagName==="span" && /OR/.test(n.getAttribute("data-tip"))), "LIST refs render an expansion tooltip");
-assert(tipped.some(n => n.tagName==="a"), "real items carry a description tooltip");
+assert(tipped.length > 0 && tipped.every(n => n.tagName==="span"), "only LIST refs carry tooltips (no item/quality descriptions)");
+assert(tipped.some(n => /OR/.test(n.getAttribute("data-tip"))), "LIST refs render an expansion tooltip");
+assert(tipped.some(n => Array.isArray(n._tipItems) && n._tipItems[0] && n._tipItems[0].id && n._tipItems[0].label),
+  "LIST refs carry structured expansion for in-tooltip links");
 
 // Export copies JSON to clipboard
 const expBtn = toolbar.children.find(c => c._text === "Export");

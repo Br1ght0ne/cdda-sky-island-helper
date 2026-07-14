@@ -272,12 +272,13 @@
   // Real items link to the item browser; LIST/requirement pseudo-ids
   // (e.g. "cordage", "any_badge") aren't item pages, so render them as a
   // hoverable span whose tooltip expands the requirement.
-  function itemLink(id, text, isList, tip) {
+  function itemLink(id, text, isList, tip, expand) {
     if (!isList) return guideLink("item", id, text, tip);
     const s = document.createElement("span");
     s.className = "list-ref";
     s.textContent = text;
-    if (tip) s.setAttribute("data-tip", tip);
+    if (tip) s.setAttribute("data-tip", tip);       // detector + plain-text fallback
+    if (expand) s._tipItems = expand;               // structured, for linked tooltip
     return s;
   }
 
@@ -302,7 +303,7 @@
       if (i) { const or = document.createElement("span"); or.className = "or"; or.textContent = "or"; text.appendChild(or); }
       text.appendChild(stepper(u, gi, a, locked));
       text.appendChild(textNode(" "));
-      text.appendChild(itemLink(a.id, a.name, a.list, a.tip));
+      text.appendChild(itemLink(a.id, a.name, a.list, a.tip, a.expand));
     });
     row.appendChild(cb); row.appendChild(text);
     return row;
@@ -430,7 +431,7 @@
       rec.alts.forEach((a, i) => {
         if (i) { const or = document.createElement("span"); or.className = "or"; or.textContent = " or "; name.appendChild(or); }
         const c = document.createElement("span"); c.className = "count"; c.textContent = (counts[a.id] || 0) + "× ";
-        name.appendChild(c); name.appendChild(itemLink(a.id, a.name, a.list, a.tip));
+        name.appendChild(c); name.appendChild(itemLink(a.id, a.name, a.list, a.tip, a.expand));
       });
       const from = document.createElement("div");
       from.className = "shop-from";
@@ -543,14 +544,35 @@
     els.toolbar.appendChild(reset);
   }
 
-  // ---- hover tooltips (guide-style) ---------------------------------------
+  // ---- hover tooltips, CRPG-style ------------------------------------------
+  // A tooltip shows immediately on hover but is transient (can't be touched).
+  // Keep hovering the same item for FREEZE_MS and it "freezes": it becomes
+  // interactive (grabbable/scrollable) and its border turns gold, so you can
+  // move the cursor onto it. It then only closes once you leave both the item
+  // and the tooltip.
+  const FREEZE_MS = 1400;
+  const BRIDGE_MS = 260; // grace period to travel from item to a frozen tooltip
   function setupTooltips() {
     const tip = document.createElement("div");
     tip.className = "tooltip";
     tip.style.display = "none";
+    tip.style.pointerEvents = "none";
     document.body.appendChild(tip);
-    let current = null;
+    let current = null, frozen = false, freezeTimer = null, hideTimer = null;
 
+    const clearFreeze = () => { if (freezeTimer) { clearTimeout(freezeTimer); freezeTimer = null; } };
+    const clearHide = () => { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; } };
+    function setFrozen(on) {
+      frozen = on;
+      tip.className = "tooltip" + (on ? " frozen" : "");
+      tip.style.pointerEvents = on ? "auto" : "none";
+    }
+    function hide() {
+      clearFreeze(); clearHide();
+      tip.style.display = "none";
+      setFrozen(false);
+      current = null;
+    }
     function place(target) {
       if (!target.getBoundingClientRect) return;
       const r = target.getBoundingClientRect();
@@ -564,17 +586,54 @@
       tip.style.left = left + "px";
       tip.style.top = top + "px";
     }
+    function fill(target) {
+      const items = target._tipItems;
+      if (items && items.length) {
+        tip.textContent = "";
+        items.forEach((it, i) => {
+          if (i) { const or = document.createElement("span"); or.className = "or"; or.textContent = " OR "; tip.appendChild(or); }
+          const a = document.createElement("a");
+          a.className = "item-link";
+          a.href = GUIDE + "item/" + encodeURIComponent(it.id);
+          a.target = "_blank"; a.rel = "noopener noreferrer";
+          a.textContent = it.label;
+          tip.appendChild(a);
+        });
+      } else {
+        tip.textContent = target.getAttribute("data-tip") || "";
+      }
+    }
+    function show(target) {
+      current = target;
+      clearFreeze(); clearHide();
+      setFrozen(false);
+      fill(target);
+      place(target);
+      freezeTimer = setTimeout(() => { if (current === target) setFrozen(true); }, FREEZE_MS);
+    }
     document.addEventListener("mouseover", e => {
       const t = e.target.closest && e.target.closest("[data-tip]");
-      if (!t || t === current) return;
-      current = t;
-      tip.textContent = t.getAttribute("data-tip");
-      place(t);
+      if (!t) return;
+      if (t === current) { clearHide(); return; } // re-entered same item
+      show(t);
     });
     document.addEventListener("mouseout", e => {
       const t = e.target.closest && e.target.closest("[data-tip]");
-      if (t && t === current) { tip.style.display = "none"; current = null; }
+      if (!t || t !== current) return;
+      if (frozen) hideTimer = setTimeout(hide, BRIDGE_MS); // allow travel to tooltip
+      else hide();
     });
+    // Clicking an item-group (not a real-item link) freezes the tooltip at once.
+    document.addEventListener("click", e => {
+      const t = e.target.closest && e.target.closest("[data-tip]");
+      if (!t || t.tagName === "A") return; // let real-item links navigate
+      if (current !== t) show(t);
+      clearFreeze();
+      setFrozen(true);
+    });
+    // Once frozen, entering the tooltip cancels the pending hide; leaving closes.
+    tip.addEventListener("mouseenter", clearHide);
+    tip.addEventListener("mouseleave", () => { if (frozen) hide(); });
   }
 
   els.search.addEventListener("input", render);

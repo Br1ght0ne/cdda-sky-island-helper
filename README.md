@@ -28,9 +28,10 @@ Just open `index.html` in a browser. No server, no build step, no internet.
   (warp shards get their own running total).
 - **Every item is a link** to the [CDDA Guide](https://cdda-guide.nornagon.net)
   — materials/tools open `/item/<id>`, tool qualities open `/tool_quality/<id>`.
-- **Hover tooltips** (guide-style): real items show their in-game description;
-  `LIST`/requirement pseudo-items expand to their full option list, e.g.
-  *cordage* → "1 long string OR … OR 6 short strings OR 6 short leather laces".
+- **Sticky expansion tooltips** on item-group (`LIST`) requirements: hovering
+  *cordage* shows "1 long string OR … OR 6 short leather laces". Keep hovering
+  ~1.4 s and the tooltip **freezes** (muted border turns vivid purple) so you
+  can move onto it — every option inside is itself a link to the CDDA Guide.
 - **Search** by upgrade name, effect, or required item.
 - **Filters**: hide completed, show only planned.
 - **State is saved in your browser** (`localStorage`) and survives reloads even

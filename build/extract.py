@@ -30,8 +30,6 @@ CDDA = "/Users/brightone/dev/github.com/CleverRaven/cataclysm-dda"
 MOD = os.path.join(CDDA, "data/mods/Sky_Island")
 BASE = os.path.join(CDDA, "data/json")
 
-DESC_LIMIT = 320  # tooltip descriptions are truncated to keep the data compact
-
 # Files that define upgrades, mapped to (group, category). Order matters for display.
 UPGRADE_FILES = [
     ("missions/island_upgrades/rankup.json",      "Progression",         "Island Rank Up"),
@@ -91,23 +89,8 @@ def norm_name(name):
     return None, None
 
 
-def norm_desc(desc):
-    if isinstance(desc, str):
-        s = desc
-    elif isinstance(desc, dict):
-        s = desc.get("str") or ""
-    elif isinstance(desc, list):
-        s = " ".join(x if isinstance(x, str) else (x.get("str", "") if isinstance(x, dict) else "") for x in desc)
-    else:
-        return None
-    s = re.sub(r"\s+", " ", s).strip()
-    if not s:
-        return None
-    return s[:DESC_LIMIT] + ("…" if len(s) > DESC_LIMIT else "")
-
-
 # ---------------------------------------------------------------------------
-# Index: id -> {n: name, p: plural, d: description}, plus requirement bodies.
+# Index: id -> {n: name, p: plural}, plus requirement bodies for LIST expansion.
 # ---------------------------------------------------------------------------
 def build_index():
     names, parents, reqs = {}, {}, {}
@@ -142,11 +125,10 @@ def _register(o, names, parents, reqs):
         for i in ids:
             reqs.setdefault(i, o["components"])
     n, p = norm_name(o.get("name"))
-    d = norm_desc(o.get("description"))
     cf = o.get("copy-from")
     for i in ids:
         if n and i not in names:
-            names[i] = {"n": n, "p": p, "d": d}
+            names[i] = {"n": n, "p": p}
         if isinstance(cf, str) and i not in parents:
             parents[i] = cf
 
@@ -158,11 +140,6 @@ def prettify(item_id):
 def name_of(item_id, idx):
     e = idx["names"].get(item_id)
     return e["n"] if e else prettify(item_id)
-
-
-def desc_of(item_id, idx):
-    e = idx["names"].get(item_id)
-    return e["d"] if e else None
 
 
 def label_for(item_id, count, idx):
@@ -199,11 +176,13 @@ def expand_requirement(req_id, mult, idx, seen=None):
     return leaves
 
 
-def list_tooltip(req_id, idx):
+def list_expansion(req_id, idx):
+    """Structured expansion for tooltips: [{id, label}], so the app can render
+    each option as a link to the CDDA Guide."""
     exp = expand_requirement(req_id, 1, idx)
     if not exp:
         return None
-    return " OR ".join(label_for(e["id"], e["count"], idx) for e in exp)
+    return [{"id": e["id"], "label": label_for(e["id"], e["count"], idx)} for e in exp]
 
 
 def parse_components(comps, idx):
@@ -221,9 +200,11 @@ def parse_components(comps, idx):
                 "name": name_of(iid, idx) + (" (any)" if is_list else ""),
                 "list": is_list,
             }
-            tip = list_tooltip(iid, idx) if is_list else desc_of(iid, idx)
-            if tip:
-                entry["tip"] = tip
+            if is_list:  # only item-group / requirement pseudo-items get a tooltip
+                exp = list_expansion(iid, idx)
+                if exp:
+                    entry["expand"] = exp                      # structured, for links
+                    entry["tip"] = " OR ".join(e["label"] for e in exp)  # plain fallback
             alts.append(entry)
         if alts:
             out.append(alts)
@@ -234,11 +215,7 @@ def parse_qualities(quals, idx):
     out = []
     for q in quals or []:
         qid = q.get("id")
-        entry = {"id": qid, "level": q.get("level", 1), "name": name_of(qid, idx)}
-        d = desc_of(qid, idx)
-        if d:
-            entry["tip"] = d
-        out.append(entry)
+        out.append({"id": qid, "level": q.get("level", 1), "name": name_of(qid, idx)})
     return out
 
 
@@ -251,11 +228,7 @@ def parse_tools(tools, idx):
             iid = alt[0]
             if iid == "fakeitem_statue":
                 continue  # the Heart of the Island itself; always available
-            entry = {"id": iid, "name": name_of(iid, idx)}
-            d = desc_of(iid, idx)
-            if d:
-                entry["tip"] = d
-            out.append(entry)
+            out.append({"id": iid, "name": name_of(iid, idx)})
     return out
 
 

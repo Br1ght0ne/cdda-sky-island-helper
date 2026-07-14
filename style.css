@@ -116,11 +116,18 @@ h1 .accent { color: var(--accent); }
 .req.have .req-text .list-ref { color: var(--muted); }
 
 .tooltip {
-  position: absolute; z-index: 100; max-width: 340px;
+  position: absolute; z-index: 100; max-width: 340px; max-height: 45vh; overflow-y: auto;
   background: #0c0a14; color: var(--text);
-  border: 1px solid var(--accent2); border-radius: 8px;
+  border: 1px solid var(--border); border-radius: 8px; /* muted while transient */
   padding: 8px 11px; font-size: 12.5px; line-height: 1.45;
   box-shadow: 0 8px 24px rgba(0,0,0,.5); pointer-events: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+/* frozen = interactive: vivid purple border signals you can move onto it */
+.tooltip.frozen {
+  border-color: var(--accent);
+  box-shadow: 0 8px 28px rgba(0,0,0,.6), 0 0 0 1px rgba(185,140,255,.4);
+  cursor: default;
 }
 .count { color: var(--shard); font-variant-numeric: tabular-nums; font-weight: 600; }
 .or { color: var(--muted); font-style: italic; margin: 0 3px; }
