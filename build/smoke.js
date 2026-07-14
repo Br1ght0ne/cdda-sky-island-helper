@@ -86,14 +86,21 @@ planButtons[1] && planButtons[1].dispatch("click");
 planButtons[2] && planButtons[2].dispatch("click");
 assert(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan && Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length >= 1, "planning persists to localStorage");
 
-// Expand all / Collapse all
+// Expand all / Collapse all — now also affects collapsible sections
 const expandAll = toolbar.children.find(c => c._text === "Expand all");
 const collapseAll = toolbar.children.find(c => c._text === "Collapse all");
 assert(!!expandAll && !!collapseAll, "Expand all / Collapse all buttons present");
+const countCards = () => { let n=0; (function w(x){ if(typeof x.className==="string" && (x.className==="card"||x.className.indexOf("card ")===0)) n++; (x.children||[]).forEach(w); })(list); return n; };
+const countHeads = () => { let n=0; (function w(x){ if(typeof x.className==="string" && x.className.indexOf("group-head")===0) n++; (x.children||[]).forEach(w); })(list); return n; };
 expandAll.dispatch("click");
-assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).open).length === 84, "expand all opens every upgrade");
+let es = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+assert(Object.keys(es.open).length === 84 && Object.keys(es.groupsCollapsed || {}).length === 0, "expand all opens every section + upgrade");
 collapseAll.dispatch("click");
-assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).open).length === 0, "collapse all closes every upgrade");
+es = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+assert(Object.keys(es.open).length === 0, "collapse all closes every upgrade");
+assert(Object.keys(es.groupsCollapsed || {}).length >= 5, "collapse all collapses every section");
+assert(countCards() === 0 && countHeads() >= 5, "collapsed sections hide cards but keep section names");
+expandAll.dispatch("click"); // restore full render for the remaining checks
 
 const shopping = registry["shopping"];
 assert(shopping.children.length > 0 || shopping._html !== "", "shopping list populated after planning");
@@ -158,6 +165,12 @@ assert(tipped.length > 0 && tipped.every(n => n.tagName==="span"), "only LIST re
 assert(tipped.some(n => /OR/.test(n.getAttribute("data-tip"))), "LIST refs render an expansion tooltip");
 assert(tipped.some(n => Array.isArray(n._tipItems) && n._tipItems[0] && n._tipItems[0].id && n._tipItems[0].label),
   "LIST refs carry structured expansion for in-tooltip links");
+
+// Search matches tool qualities (e.g. "boiling" = the BOIL quality)
+const searchEl = registry["search"];
+searchEl.value = "boiling"; searchEl.dispatch("input");
+assert(countCards() > 0, "search matches tool qualities");
+searchEl.value = ""; searchEl.dispatch("input"); // reset filter
 
 // Remove finished from plan: rank-up #1 was planned and marked done earlier,
 // so it should be dropped from the plan (checked before import replaces state).

@@ -7,6 +7,7 @@
   const DATA = (window.SKYISLAND_DATA || { upgrades: [] });
   const UP = DATA.upgrades;
   const byId = Object.fromEntries(UP.map(u => [u.id, u]));
+  const GROUPS = [...new Set(UP.map(u => u.group))];
 
   const STORE_KEY = "skyisland.tracker.v1";
   const els = {
@@ -29,7 +30,7 @@
     // `tools` is a GLOBAL registry of owned tool qualities (keyed `id::level`).
     // Tool qualities are permanent island gear, so ownership is shared across
     // every upgrade rather than tracked per-upgrade like materials.
-    return { done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: {} };
+    return { done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: {}, groupsCollapsed: {} };
   }
   function load() {
     try {
@@ -106,11 +107,9 @@
     groups.forEach(g => { if (groupMet(u, g)) met++; });
     return { met, total: groups.length };
   }
-  // "Finished" = crafted (marked done) or every requirement already gathered.
+  // "Finished" = crafted, i.e. explicitly marked done.
   function isFinished(u) {
-    if (state.done[u.id]) return true;
-    const p = progress(u);
-    return p.total > 0 && p.met === p.total;
+    return !!state.done[u.id];
   }
 
   // ---- rendering -----------------------------------------------------------
@@ -134,11 +133,30 @@
     if (!shown) {
       els.list.innerHTML = '<div class="empty">No upgrades match your filters.</div>';
     } else {
+      const searching = !!q;
       for (const group of Object.keys(groups)) {
+        const collapsed = !searching && !!state.groupsCollapsed[group];
         const gh = document.createElement("div");
-        gh.className = "group-head";
-        gh.textContent = group;
+        gh.className = "group-head" + (collapsed ? " collapsed" : "");
+        const caret = document.createElement("span");
+        caret.className = "caret";
+        caret.textContent = collapsed ? "▸" : "▾";
+        const label = document.createElement("span");
+        label.className = "group-label";
+        label.textContent = group;
+        let gcount = 0;
+        for (const cat of Object.keys(groups[group])) gcount += groups[group][cat].length;
+        const cnt = document.createElement("span");
+        cnt.className = "group-count";
+        cnt.textContent = gcount;
+        gh.appendChild(caret); gh.appendChild(label); gh.appendChild(cnt);
+        gh.addEventListener("click", () => {
+          if (state.groupsCollapsed[group]) delete state.groupsCollapsed[group];
+          else state.groupsCollapsed[group] = true;
+          render();
+        });
         els.list.appendChild(gh);
+        if (collapsed) continue;
         for (const cat of Object.keys(groups[group])) {
           const ch = document.createElement("div");
           ch.className = "cat-head";
@@ -158,6 +176,8 @@
     if ((u.effect || "").toLowerCase().includes(q)) return true;
     for (const alts of u.components)
       for (const a of alts) if (a.name.toLowerCase().includes(q)) return true;
+    for (const ql of u.qualities) if (ql.name.toLowerCase().includes(q)) return true;
+    for (const t of u.tools) if (t.name.toLowerCase().includes(q)) return true;
     return false;
   }
 
@@ -557,7 +577,12 @@
   // ---- wiring --------------------------------------------------------------
   function setAllOpen(open) {
     state.open = {};
-    if (open) UP.forEach(u => { state.open[u.id] = true; });
+    state.groupsCollapsed = {};
+    if (open) {
+      UP.forEach(u => { state.open[u.id] = true; });        // sections + cards open
+    } else {
+      GROUPS.forEach(g => { state.groupsCollapsed[g] = true; }); // only section names
+    }
     render();
   }
 
@@ -565,7 +590,7 @@
     // Sits right after the HTML "Clear plan" button.
     const removeFinished = document.createElement("button");
     removeFinished.type = "button"; removeFinished.className = "btn ghost"; removeFinished.textContent = "Remove finished";
-    removeFinished.title = "Remove completed or fully-gathered upgrades from your plan";
+    removeFinished.title = "Remove crafted (completed) upgrades from your plan";
     removeFinished.addEventListener("click", () => {
       const finished = UP.filter(u => state.plan[u.id] && isFinished(u));
       if (!finished.length) { alert("No finished upgrades in your plan."); return; }
