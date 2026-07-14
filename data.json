@@ -8242,5 +8242,450 @@
       "qualities": [],
       "tools": []
     }
-  ]
+  ],
+  "quality_items": {
+    "SAW_M_FINE::1": {
+      "examples": [
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        },
+        {
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
+        },
+        {
+          "id": "hacksaw",
+          "name": "hacksaw"
+        }
+      ],
+      "total": 5
+    },
+    "WELD::1": {
+      "examples": [
+        {
+          "id": "welder_crude",
+          "name": "makeshift arc welder"
+        },
+        {
+          "id": "welder",
+          "name": "arc welder"
+        },
+        {
+          "id": "welding_kit",
+          "name": "high-temperature welding kit"
+        }
+      ],
+      "total": 4
+    },
+    "BUTCHER::16": {
+      "examples": [
+        {
+          "id": "crash_axe",
+          "name": "crash axe"
+        },
+        {
+          "id": "knife_rm42",
+          "name": "F-S fighting knife"
+        },
+        {
+          "id": "ch_kukri",
+          "name": "hardened steel kukri"
+        }
+      ],
+      "total": 25
+    },
+    "SAW_M::2": {
+      "examples": [
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        },
+        {
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
+        },
+        {
+          "id": "hacksaw",
+          "name": "hacksaw"
+        }
+      ],
+      "total": 5
+    },
+    "WRENCH_FINE::1": {
+      "examples": [
+        {
+          "id": "wrench",
+          "name": "adjustable wrench"
+        },
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        },
+        {
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
+        }
+      ],
+      "total": 8
+    },
+    "CHEM::2": {
+      "examples": [
+        {
+          "id": "chemistry_set_basic",
+          "name": "basic chemistry set"
+        },
+        {
+          "id": "chemistry_set",
+          "name": "chemistry set"
+        }
+      ],
+      "total": 2
+    },
+    "MOP::1": {
+      "examples": [
+        {
+          "id": "mop_folded",
+          "name": "collapsible mop"
+        },
+        {
+          "id": "mop",
+          "name": "mop"
+        }
+      ],
+      "total": 2
+    },
+    "WRENCH::2": {
+      "examples": [
+        {
+          "id": "wrench",
+          "name": "adjustable wrench"
+        },
+        {
+          "id": "cordless_impact_wrench",
+          "name": "cordless impact wrench"
+        },
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        }
+      ],
+      "total": 9
+    },
+    "DRILL::1": {
+      "examples": [
+        {
+          "id": "makeshift_hand_drill",
+          "name": "makeshift hand drill"
+        },
+        {
+          "id": "hand_drill",
+          "name": "hand drill"
+        },
+        {
+          "id": "cordless_drill",
+          "name": "cordless drill"
+        }
+      ],
+      "total": 5
+    },
+    "SHOTGUN::1": {
+      "examples": [],
+      "total": 0
+    },
+    "SMOOTH::1": {
+      "examples": [
+        {
+          "id": "wood_smoother",
+          "name": "wooden smoother"
+        },
+        {
+          "id": "metal_smoother",
+          "name": "metallic smoother"
+        }
+      ],
+      "total": 2
+    },
+    "BOIL::2": {
+      "examples": [
+        {
+          "id": "pot_copper",
+          "name": "%s by electrolysis"
+        },
+        {
+          "id": "aluminum_pan",
+          "name": "aluminum frying pan"
+        },
+        {
+          "id": "keg",
+          "name": "aluminum keg"
+        }
+      ],
+      "total": 61
+    },
+    "HOSE::1": {
+      "examples": [
+        {
+          "id": "hose_garden",
+          "name": "garden hose"
+        },
+        {
+          "id": "makeshift_hose",
+          "name": "leather hose"
+        },
+        {
+          "id": "hose",
+          "name": "rubber hose"
+        }
+      ],
+      "total": 3
+    },
+    "PISTOL::1": {
+      "examples": [],
+      "total": 0
+    },
+    "CUT_FINE::2": {
+      "examples": [
+        {
+          "id": "misc_repairkit",
+          "name": "miscellaneous repair kit"
+        },
+        {
+          "id": "xacto",
+          "name": "X-Acto knife"
+        },
+        {
+          "id": "scalpel",
+          "name": "scalpel"
+        }
+      ],
+      "total": 4
+    },
+    "PRY::2": {
+      "examples": [
+        {
+          "id": "crowbar_warhammer",
+          "name": "bec de crowbar"
+        },
+        {
+          "id": "claw_bar",
+          "name": "claw bar"
+        },
+        {
+          "id": "crash_axe",
+          "name": "crash axe"
+        }
+      ],
+      "total": 10
+    },
+    "WINNOW::1": {
+      "examples": [
+        {
+          "id": "fan",
+          "name": "desk fan"
+        },
+        {
+          "id": "hair_dryer",
+          "name": "hair dryer"
+        },
+        {
+          "id": "leather_bellow",
+          "name": "leather bellow"
+        }
+      ],
+      "total": 8
+    },
+    "SCREW::1": {
+      "examples": [
+        {
+          "id": "camping_multitool",
+          "name": "camping multitool"
+        },
+        {
+          "id": "cordless_drill",
+          "name": "cordless drill"
+        },
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        }
+      ],
+      "total": 14
+    },
+    "DIG::1": {
+      "examples": [
+        {
+          "id": "exodii_prybar",
+          "name": "breacher"
+        },
+        {
+          "id": "bronze_hoe",
+          "name": "bronze hoe"
+        },
+        {
+          "id": "digging_stick",
+          "name": "digging stick"
+        }
+      ],
+      "total": 13
+    },
+    "GLARE::1": {
+      "examples": [
+        {
+          "id": "outsert_breach",
+          "name": "breach outsert lens"
+        },
+        {
+          "id": "welding_mask_crude",
+          "name": "crude welding mask"
+        },
+        {
+          "id": "eclipse_glasses",
+          "name": "eclipse glasses"
+        }
+      ],
+      "total": 8
+    },
+    "HAMMER::2": {
+      "examples": [
+        {
+          "id": "exodii_prybar",
+          "name": "breacher"
+        },
+        {
+          "id": "halligan",
+          "name": "Halligan bar"
+        },
+        {
+          "id": "iceaxe",
+          "name": "ice axe"
+        }
+      ],
+      "total": 11
+    },
+    "STRAIN::1": {
+      "examples": [
+        {
+          "id": "sieve_steel_makeshift",
+          "name": "makeshift sieve"
+        },
+        {
+          "id": "colander_steel",
+          "name": "mesh colander"
+        },
+        {
+          "id": "sieve_steel",
+          "name": "sieve"
+        }
+      ],
+      "total": 5
+    },
+    "BLOW_HOT_AIR::1": {
+      "examples": [
+        {
+          "id": "hair_dryer",
+          "name": "hair dryer"
+        }
+      ],
+      "total": 1
+    },
+    "FABRIC_CUT::2": {
+      "examples": [
+        {
+          "id": "kevlar_shears",
+          "name": "Kevlar shears"
+        },
+        {
+          "id": "tailors_kit",
+          "name": "tailor's kit"
+        }
+      ],
+      "total": 2
+    },
+    "JACK::1": {
+      "examples": [
+        {
+          "id": "nose_plate",
+          "name": "nose plate"
+        },
+        {
+          "id": "jack_makeshift",
+          "name": "makeshift jack"
+        },
+        {
+          "id": "jack_small",
+          "name": "scissor jack"
+        }
+      ],
+      "total": 8
+    },
+    "SAW_W::2": {
+      "examples": [
+        {
+          "id": "bow_saw",
+          "name": "bow saw"
+        },
+        {
+          "id": "saw_bronze",
+          "name": "bronze wood saw"
+        },
+        {
+          "id": "misc_repairkit",
+          "name": "miscellaneous repair kit"
+        }
+      ],
+      "total": 5
+    },
+    "SEW::3": {
+      "examples": [
+        {
+          "id": "needle_steel",
+          "name": "needle"
+        },
+        {
+          "id": "sewing_kit",
+          "name": "sewing kit"
+        },
+        {
+          "id": "tailors_kit",
+          "name": "tailor's kit"
+        }
+      ],
+      "total": 3
+    },
+    "SCREW_FINE::1": {
+      "examples": [
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        },
+        {
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
+        },
+        {
+          "id": "robofac_gun_kit",
+          "name": "Hub 01 HWP maintenance kit"
+        }
+      ],
+      "total": 6
+    },
+    "HAMMER_FINE::1": {
+      "examples": [
+        {
+          "id": "hammer_peen",
+          "name": "ball-peen hammer"
+        },
+        {
+          "id": "hammer_bronze",
+          "name": "bronze hammer"
+        },
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        }
+      ],
+      "total": 6
+    }
+  }
 }

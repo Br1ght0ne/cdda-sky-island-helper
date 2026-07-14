@@ -134,6 +134,12 @@ assert(!!sharedQ, "a tool quality is shared by multiple upgrades (" + sharedQ + 
 cbOf(byQ[sharedQ][0]).checked = true; cbOf(byQ[sharedQ][0]).dispatch("change");
 assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).tools || {}).length >= 1, "owning a quality persists to global state.tools");
 assert(qualRows().filter(r => qidOf(r)===sharedQ).every(r => cbOf(r).checked === true), "checking a quality syncs to every upgrade that needs it");
+// Quality example items sourced from the game data
+const qi = window.SKYISLAND_DATA.quality_items || {};
+assert(Object.keys(qi).length > 0 && qi["HAMMER::2"] && qi["HAMMER::2"].examples.length > 0 && qi["HAMMER::2"].total >= qi["HAMMER::2"].examples.length,
+  "quality_items provides example tools + total count");
+const egRow = qualRows().find(r => { let has=false; (function w(n){ if(typeof n.className==="string" && n.className==="quality-egs") has=true; (n.children||[]).forEach(w); })(r); return has; });
+assert(!!egRow, "quality rows display example items inline");
 
 // Guide links: item + tool_quality namespaces, and text is a span, not a label.
 const anchors = [];

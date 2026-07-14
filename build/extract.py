@@ -90,15 +90,17 @@ def norm_name(name):
 
 
 # ---------------------------------------------------------------------------
-# Index: id -> {n: name, p: plural}, plus requirement bodies for LIST expansion.
+# Index: id -> {n: name, p: plural}, requirement bodies for LIST expansion,
+# copy-from parents, per-id tool qualities, and the set of concrete item ids.
 # ---------------------------------------------------------------------------
 def build_index():
-    names, parents, reqs = {}, {}, {}
+    idx = {"names": {}, "reqs": {}, "parents": {}, "own_qual": {}, "concrete": set()}
     for o in iter_json_objects(BASE):
-        _register(o, names, parents, reqs)
+        _register(o, idx)
     for o in iter_json_objects(MOD):
-        _register(o, names, parents, reqs)
+        _register(o, idx)
     # Resolve copy-from inheritance for entries still missing a name.
+    names, parents = idx["names"], idx["parents"]
     for cid, parent in list(parents.items()):
         if cid in names:
             continue
@@ -108,10 +110,10 @@ def build_index():
             p = parents.get(p)
         if p in names:
             names[cid] = names[p]
-    return {"names": names, "reqs": reqs}
+    return idx
 
 
-def _register(o, names, parents, reqs):
+def _register(o, idx):
     ids = []
     for key in ("id", "abstract", "result"):
         v = o.get(key)
@@ -121,16 +123,33 @@ def _register(o, names, parents, reqs):
             ids.extend(x for x in v if isinstance(x, str))
     if not ids:
         return
+    if isinstance(o.get("id"), str):
+        idx["concrete"].add(o["id"])
     if o.get("type") == "requirement" and isinstance(o.get("components"), list):
         for i in ids:
-            reqs.setdefault(i, o["components"])
+            idx["reqs"].setdefault(i, o["components"])
     n, p = norm_name(o.get("name"))
     cf = o.get("copy-from")
     for i in ids:
-        if n and i not in names:
-            names[i] = {"n": n, "p": p}
-        if isinstance(cf, str) and i not in parents:
-            parents[i] = cf
+        if n and i not in idx["names"]:
+            idx["names"][i] = {"n": n, "p": p}
+        if isinstance(cf, str) and i not in idx["parents"]:
+            idx["parents"][i] = cf
+    # Tool qualities an item confers (static + charge-gated, incl. copy-from extend).
+    quals = []
+    for key in ("qualities", "charged_qualities"):
+        v = o.get(key)
+        if isinstance(v, list):
+            quals += v
+        ext = o.get("extend")
+        if isinstance(ext, dict) and isinstance(ext.get(key), list):
+            quals += ext[key]
+    if quals:
+        for i in ids:
+            d = idx["own_qual"].setdefault(i, {})
+            for pair in quals:
+                if isinstance(pair, list) and len(pair) >= 2 and isinstance(pair[0], str):
+                    d[pair[0]] = max(d.get(pair[0], 0), pair[1])
 
 
 def prettify(item_id):
@@ -183,6 +202,49 @@ def list_expansion(req_id, idx):
     if not exp:
         return None
     return [{"id": e["id"], "label": label_for(e["id"], e["count"], idx)} for e in exp]
+
+
+def build_quality_index(idx, ql_pairs, sample=3):
+    """For each required (quality, level), find every concrete item that confers
+    that quality at >= the level (following copy-from), and return a few example
+    names plus a total count. Keyed 'QUALITY::level'."""
+    parents, own_qual, concrete, names = idx["parents"], idx["own_qual"], idx["concrete"], idx["names"]
+    memo = {}
+
+    def eff(i, stack=()):
+        if i in memo:
+            return memo[i]
+        res = {}
+        p = parents.get(i)
+        if p and p not in stack:
+            res.update(eff(p, stack + (i,)))
+        for q, lvl in own_qual.get(i, {}).items():
+            if lvl > res.get(q, -1):
+                res[q] = lvl
+        memo[i] = res
+        return res
+
+    qmap = {}  # quality -> [(level, name, id)]
+    for i in concrete:
+        if "fake" in i:
+            continue
+        e = eff(i)
+        if not e:
+            continue
+        entry = names.get(i)
+        if not entry:
+            continue
+        for q, lvl in e.items():
+            qmap.setdefault(q, []).append((lvl, entry["n"], i))
+
+    out = {}
+    for q, level in ql_pairs:
+        sat = sorted((t for t in qmap.get(q, []) if t[0] >= level), key=lambda t: (t[0], t[1].lower()))
+        out[f"{q}::{level}"] = {
+            "examples": [{"id": i, "name": nm} for (_lvl, nm, i) in sat[:sample]],
+            "total": len(sat),
+        }
+    return out
 
 
 def parse_components(comps, idx):
@@ -277,11 +339,16 @@ def main():
                 "tools": parse_tools(r.get("tools"), idx) if r else [],
             })
 
+    # Example items that satisfy each required tool quality, from the game source.
+    ql_pairs = {(q["id"], q["level"]) for u in upgrades for q in u["qualities"]}
+    quality_items = build_quality_index(idx, ql_pairs)
+
     payload = {
         "generated_from": "CleverRaven/cataclysm-dda data/mods/Sky_Island",
         "guide_base": "https://cdda-guide.nornagon.net",
         "count": len(upgrades),
         "upgrades": upgrades,
+        "quality_items": quality_items,
     }
 
     json_path = os.path.join(PROJECT, "data.json")

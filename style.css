@@ -95,6 +95,9 @@ h1 .accent { color: var(--accent); }
 .req:last-child { border-bottom: none; }
 .req input { margin-top: 1px; accent-color: var(--good); width: 16px; height: 16px; cursor: pointer; flex: none; }
 .req-text { flex: 1; }
+.quality-egs { color: var(--muted); font-size: 12px; }
+.quality-egs .item-link { color: var(--muted); border-bottom-color: var(--border); }
+.quality-egs .item-link:hover { color: var(--accent); }
 .req.comp { align-items: center; }
 .req.have .req-text { color: var(--muted); }
 

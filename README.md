@@ -22,7 +22,10 @@ Just open `index.html` in a browser. No server, no build step, no internet.
 - **Tool qualities are a shared, global registry**: since the tools that provide
   them live permanently on the island, ticking e.g. *Hammering lvl 2* once marks
   it satisfied in **every** upgrade that needs it (and unticking clears it
-  everywhere). Kept separate from per-upgrade material progress.
+  everywhere). Kept separate from per-upgrade material progress. Each quality
+  also lists a few **example items** that provide it at the required level or
+  higher (sourced from the game data), e.g. "*Hammering lvl 2 — e.g. breacher,
+  Halligan bar, ice axe and 8 more*".
 - **The shopping list is interactive and linked**: ticking a material there
   marks it gathered for every planned upgrade that needs it, and that instantly
   reflects back in the cards (and vice-versa) — one shared state, no framework.
@@ -77,7 +80,10 @@ The extractor:
   in-game descriptions from the base CDDA data + the mod, falling back to a
   prettified id when a name can't be found;
 - recursively expands `requirement` objects referenced via `LIST` (counts
-  multiply through nesting) to build the hover tooltips.
+  multiply through nesting) to build the hover tooltips;
+- scans every item's `qualities`/`charged_qualities` (following `copy-from`) to
+  find example tools that satisfy each required tool quality at level ≥ needed,
+  emitted as `quality_items` in the data.
 
 The CDDA repo path is hard-coded near the top of `build/extract.py` — adjust
 `CDDA` if yours differs.

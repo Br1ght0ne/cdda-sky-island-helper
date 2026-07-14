@@ -390,6 +390,19 @@
     text.appendChild(guideLink("tool_quality", q.id, q.name));
     text.appendChild(textNode(" "));
     text.appendChild(tagNode("lvl " + q.level));
+    const info = (DATA.quality_items || {})[q.id + "::" + q.level];
+    if (info && info.examples.length) {
+      const egs = document.createElement("span");
+      egs.className = "quality-egs";
+      egs.appendChild(textNode(" — e.g. "));
+      info.examples.forEach((e, i) => {
+        if (i) egs.appendChild(textNode(", "));
+        egs.appendChild(guideLink("item", e.id, e.name));
+      });
+      const more = info.total - info.examples.length;
+      if (more > 0) egs.appendChild(textNode(" and " + more + " more"));
+      text.appendChild(egs);
+    }
     row.appendChild(cb); row.appendChild(text);
     return row;
   }
