@@ -106,6 +106,12 @@
     groups.forEach(g => { if (groupMet(u, g)) met++; });
     return { met, total: groups.length };
   }
+  // "Finished" = crafted (marked done) or every requirement already gathered.
+  function isFinished(u) {
+    if (state.done[u.id]) return true;
+    const p = progress(u);
+    return p.total > 0 && p.met === p.total;
+  }
 
   // ---- rendering -----------------------------------------------------------
   function render() {
@@ -556,6 +562,20 @@
   }
 
   function addToolbarButtons() {
+    // Sits right after the HTML "Clear plan" button.
+    const removeFinished = document.createElement("button");
+    removeFinished.type = "button"; removeFinished.className = "btn ghost"; removeFinished.textContent = "Remove finished";
+    removeFinished.title = "Remove completed or fully-gathered upgrades from your plan";
+    removeFinished.addEventListener("click", () => {
+      const finished = UP.filter(u => state.plan[u.id] && isFinished(u));
+      if (!finished.length) { alert("No finished upgrades in your plan."); return; }
+      if (confirm("Remove " + finished.length + " finished upgrade(s) from your plan?")) {
+        finished.forEach(u => delete state.plan[u.id]);
+        render();
+      }
+    });
+    els.toolbar.appendChild(removeFinished);
+
     const expand = document.createElement("button");
     expand.type = "button"; expand.className = "btn ghost"; expand.textContent = "Expand all";
     expand.addEventListener("click", () => setAllOpen(true));

@@ -159,6 +159,15 @@ assert(tipped.some(n => /OR/.test(n.getAttribute("data-tip"))), "LIST refs rende
 assert(tipped.some(n => Array.isArray(n._tipItems) && n._tipItems[0] && n._tipItems[0].id && n._tipItems[0].label),
   "LIST refs carry structured expansion for in-tooltip links");
 
+// Remove finished from plan: rank-up #1 was planned and marked done earlier,
+// so it should be dropped from the plan (checked before import replaces state).
+const planBeforeRm = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length;
+const rmFin = toolbar.children.find(c => c._text === "Remove finished");
+assert(!!rmFin, "Remove finished button present");
+rmFin.dispatch("click");
+assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length < planBeforeRm,
+  "remove finished drops completed upgrades from the plan");
+
 // Export copies JSON to clipboard
 const expBtn = toolbar.children.find(c => c._text === "Export");
 assert(!!expBtn, "Export button added to toolbar");
@@ -171,6 +180,7 @@ setTimeout(() => {
   impBtn.dispatch("click");
   const after = JSON.parse(storeBacking["skyisland.tracker.v1"]);
   assert(after.plan["SKYISLAND_UPGRADE_landing1"] === true, "import replaced state from JSON");
+
   // Reset wipes everything
   global.confirm = () => true;
   const resetBtn = toolbar.children.find(c => c._text === "Reset");

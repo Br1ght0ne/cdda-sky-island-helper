@@ -29,6 +29,9 @@ Just open `index.html` in a browser. No server, no build step, no internet.
 - **The shopping list is interactive and linked**: ticking a material there
   marks it gathered for every planned upgrade that needs it, and that instantly
   reflects back in the cards (and vice-versa) — one shared state, no framework.
+- **Plan housekeeping**: *Clear plan* empties it; *Remove finished* drops every
+  planned upgrade you've completed or fully gathered, so only outstanding work
+  stays in the shopping list.
 - **Mark upgrades complete** with the big checkbox on the left.
 - **Plan** button on each upgrade feeds a live **shopping list** in the sidebar
   that aggregates every still-missing material across your planned upgrades
