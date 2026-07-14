@@ -18,11 +18,14 @@
     clearPlan: document.getElementById("clear-plan"),
     removeFinished: document.getElementById("remove-finished"),
     planActions: document.getElementById("plan-actions"),
+    planPanel: document.getElementById("plan-panel"),
+    planHandle: document.getElementById("plan-handle"),
+    planSummary: document.getElementById("plan-summary"),
     shopping: document.getElementById("shopping"),
     planHint: document.getElementById("plan-hint"),
     stats: document.getElementById("stats"),
     foot: document.getElementById("foot"),
-    toolbar: document.querySelector(".toolbar"),
+    toolbarActions: document.getElementById("toolbar-actions"),
   };
 
   // ---- state ---------------------------------------------------------------
@@ -441,7 +444,7 @@
     els.planHint.style.display = planned.length ? "none" : "block";
     els.planActions.style.display = planned.length ? "flex" : "none";
     els.shopping.innerHTML = "";
-    if (!planned.length) return;
+    if (!planned.length) { els.planSummary.textContent = "nothing planned yet"; return; }
 
     // Aggregate component groups across planned upgrades. Key by the set of
     // alternative ids so "3 nails" from two upgrades merges into one line.
@@ -529,6 +532,8 @@
     tot.className = "shop-total";
     tot.textContent = itemsNeeded + " material line(s) still to gather across " + planned.length + " planned upgrade(s).";
     els.shopping.appendChild(tot);
+
+    els.planSummary.textContent = planned.length + " planned · " + itemsNeeded + " to gather";
   }
 
   function renderStats() {
@@ -596,8 +601,8 @@
     const collapse = document.createElement("button");
     collapse.type = "button"; collapse.className = "btn ghost"; collapse.textContent = "Collapse all";
     collapse.addEventListener("click", () => setAllOpen(false));
-    els.toolbar.appendChild(expand);
-    els.toolbar.appendChild(collapse);
+    els.toolbarActions.appendChild(expand);
+    els.toolbarActions.appendChild(collapse);
 
     const exp = document.createElement("button");
     exp.type = "button"; exp.className = "btn"; exp.textContent = "Export";
@@ -617,9 +622,9 @@
         render();
       }
     });
-    els.toolbar.appendChild(exp);
-    els.toolbar.appendChild(imp);
-    els.toolbar.appendChild(reset);
+    els.toolbarActions.appendChild(exp);
+    els.toolbarActions.appendChild(imp);
+    els.toolbarActions.appendChild(reset);
   }
 
   // ---- hover tooltips, CRPG-style ------------------------------------------
@@ -730,7 +735,26 @@
       render();
     }
   });
+  // ---- mobile Plan bottom sheet -------------------------------------------
+  function setupPlanSheet() {
+    const backdrop = document.createElement("div");
+    backdrop.className = "plan-backdrop";
+    document.body.appendChild(backdrop);
+    let open = false;
+    function setOpen(v) {
+      open = v;
+      els.planPanel.className = "panel sticky" + (open ? " open" : "");
+      backdrop.className = "plan-backdrop" + (open ? " show" : "");
+      els.planHandle.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    els.planHandle.addEventListener("click", () => setOpen(!open));
+    backdrop.addEventListener("click", () => setOpen(false));
+    // Opening a card action or planning shouldn't force the sheet, but tapping
+    // "Only in plan" while filtering feels natural to peek — left to the user.
+  }
+
   addToolbarButtons();
   setupTooltips();
+  setupPlanSheet();
   render();
 })();

@@ -44,6 +44,10 @@ Just open `index.html` in a browser. No server, no build step, no internet.
   can move onto it — every option inside is itself a link to the CDDA Guide.
 - **Search** by upgrade name, effect, or required item.
 - **Filters**: hide completed, show only planned.
+- **Responsive / mobile**: on narrow screens the layout collapses to one column
+  and the Plan becomes a **pull-up bottom sheet** — a handle pinned to the bottom
+  shows a live summary (e.g. "3 planned · 12 to gather"); tap it (or the backdrop)
+  to slide the full plan up and back down.
 - **State is saved in your browser** (`localStorage`) and survives reloads even
   when opened from a `file://` path.
 - **Export / Import** your whole progress as JSON via the clipboard, to back it

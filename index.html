@@ -18,6 +18,8 @@
     <main>
       <div class="toolbar">
         <input type="search" id="search" placeholder="Search upgrades or items…" autocomplete="off">
+      </div>
+      <div class="toolbar toolbar-actions" id="toolbar-actions">
         <label class="chk"><input type="checkbox" id="hide-done"> Hide completed</label>
         <label class="chk"><input type="checkbox" id="only-plan"> Only in plan</label>
       </div>
@@ -26,16 +28,26 @@
     </main>
 
     <aside>
-      <div class="panel sticky">
-        <div class="panel-head">
-          <h2>Plan</h2>
-          <div class="panel-actions" id="plan-actions">
-            <button id="remove-finished" class="btn ghost tiny" type="button" title="Remove crafted (completed) upgrades from your plan">Remove finished</button>
-            <button id="clear-plan" class="btn ghost tiny" type="button">Clear</button>
+      <div class="panel sticky" id="plan-panel">
+        <button class="plan-handle" id="plan-handle" type="button" aria-expanded="false" aria-controls="plan-scroll">
+          <span class="plan-grip" aria-hidden="true"></span>
+          <span class="plan-handle-row">
+            <span class="plan-handle-title">Plan</span>
+            <span class="plan-summary" id="plan-summary"></span>
+            <span class="plan-caret" aria-hidden="true">⌃</span>
+          </span>
+        </button>
+        <div class="plan-scroll" id="plan-scroll">
+          <div class="panel-head">
+            <h2>Plan</h2>
+            <div class="panel-actions" id="plan-actions">
+              <button id="remove-finished" class="btn ghost tiny" type="button" title="Remove crafted (completed) upgrades from your plan">Remove finished</button>
+              <button id="clear-plan" class="btn ghost tiny" type="button">Clear</button>
+            </div>
           </div>
+          <p class="hint" id="plan-hint">Click <strong>＋ Plan</strong> on any upgrade to add its materials here.</p>
+          <div id="shopping"></div>
         </div>
-        <p class="hint" id="plan-hint">Click <strong>＋ Plan</strong> on any upgrade to add its materials here.</p>
-        <div id="shopping"></div>
       </div>
     </aside>
   </div>

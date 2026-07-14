@@ -14,6 +14,8 @@
   --radius: 10px;
 }
 * { box-sizing: border-box; }
+/* Kill the ~300ms touch tap delay on interactive elements (double-tap-zoom hold). */
+button, a, input, label, .plan-handle, .plan-backdrop, .card-top, .group-head { touch-action: manipulation; }
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
@@ -22,6 +24,9 @@ body {
   font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 .wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+/* Never let long names/descriptions force the page wider than the screen. */
+.card-title, .card-effect, .req-text, .shop-name, .shop-from, .desc, .quality-egs, .group-label { overflow-wrap: anywhere; }
 
 header {
   background: linear-gradient(120deg, #241a3d, #14101f 70%);
@@ -33,10 +38,13 @@ h1 .accent { color: var(--accent); }
 .sub { margin: 6px 0 0; color: var(--muted); }
 .sub em { color: var(--text); font-style: normal; }
 
-.layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; margin-top: 22px; align-items: start; }
-@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } aside .sticky { position: static; } }
+.layout { display: grid; grid-template-columns: 1fr 420px; gap: 24px; margin-top: 22px; align-items: start; }
+
+/* The pull-up handle is desktop-hidden; the Plan is a normal sidebar there. */
+.plan-handle { display: none; }
 
 .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+.toolbar-actions { border-top: 1px solid var(--border); padding-top: 12px; }
 #search {
   flex: 1 1 240px; min-width: 180px;
   background: var(--panel); border: 1px solid var(--border); color: var(--text);
@@ -124,7 +132,7 @@ h1 .accent { color: var(--accent); }
 .req.have .req-text .list-ref { color: var(--muted); }
 
 .tooltip {
-  position: absolute; z-index: 100; max-width: 340px; max-height: 45vh; overflow-y: auto;
+  position: absolute; z-index: 100; max-width: min(340px, calc(100vw - 16px)); max-height: 45vh; overflow-y: auto;
   background: #0c0a14; color: var(--text);
   border: 1px solid var(--border); border-radius: 8px; /* muted while transient */
   padding: 8px 11px; font-size: 12.5px; line-height: 1.45;
@@ -160,6 +168,64 @@ aside .sticky { position: sticky; top: 16px; }
 .shop-total { margin-top: 12px; font-size: 12px; color: var(--muted); }
 .shard-line { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 14px; }
 .shard-line .count { color: var(--shard); }
+
+/* ---- mobile: single column + Plan as a pull-up bottom sheet ---- */
+.plan-backdrop { display: none; }
+@media (max-width: 900px) {
+  html, body { overflow-x: hidden; } /* safety net; sticky isn't used at this size */
+  .wrap { padding: 0 14px; }
+  .layout { grid-template-columns: 1fr; }
+  body { padding-bottom: 62px; } /* clear the collapsed sheet handle */
+
+  #plan-panel {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    margin: 0; padding: 0;
+    max-height: 88vh; border-radius: 14px 14px 0 0;
+    display: flex; flex-direction: column;
+    box-shadow: 0 -10px 30px rgba(0,0,0,.55);
+    transform: translateY(calc(100% - 60px)); /* only the handle peeks up */
+    transition: transform .2s ease;
+  }
+  #plan-panel.open { transform: translateY(0); }
+
+  .plan-handle {
+    display: flex; flex-direction: column; gap: 6px;
+    width: 100%; height: 60px; flex: none;
+    background: transparent; border: none; color: var(--text);
+    padding: 8px 16px 0; cursor: pointer; text-align: left;
+  }
+  .plan-grip { width: 40px; height: 4px; border-radius: 2px; background: var(--border); align-self: center; }
+  .plan-handle-row { display: flex; align-items: center; gap: 8px; }
+  .plan-handle-title { font-weight: 600; font-size: 15px; }
+  .plan-summary { flex: 1; color: var(--muted); font-size: 12px; }
+  .plan-caret { color: var(--muted); font-size: 16px; transition: transform .2s ease; }
+  #plan-panel.open .plan-caret { transform: rotate(180deg); }
+
+  .plan-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; padding: 4px 16px 24px; }
+  .panel-head h2 { display: none; } /* the handle already labels it "Plan" */
+
+  .plan-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 55;
+    background: rgba(0,0,0,.5); opacity: 0; pointer-events: none;
+    transition: opacity .2s ease;
+  }
+  .plan-backdrop.show { opacity: 1; pointer-events: auto; }
+}
+
+/* Very narrow phones (iPhone SE ~375px): tighten so nothing overflows. */
+@media (max-width: 480px) {
+  h1 { font-size: 21px; }
+  header { padding: 16px 0 14px; }
+  .sub { font-size: 12.5px; }
+  .toolbar { gap: 8px; }
+  .card-top { padding: 10px 11px; gap: 8px; }
+  .card-side { flex-direction: row; align-items: center; gap: 8px; }
+  .card-key { margin-left: 6px; white-space: normal; overflow-wrap: anywhere; } /* was nowrap -> could overflow */
+  .card-body { padding: 0 11px 12px 36px; }
+  .req { gap: 7px; }
+  .stepper .qty { width: 2.4ch; min-width: 2.4ch; }
+  .stepper .step { width: 22px; } /* keep tap targets usable */
+}
 
 footer { color: var(--muted); font-size: 12px; padding: 30px 0 40px; margin-top: 20px; border-top: 1px solid var(--border); }
 footer code { color: var(--text); }

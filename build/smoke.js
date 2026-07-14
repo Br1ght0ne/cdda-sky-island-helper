@@ -66,6 +66,7 @@ require(path.join(ROOT, "app.js"));
 function assert(c, m) { if (!c) { console.error("FAIL:", m); process.exitCode = 1; } else console.log("ok  -", m); }
 
 const list = registry["list"];
+const actions = registry["toolbar-actions"]; // Expand/Collapse/Export/Import/Reset live here now
 assert(list.children.length > 0, "list rendered group/category/card nodes");
 
 // find first upgrade card's plan button and click it (Island Rank Up 1)
@@ -87,8 +88,8 @@ planButtons[2] && planButtons[2].dispatch("click");
 assert(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan && Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length >= 1, "planning persists to localStorage");
 
 // Expand all / Collapse all — now also affects collapsible sections
-const expandAll = toolbar.children.find(c => c._text === "Expand all");
-const collapseAll = toolbar.children.find(c => c._text === "Collapse all");
+const expandAll = actions.children.find(c => c._text === "Expand all");
+const collapseAll = actions.children.find(c => c._text === "Collapse all");
 assert(!!expandAll && !!collapseAll, "Expand all / Collapse all buttons present");
 const countCards = () => { let n=0; (function w(x){ if(typeof x.className==="string" && (x.className==="card"||x.className.indexOf("card ")===0)) n++; (x.children||[]).forEach(w); })(list); return n; };
 const countHeads = () => { let n=0; (function w(x){ if(typeof x.className==="string" && x.className.indexOf("group-head")===0) n++; (x.children||[]).forEach(w); })(list); return n; };
@@ -172,6 +173,15 @@ searchEl.value = "boiling"; searchEl.dispatch("input");
 assert(countCards() > 0, "search matches tool qualities");
 searchEl.value = ""; searchEl.dispatch("input"); // reset filter
 
+// Mobile Plan bottom sheet: handle toggles the panel open/closed
+const planHandle = registry["plan-handle"];
+const planPanel = registry["plan-panel"];
+assert(!!planHandle && planHandle._listeners.click, "plan sheet handle is wired");
+planHandle.dispatch("click");
+assert(/\bopen\b/.test(planPanel.className), "tapping the handle opens the plan sheet");
+planHandle.dispatch("click");
+assert(!/\bopen\b/.test(planPanel.className), "tapping again closes the plan sheet");
+
 // Remove finished from plan: rank-up #1 was planned and marked done earlier,
 // so it should be dropped from the plan (checked before import replaces state).
 const planBeforeRm = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length;
@@ -182,21 +192,21 @@ assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length
   "remove finished drops completed upgrades from the plan");
 
 // Export copies JSON to clipboard
-const expBtn = toolbar.children.find(c => c._text === "Export");
+const expBtn = actions.children.find(c => c._text === "Export");
 assert(!!expBtn, "Export button added to toolbar");
 expBtn.dispatch("click");
 setTimeout(() => {
   assert(clipboard.length > 0 && JSON.parse(clipboard), "export wrote valid JSON to clipboard");
   // Import
   promptReturn = JSON.stringify({ plan: { "SKYISLAND_UPGRADE_landing1": true }, done: {}, have: {}, open: {} });
-  const impBtn = toolbar.children.find(c => c._text === "Import");
+  const impBtn = actions.children.find(c => c._text === "Import");
   impBtn.dispatch("click");
   const after = JSON.parse(storeBacking["skyisland.tracker.v1"]);
   assert(after.plan["SKYISLAND_UPGRADE_landing1"] === true, "import replaced state from JSON");
 
   // Reset wipes everything
   global.confirm = () => true;
-  const resetBtn = toolbar.children.find(c => c._text === "Reset");
+  const resetBtn = actions.children.find(c => c._text === "Reset");
   assert(!!resetBtn, "Reset button present");
   resetBtn.dispatch("click");
   const cleared = JSON.parse(storeBacking["skyisland.tracker.v1"]);
