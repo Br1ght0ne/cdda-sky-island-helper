@@ -1,0 +1,146 @@
+// Minimal DOM shim to smoke-test app.js under node (no jsdom).
+const fs = require("fs");
+const path = require("path");
+const ROOT = path.dirname(__dirname);
+
+function mkEl(tag) {
+  return {
+    tagName: tag, children: [], _listeners: {}, style: {}, dataset: {}, _attrs: {},
+    className: "", _text: "", _html: "",
+    set textContent(v) { this._text = v; this.children = []; },
+    get textContent() { return this._text; },
+    set innerHTML(v) { this._html = v; this.children = []; },
+    get innerHTML() { return this._html; },
+    appendChild(c) { this.children.push(c); return c; },
+    removeChild(c) { this.children = this.children.filter(x => x !== c); },
+    addEventListener(ev, fn) { (this._listeners[ev] = this._listeners[ev] || []).push(fn); },
+    dispatch(ev, e) { (this._listeners[ev] || []).forEach(fn => fn(e || { stopPropagation() {} })); },
+    setAttribute(k, v) { this._attrs[k] = String(v); },
+    getAttribute(k) { return k in this._attrs ? this._attrs[k] : null; },
+    querySelector() { return null; },
+    closest() { return null; },
+    getBoundingClientRect() { return { left: 0, top: 0, right: 0, bottom: 0 }; },
+    select() {},
+  };
+}
+
+const registry = {};
+function getEl(id) { return registry[id] || (registry[id] = mkEl("div")); }
+
+// Pre-create the elements index.html references by id.
+["list","search","hide-done","only-plan","clear-plan","shopping","plan-hint","stats","foot"]
+  .forEach(id => { registry[id] = mkEl(id === "search" ? "input" : "div"); registry[id].value = ""; registry[id].checked = false; });
+const toolbar = mkEl("div");
+
+global.document = {
+  getElementById: getEl,
+  querySelector: sel => sel === ".toolbar" ? toolbar : null,
+  createElement: mkEl,
+  createTextNode: t => ({ nodeType: 3, textContent: t, _text: t }),
+  body: mkEl("body"),
+  documentElement: { clientWidth: 1000 },
+  addEventListener: () => {},
+  execCommand: () => true,
+};
+const storeBacking = {};
+global.localStorage = {
+  getItem: k => (k in storeBacking ? storeBacking[k] : null),
+  setItem: (k, v) => { storeBacking[k] = String(v); },
+};
+let clipboard = "";
+// Node 21+ ships a read-only `navigator` global; override it forcibly.
+Object.defineProperty(globalThis, "navigator", {
+  value: { clipboard: { writeText: t => { clipboard = t; return Promise.resolve(); } } },
+  configurable: true, writable: true,
+});
+global.alert = () => {};
+global.confirm = () => true;
+let promptReturn = null;
+global.prompt = () => promptReturn;
+global.window = { scrollX: 0, scrollY: 0 };
+
+require(path.join(ROOT, "data.js"));
+require(path.join(ROOT, "app.js"));
+
+// ---- assertions ----
+function assert(c, m) { if (!c) { console.error("FAIL:", m); process.exitCode = 1; } else console.log("ok  -", m); }
+
+const list = registry["list"];
+assert(list.children.length > 0, "list rendered group/category/card nodes");
+
+// find first upgrade card's plan button and click it (Island Rank Up 1)
+// locate a card by walking children
+function findByText(node, text) {
+  if (node._text === text) return node;
+  for (const c of node.children || []) { const r = findByText(c, text); if (r) return r; }
+  return null;
+}
+const planButtons = [];
+(function walk(n){ if(n.tagName==="button" && /Plan/.test(n._text)) planButtons.push(n); (n.children||[]).forEach(walk); })(list);
+assert(planButtons.length > 0, "plan buttons exist (" + planButtons.length + ")");
+
+// Click plan on first two upgrades
+planButtons[0].dispatch("click");
+planButtons[1] && planButtons[1].dispatch("click");
+assert(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan && Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length >= 1, "planning persists to localStorage");
+
+// Expand all / Collapse all
+const expandAll = toolbar.children.find(c => c._text === "Expand all");
+const collapseAll = toolbar.children.find(c => c._text === "Collapse all");
+assert(!!expandAll && !!collapseAll, "Expand all / Collapse all buttons present");
+expandAll.dispatch("click");
+assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).open).length === 84, "expand all opens every upgrade");
+collapseAll.dispatch("click");
+assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).open).length === 0, "collapse all closes every upgrade");
+
+const shopping = registry["shopping"];
+assert(shopping.children.length > 0 || shopping._html !== "", "shopping list populated after planning");
+
+// Check a "have" checkbox inside first card
+const checkboxes = [];
+(function walk(n){ if(n.tagName==="input" && n.type==="checkbox") checkboxes.push(n); (n.children||[]).forEach(walk); })(list);
+assert(checkboxes.length > 0, "requirement checkboxes rendered (" + checkboxes.length + ")");
+const reqCb = checkboxes.find(c => c._listeners.change);
+reqCb.checked = true; reqCb.dispatch("change");
+const st = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+assert(st.have && Object.keys(st.have).length >= 1 || st.done && Object.keys(st.done).length >= 1, "checking an item persists");
+
+// Guide links: item + tool_quality namespaces, and text is a span, not a label.
+const anchors = [];
+(function walk(n){ if(n.tagName==="a" && n.href) anchors.push(n); (n.children||[]).forEach(walk); })(list);
+assert(anchors.some(a => a.href.includes("/item/")), "item links point to /item/");
+assert(anchors.some(a => a.href.includes("/tool_quality/")), "quality links point to /tool_quality/");
+assert(anchors.every(a => a.target === "_blank" && /noopener/.test(a.rel || "")), "links open safely in a new tab");
+let labels = 0;
+(function walk(n){ if(n.tagName==="label" && n.htmlFor) labels++; (n.children||[]).forEach(walk); })(list);
+assert(labels === 0, "requirement rows no longer use click-to-toggle labels");
+
+// Tooltips: LIST refs expand as a span[data-tip], real items carry descriptions.
+const tipped = [];
+(function walk(n){ const t=n.getAttribute&&n.getAttribute("data-tip"); if(t) tipped.push(n); (n.children||[]).forEach(walk); })(list);
+assert(tipped.some(n => n.tagName==="span" && /OR/.test(n.getAttribute("data-tip"))), "LIST refs render an expansion tooltip");
+assert(tipped.some(n => n.tagName==="a"), "real items carry a description tooltip");
+
+// Export copies JSON to clipboard
+const expBtn = toolbar.children.find(c => c._text === "Export");
+assert(!!expBtn, "Export button added to toolbar");
+expBtn.dispatch("click");
+setTimeout(() => {
+  assert(clipboard.length > 0 && JSON.parse(clipboard), "export wrote valid JSON to clipboard");
+  // Import
+  promptReturn = JSON.stringify({ plan: { "SKYISLAND_UPGRADE_landing1": true }, done: {}, have: {}, open: {} });
+  const impBtn = toolbar.children.find(c => c._text === "Import");
+  impBtn.dispatch("click");
+  const after = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  assert(after.plan["SKYISLAND_UPGRADE_landing1"] === true, "import replaced state from JSON");
+  // Reset wipes everything
+  global.confirm = () => true;
+  const resetBtn = toolbar.children.find(c => c._text === "Reset");
+  assert(!!resetBtn, "Reset button present");
+  resetBtn.dispatch("click");
+  const cleared = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  assert(Object.keys(cleared.plan).length === 0 && Object.keys(cleared.have).length === 0 &&
+         Object.keys(cleared.done).length === 0, "reset clears all progress");
+
+  console.log(process.exitCode ? "\nSMOKE TEST FAILED" : "\nAll smoke checks passed");
+}, 10);
