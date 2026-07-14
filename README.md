@@ -83,11 +83,12 @@ One-time setup: in the repo's **Settings → Pages**, set **Source** to
 
 ## Rebuilding the data
 
-`data.json` / `data.js` are generated from the mod source. If the mod updates,
-regenerate them:
+`data.json` / `data.js` are generated from the mod source. The extractor reads
+the CDDA checkout from the **`CDDA_PATH`** env var (this repo sets it in the
+gitignored `mise.local.toml`). If the mod updates, regenerate them:
 
 ```bash
-python3 build/extract.py     # reads data/mods/Sky_Island, writes data.json + data.js
+python3 build/extract.py     # reads $CDDA_PATH/data/mods/Sky_Island, writes data.json + data.js
 node build/smoke.js          # optional: verify app.js still works end-to-end
 ```
 
@@ -103,8 +104,8 @@ The extractor:
   find example tools that satisfy each required tool quality at level ≥ needed,
   emitted as `quality_items` in the data.
 
-The CDDA repo path is hard-coded near the top of `build/extract.py` — adjust
-`CDDA` if yours differs.
+Point `CDDA_PATH` at your own Cataclysm-DDA checkout (e.g. in `mise.local.toml`
+or `export CDDA_PATH=…`); the script errors out if it isn't set.
 
 ## Not yet covered
 

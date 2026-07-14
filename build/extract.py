@@ -26,7 +26,11 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJECT = os.path.dirname(HERE)
-CDDA = "/Users/brightone/dev/github.com/CleverRaven/cataclysm-dda"
+CDDA = os.environ.get("CDDA_PATH")
+if not CDDA:
+    sys.exit("CDDA_PATH is not set. Point it at your Cataclysm-DDA checkout "
+             "(this repo defines it in the gitignored mise.local.toml).")
+CDDA = os.path.expanduser(CDDA)
 MOD = os.path.join(CDDA, "data/mods/Sky_Island")
 BASE = os.path.join(CDDA, "data/json")
 
