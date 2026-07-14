@@ -209,18 +209,41 @@
     const top = document.createElement("div");
     top.className = "card-top";
 
-    const doneWrap = document.createElement("label");
-    doneWrap.className = "card-done";
-    doneWrap.title = "Mark upgrade completed";
-    const doneCb = document.createElement("input");
-    doneCb.type = "checkbox";
-    doneCb.checked = done;
-    doneCb.addEventListener("click", e => e.stopPropagation());
-    doneCb.addEventListener("change", () => {
-      if (doneCb.checked) state.done[u.id] = true; else delete state.done[u.id];
-      render();
-    });
-    doneWrap.appendChild(doneCb);
+    // Top-left control: a "Mark complete" checkbox for one-shot mission
+    // upgrades, or a "Craft" button (tally + reset) for repeatable key-item crafts.
+    let doneWrap, doneCb = null, craftBtn = null;
+    if (u.repeatable) {
+      doneWrap = document.createElement("div");
+      doneWrap.className = "card-done";
+      const ready = prog.total > 0 && prog.met === prog.total;
+      craftBtn = document.createElement("button");
+      craftBtn.type = "button";
+      craftBtn.className = "craft-btn" + (ready ? " ready" : "");
+      craftBtn.textContent = "Craft";
+      craftBtn.disabled = !ready;
+      craftBtn.title = ready ? "Tally one craft and reset ingredients"
+                             : "Gather all ingredients first";
+      craftBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        state.crafted[u.id] = (state.crafted[u.id] || 0) + 1;
+        resetComponents(u);
+        render();
+      });
+      doneWrap.appendChild(craftBtn);
+    } else {
+      doneWrap = document.createElement("label");
+      doneWrap.className = "card-done";
+      doneWrap.title = "Mark upgrade completed";
+      doneCb = document.createElement("input");
+      doneCb.type = "checkbox";
+      doneCb.checked = done;
+      doneCb.addEventListener("click", e => e.stopPropagation());
+      doneCb.addEventListener("change", () => {
+        if (doneCb.checked) state.done[u.id] = true; else delete state.done[u.id];
+        render();
+      });
+      doneWrap.appendChild(doneCb);
+    }
 
     const main = document.createElement("div");
     main.className = "card-main";
@@ -232,6 +255,21 @@
       key.className = "card-key";
       key.textContent = "Craft: " + u.key_name;
       title.appendChild(key);
+    }
+    const craftedN = state.crafted[u.id] || 0;
+    if (craftedN > 0) {
+      const tag = document.createElement("span");
+      tag.className = "crafted-tag";
+      tag.textContent = "Crafted: " + craftedN;
+      tag.title = "Click to reset this craft count to 0";
+      tag.addEventListener("click", e => {
+        e.stopPropagation();
+        if (confirm('Reset crafted count for "' + u.name + '" to 0?')) {
+          delete state.crafted[u.id];
+          render();
+        }
+      });
+      title.appendChild(tag);
     }
     const eff = document.createElement("div");
     eff.className = "card-effect";
