@@ -70,6 +70,17 @@ updates); `data.js` is byte-for-byte the same payload wrapped in a global so the
 page can load it without a web server (`fetch()` is blocked on `file://`). Both
 are regenerated together — never edit them by hand.
 
+## Deploying (GitHub Pages)
+
+The site is served straight from the repo root — no build step. Pushing to
+`main` runs `.github/workflows/deploy.yml`, which bundles the four site files
+(`index.html`, `style.css`, `app.js`, `data.js`) and publishes them to
+GitHub Pages.
+
+One-time setup: in the repo's **Settings → Pages**, set **Source** to
+**GitHub Actions**. After the first successful run the site is live at
+`https://br1ght0ne.github.io/cdda-sky-island-helper/`.
+
 ## Rebuilding the data
 
 `data.json` / `data.js` are generated from the mod source. If the mod updates,
