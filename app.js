@@ -26,7 +26,7 @@
   let state = load();
 
   function blankState() {
-    return { done: {}, plan: {}, have: {}, open: {} };
+    return { done: {}, plan: {}, have: {}, qty: {}, open: {} };
   }
   function load() {
     try {
@@ -42,11 +42,42 @@
   }
 
   // ---- helpers -------------------------------------------------------------
-  // A requirement is "met" when its checkbox (have) is ticked OR the upgrade
-  // is marked done. Key: `${upgradeId}::${section}::${index}`.
+  // A requirement group is "met" when the upgrade is done, OR its checkbox is
+  // ticked (state.have -> "I have one of these, doesn't matter which"), OR any
+  // one alternative's tracked quantity (state.qty) has reached its required
+  // count. Group key: `${upgradeId}::${section}::${index}`.
   function haveKey(u, section, idx) { return u.id + "::" + section + "::" + idx; }
+  function qtyKey(u, gi, altId) { return u.id + "::comp::" + gi + "::" + altId; }
+  function getQty(u, gi, altId) { return state.qty[qtyKey(u, gi, altId)] || 0; }
+  function setQty(u, gi, alt, val) {
+    const v = Math.max(0, Math.min(alt.count, val | 0));
+    const k = qtyKey(u, gi, alt.id);
+    if (v <= 0) delete state.qty[k]; else state.qty[k] = v;
+    render();
+  }
+  // Whole-group manual flag (used by the checkbox and by qualities/tools).
   function isHave(u, section, idx) {
     return !!state.done[u.id] || !!state.have[haveKey(u, section, idx)];
+  }
+  // Component group also counts as met if any alternative is fully stocked.
+  function compMet(u, gi, alts) {
+    if (isHave(u, "comp", gi)) return true;
+    return alts.some(a => getQty(u, gi, a.id) >= a.count);
+  }
+  // Toggle a component group's overall state (from either view). Checking sets
+  // the manual flag; unchecking clears the flag AND any per-item quantities.
+  function setCompGroup(u, gi, alts, met) {
+    const k = haveKey(u, "comp", gi);
+    if (met) {
+      state.have[k] = true;
+    } else {
+      delete state.have[k];
+      alts.forEach(a => delete state.qty[qtyKey(u, gi, a.id)]);
+    }
+    render();
+  }
+  function groupMet(u, g) {
+    return g.section === "comp" ? compMet(u, g.idx, g.alts) : isHave(u, g.section, g.idx);
   }
   function reqGroups(u) {
     // Flattened list of every checkable requirement across sections.
@@ -60,7 +91,7 @@
     const groups = reqGroups(u);
     if (!groups.length) return { met: 0, total: 0 };
     let met = 0;
-    groups.forEach(g => { if (isHave(u, g.section, g.idx)) met++; });
+    groups.forEach(g => { if (groupMet(u, g)) met++; });
     return { met, total: groups.length };
   }
 
@@ -193,7 +224,7 @@
 
     if (u.components.length) {
       body.appendChild(sectionLabel("Materials"));
-      u.components.forEach((alts, i) => body.appendChild(reqRow(u, "comp", i, componentText(alts))));
+      u.components.forEach((alts, i) => body.appendChild(componentRow(u, i, alts)));
     }
     if (u.qualities.length) {
       body.appendChild(sectionLabel("Tool qualities"));
@@ -250,17 +281,64 @@
     return s;
   }
 
-  function componentText(alts) {
-    // returns array of nodes describing "N× Item or M× Other"
-    const nodes = [];
+  // A material requirement row: group checkbox + one stepper per alternative.
+  // The line is met when the box is ticked or any alternative is fully stocked.
+  function componentRow(u, gi, alts) {
+    const met = compMet(u, gi, alts);
+    const locked = !!state.done[u.id];
+    const row = document.createElement("div");
+    row.className = "req comp" + (met ? " have" : "");
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = met;
+    cb.disabled = locked;
+    cb.title = "I have one of these (any alternative)";
+    cb.addEventListener("change", () => setCompGroup(u, gi, alts, cb.checked));
+
+    const text = document.createElement("span");
+    text.className = "req-text";
     alts.forEach((a, i) => {
-      if (i) { const or = document.createElement("span"); or.className = "or"; or.textContent = "or"; nodes.push(or); }
-      const c = document.createElement("span");
-      c.className = "count";
-      c.textContent = a.count + "×";
-      nodes.push(c, textNode(" "), itemLink(a.id, a.name, a.list, a.tip));
+      if (i) { const or = document.createElement("span"); or.className = "or"; or.textContent = "or"; text.appendChild(or); }
+      text.appendChild(stepper(u, gi, a, locked));
+      text.appendChild(textNode(" "));
+      text.appendChild(itemLink(a.id, a.name, a.list, a.tip));
     });
-    return nodes;
+    row.appendChild(cb); row.appendChild(text);
+    return row;
+  }
+
+  // "[−] have/count [+]" quantity tracker for a single alternative.
+  function stepper(u, gi, a, locked) {
+    const have = getQty(u, gi, a.id);
+    const done = have >= a.count;
+    const wrap = document.createElement("span");
+    wrap.className = "stepper" + (done ? " full" : "");
+
+    const minus = document.createElement("button");
+    minus.type = "button"; minus.className = "step"; minus.textContent = "−";
+    minus.disabled = locked || have <= 0;
+    minus.title = "Have one fewer";
+    minus.addEventListener("click", e => { e.stopPropagation(); setQty(u, gi, a, have - 1); });
+
+    const qty = document.createElement("input");
+    qty.className = "qty"; qty.type = "text"; qty.inputMode = "numeric";
+    qty.value = have; qty.disabled = locked;
+    qty.title = "How many you have";
+    qty.addEventListener("click", e => e.stopPropagation());
+    qty.addEventListener("change", () => setQty(u, gi, a, parseInt(qty.value, 10) || 0));
+
+    const sep = document.createElement("span");
+    sep.className = "of"; sep.textContent = "/" + a.count;
+
+    const plus = document.createElement("button");
+    plus.type = "button"; plus.className = "step"; plus.textContent = "+";
+    plus.disabled = locked || have >= a.count;
+    plus.title = "Have one more";
+    plus.addEventListener("click", e => { e.stopPropagation(); setQty(u, gi, a, have + 1); });
+
+    wrap.appendChild(minus); wrap.appendChild(qty); wrap.appendChild(sep); wrap.appendChild(plus);
+    return wrap;
   }
 
   function reqRow(u, section, idx, contentNodes) {
@@ -291,45 +369,67 @@
     els.shopping.innerHTML = "";
     if (!planned.length) return;
 
-    // Aggregate component groups across planned upgrades, skipping met ones.
-    // Key by the set of alternative ids so "3 nails" from two upgrades merges.
-    const agg = {}; // sig -> { alts:[{id,name}], counts:{id:count}, from:Set, met:bool count }
+    // Aggregate component groups across planned upgrades. Key by the set of
+    // alternative ids so "3 nails" from two upgrades merges into one line.
+    // Each line tracks its contributing (upgrade, group) pairs so ticking it
+    // updates the very same state the cards read/write.
+    const agg = {}; // sig -> { alts, from:Set, groups:[{u,gi,alts}] }
     let shards = 0, shardsHave = 0;
 
     planned.forEach(u => {
       u.components.forEach((alts, i) => {
-        const met = isHave(u, "comp", i);
-        // warp shards get their own summary line when it's a lone component.
+        // warp shards get their own read-only summary line (a currency total).
         if (alts.length === 1 && alts[0].id === "warptoken") {
           shards += alts[0].count;
-          if (met) shardsHave += alts[0].count;
+          if (compMet(u, i, alts)) shardsHave += alts[0].count;
           return;
         }
         const sig = alts.map(a => a.id).join("|");
-        const rec = agg[sig] || (agg[sig] = { alts, counts: {}, from: new Set(), need: 0, have: 0 });
-        alts.forEach(a => { rec.counts[a.id] = (rec.counts[a.id] || 0) + a.count; });
+        const rec = agg[sig] || (agg[sig] = { alts, from: new Set(), groups: [] });
+        rec.groups.push({ u, gi: i, alts });
         rec.from.add(u.name);
-        if (met) rec.have++; else rec.need++;
       });
     });
 
-    const rows = Object.values(agg).sort((a, b) => {
-      const am = a.need === 0, bm = b.need === 0;
-      if (am !== bm) return am ? 1 : -1; // needed first, met last
-      return a.alts[0].name.localeCompare(b.alts[0].name);
+    const rows = Object.values(agg).map(rec => {
+      const unmet = rec.groups.filter(g => !compMet(g.u, g.gi, g.alts));
+      return { rec, unmet, allMet: unmet.length === 0 };
+    }).sort((a, b) => {
+      if (a.allMet !== b.allMet) return a.allMet ? 1 : -1; // needed first, met last
+      return a.rec.alts[0].name.localeCompare(b.rec.alts[0].name);
     });
 
     let itemsNeeded = 0;
-    rows.forEach(rec => {
-      const allMet = rec.need === 0;
+    rows.forEach(({ rec, unmet, allMet }) => {
       if (!allMet) itemsNeeded++;
+      // Sum counts across the groups that still need this material (or all, if done).
+      const src = allMet ? rec.groups : unmet;
+      const counts = {};
+      src.forEach(g => g.alts.forEach(a => { counts[a.id] = (counts[a.id] || 0) + a.count; }));
+
       const row = document.createElement("div");
       row.className = "shop-item" + (allMet ? " have" : "");
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.className = "shop-check";
+      cb.checked = allMet;
+      cb.indeterminate = !allMet && unmet.length < rec.groups.length;
+      cb.title = "Mark this material as gathered for every planned upgrade that needs it";
+      cb.addEventListener("change", () => {
+        rec.groups.forEach(g => {
+          const k = haveKey(g.u, "comp", g.gi);
+          if (cb.checked) state.have[k] = true;
+          else { delete state.have[k]; g.alts.forEach(a => delete state.qty[qtyKey(g.u, g.gi, a.id)]); }
+        });
+        render();
+      });
+
       const name = document.createElement("div");
       name.className = "shop-name";
       rec.alts.forEach((a, i) => {
         if (i) { const or = document.createElement("span"); or.className = "or"; or.textContent = " or "; name.appendChild(or); }
-        const c = document.createElement("span"); c.className = "count"; c.textContent = rec.counts[a.id] + "× ";
+        const c = document.createElement("span"); c.className = "count"; c.textContent = (counts[a.id] || 0) + "× ";
         name.appendChild(c); name.appendChild(itemLink(a.id, a.name, a.list, a.tip));
       });
       const from = document.createElement("div");
@@ -338,7 +438,7 @@
       const col = document.createElement("div");
       col.style.flex = "1";
       col.appendChild(name); col.appendChild(from);
-      row.appendChild(col);
+      row.appendChild(cb); row.appendChild(col);
       els.shopping.appendChild(row);
     });
 

@@ -79,9 +79,11 @@ const planButtons = [];
 (function walk(n){ if(n.tagName==="button" && /Plan/.test(n._text)) planButtons.push(n); (n.children||[]).forEach(walk); })(list);
 assert(planButtons.length > 0, "plan buttons exist (" + planButtons.length + ")");
 
-// Click plan on first two upgrades
+// Plan the first two rank-ups (warp-shard only) plus a component-rich upgrade
+// (index 2 = "Construct: Climate Control") so the shopping list has real lines.
 planButtons[0].dispatch("click");
 planButtons[1] && planButtons[1].dispatch("click");
+planButtons[2] && planButtons[2].dispatch("click");
 assert(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan && Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length >= 1, "planning persists to localStorage");
 
 // Expand all / Collapse all
@@ -104,6 +106,21 @@ const reqCb = checkboxes.find(c => c._listeners.change);
 reqCb.checked = true; reqCb.dispatch("change");
 const st = JSON.parse(storeBacking["skyisland.tracker.v1"]);
 assert(st.have && Object.keys(st.have).length >= 1 || st.done && Object.keys(st.done).length >= 1, "checking an item persists");
+
+// Per-alternative +/- steppers track quantities in state.qty
+const stepPlus = [];
+(function walk(n){ if(n.tagName==="button" && n.className==="step" && n._text==="+") stepPlus.push(n); (n.children||[]).forEach(walk); })(list);
+assert(stepPlus.length > 0, "quantity steppers rendered (" + stepPlus.length + " + buttons)");
+stepPlus[0].dispatch("click");
+assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).qty || {}).length >= 1, "stepping + records a tracked quantity");
+
+// The shopping list checkbox writes the same state the cards read.
+const shopChecks = [];
+(function walk(n){ if(n.tagName==="input" && n.className==="shop-check") shopChecks.push(n); (n.children||[]).forEach(walk); })(shopping);
+assert(shopChecks.length > 0, "shopping list rows have checkboxes (" + shopChecks.length + ")");
+const haveBefore = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).have || {}).length;
+shopChecks[0].checked = true; shopChecks[0].dispatch("change");
+assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).have).length > haveBefore, "ticking a shopping line marks its contributing groups met");
 
 // Guide links: item + tool_quality namespaces, and text is a span, not a label.
 const anchors = [];

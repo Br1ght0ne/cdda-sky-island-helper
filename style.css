@@ -95,7 +95,20 @@ h1 .accent { color: var(--accent); }
 .req:last-child { border-bottom: none; }
 .req input { margin-top: 1px; accent-color: var(--good); width: 16px; height: 16px; cursor: pointer; flex: none; }
 .req-text { flex: 1; }
+.req.comp { align-items: center; }
 .req.have .req-text { color: var(--muted); }
+
+/* per-alternative quantity stepper */
+.stepper { display: inline-flex; align-items: stretch; vertical-align: middle; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-right: 3px; background: var(--bg2); }
+.stepper.full { border-color: var(--good); }
+.stepper .step { border: none; background: var(--panel2); color: var(--text); width: 20px; padding: 0; font-size: 14px; line-height: 1; cursor: pointer; }
+.stepper .step:hover:not(:disabled) { background: var(--accent2); color: #fff; }
+.stepper .step:disabled { opacity: .35; cursor: default; }
+.stepper .qty { width: 3ch; min-width: 3ch; border: none; background: transparent; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; font-size: 12.5px; padding: 2px 1px; }
+.stepper .qty:focus { outline: none; background: rgba(124,92,255,.15); }
+.stepper .of { color: var(--muted); font-size: 12px; padding: 2px 4px 0 1px; white-space: nowrap; }
+.stepper.full .qty { color: var(--good); }
+.stepper.full .of { color: var(--good); }
 .req.have .req-text .item-link { color: var(--muted); }
 .item-link { color: var(--text); text-decoration: none; border-bottom: 1px dotted var(--accent); }
 .item-link:hover { color: var(--accent); border-bottom-style: solid; }
@@ -119,7 +132,8 @@ aside .sticky { position: sticky; top: 16px; }
 .panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
 .panel h2 { margin: 0 0 10px; font-size: 16px; }
 .hint { color: var(--muted); font-size: 13px; }
-.shop-item { display: flex; align-items: baseline; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.04); font-size: 14px; }
+.shop-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.04); font-size: 14px; }
+.shop-check { margin-top: 2px; accent-color: var(--good); width: 16px; height: 16px; cursor: pointer; flex: none; }
 .shop-item .count { min-width: 34px; text-align: right; }
 .shop-item.have { opacity: .5; }
 .shop-item.have .shop-name { text-decoration: line-through; }

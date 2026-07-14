@@ -13,9 +13,15 @@ Just open `index.html` in a browser. No server, no build step, no internet.
   Construction / Raid Upgrades / Raid Unlocks.
 - **Collapsible cards** — a vertical list you can scan at a glance, with
   **Expand all / Collapse all**.
-- **Per-item checkboxes** inside each upgrade: tick off each material, tool
-  quality, and tool as you gather it. A progress bar and `met/total` badge
-  update live.
+- **Two ways to track each material** inside an upgrade:
+  - tick the line's checkbox = "I have one of these" (any alternative counts); or
+  - use the **− / +** steppers (or type a number) to count each alternative
+    separately. The whole line auto-checks the moment any one alternative
+    reaches its required quantity. Tool qualities & tools keep a simple checkbox.
+  A progress bar and `met/total` badge update live.
+- **The shopping list is interactive and linked**: ticking a material there
+  marks it gathered for every planned upgrade that needs it, and that instantly
+  reflects back in the cards (and vice-versa) — one shared state, no framework.
 - **Mark upgrades complete** with the big checkbox on the left.
 - **Plan** button on each upgrade feeds a live **shopping list** in the sidebar
   that aggregates every still-missing material across your planned upgrades
