@@ -178,7 +178,7 @@ aside .sticky { position: sticky; top: 16px; }
   body { padding-bottom: 62px; } /* clear the collapsed sheet handle */
 
   #plan-panel {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 60;
     margin: 0; padding: 0;
     max-height: 88vh; border-radius: 14px 14px 0 0;
     display: flex; flex-direction: column;
