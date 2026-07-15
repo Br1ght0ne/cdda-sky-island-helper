@@ -156,18 +156,15 @@
     if (isHave(u, "comp", gi)) return true;
     return alts.some(a => getQty(u, gi, a.id) >= a.count);
   }
-  // Toggle a component group's overall state (from either view). Checking sets
-  // the manual flag; unchecking clears the flag AND any per-item quantities.
-  function setCompGroup(u, gi, alts, met) {
+  // Toggle a component group's manual "have" override (from either view).
+  // Unchecking only clears the override, never the tracked per-item
+  // quantities — if a quantity alone still meets the count, compMet stays
+  // true and the box re-checks itself; reduce it with the steppers instead.
+  function setCompGroupFlag(u, gi, met) {
     const k = haveKey(u, "comp", gi);
-    if (met) {
-      state.have[k] = true;
-    } else {
-      delete state.have[k];
-      alts.forEach(a => delete state.qty[qtyKey(u, gi, a.id)]);
-    }
-    render();
+    if (met) state.have[k] = true; else delete state.have[k];
   }
+  function setCompGroup(u, gi, met) { setCompGroupFlag(u, gi, met); render(); }
   // Clear all tracked component state (have flags + per-alternative quantities)
   // for one upgrade. Used after a repeatable craft is tallied so gathering can
   // restart for the next copy. Tool qualities (state.tools) are intentionally
@@ -484,7 +481,7 @@
     cb.checked = met;
     cb.disabled = locked;
     cb.title = "I have one of these (any alternative)";
-    cb.addEventListener("change", () => setCompGroup(u, gi, alts, cb.checked));
+    cb.addEventListener("change", () => setCompGroup(u, gi, cb.checked));
 
     const text = document.createElement("span");
     text.className = "req-text";
@@ -733,11 +730,7 @@
       cb.indeterminate = !allMet && unmet.length < rec.groups.length;
       cb.title = "Mark this material as gathered for every planned upgrade that needs it";
       cb.addEventListener("change", () => {
-        rec.groups.forEach(g => {
-          const k = haveKey(g.u, "comp", g.gi);
-          if (cb.checked) state.have[k] = true;
-          else { delete state.have[k]; g.alts.forEach(a => delete state.qty[qtyKey(g.u, g.gi, a.id)]); }
-        });
+        rec.groups.forEach(g => setCompGroupFlag(g.u, g.gi, cb.checked));
         render();
       });
 
