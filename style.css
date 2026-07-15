@@ -304,5 +304,9 @@ aside .sticky { position: sticky; top: 16px; }
 
 footer { color: var(--muted); font-size: 12px; padding: 30px 0 40px; margin-top: 20px; border-top: 1px solid var(--border); }
 footer code { color: var(--text); }
+footer a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+footer a:hover { border-bottom-style: solid; }
+footer a:has(code) { border-bottom: none; } /* the code pill's own background already reads as a link */
+footer a code { color: inherit; }
 code { background: var(--bg2); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
 .empty { color: var(--muted); padding: 40px 0; text-align: center; }
