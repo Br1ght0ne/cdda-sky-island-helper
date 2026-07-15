@@ -357,10 +357,7 @@
       });
       title.appendChild(tag);
     }
-    const eff = document.createElement("div");
-    eff.className = "card-effect";
-    eff.textContent = u.effect || "";
-    main.appendChild(title); main.appendChild(eff);
+    main.appendChild(title);
     if (blockers.length) {
       const lock = document.createElement("div");
       lock.className = "lock-note";
@@ -399,15 +396,6 @@
     // body
     const body = document.createElement("div");
     body.className = "card-body";
-
-    if (prog.total) {
-      const pbar = document.createElement("div");
-      pbar.className = "pbar";
-      const span = document.createElement("span");
-      span.style.width = (100 * prog.met / prog.total) + "%";
-      pbar.appendChild(span);
-      body.appendChild(pbar);
-    }
 
     if (u.components.length) {
       body.appendChild(sectionLabel("Materials"));

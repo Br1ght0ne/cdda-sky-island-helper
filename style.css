@@ -108,7 +108,7 @@ body {
 .wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
 /* Never let long names/descriptions force the page wider than the screen. */
-.card-title, .card-effect, .req-text, .shop-name, .shop-from, .desc, .quality-egs, .group-label { overflow-wrap: anywhere; }
+.card-title, .req-text, .shop-name, .shop-from, .desc, .quality-egs, .group-label { overflow-wrap: anywhere; }
 
 header {
   background: linear-gradient(120deg, var(--header-grad-1), var(--header-grad-2) 70%);
@@ -170,6 +170,7 @@ h1 .accent { color: var(--accent); }
   background: transparent; border: none; border-radius: var(--radius);
   color: var(--muted); cursor: pointer;
 }
+.search-clear[hidden] { display: none; }
 .search-clear svg { width: 14px; height: 14px; }
 .search-clear:hover { color: var(--text); background: var(--panel2); }
 .chk { color: var(--muted); font-size: 14px; user-select: none; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
@@ -215,8 +216,7 @@ h1 .accent { color: var(--accent); }
   border: 1px solid rgba(var(--accent-rgb),.35); border-radius: 20px; padding: 1px 9px;
   vertical-align: middle; white-space: nowrap;
 }
-.card-effect { color: var(--muted); font-size: 13px; margin-top: 3px; }
-.card-side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.card-side { display: flex; flex-direction: row; align-items: center; gap: 8px; }
 .progress-badge { font-size: 12px; color: var(--muted); white-space: nowrap; }
 .progress-badge.complete { color: var(--good); }
 .plan-btn { border: 1px solid var(--border); background: var(--panel2); color: var(--muted); border-radius: 20px; padding: 3px 11px; font-size: 12px; cursor: pointer; white-space: nowrap; }
@@ -229,9 +229,6 @@ h1 .accent { color: var(--accent); }
 
 .card-body { display: none; padding: 0 14px 14px 44px; }
 .card.open .card-body { display: block; }
-.pbar { height: 4px; background: var(--panel2); border-radius: 4px; overflow: hidden; margin: 0 0 12px; }
-.pbar > span { display: block; height: 100%; background: var(--good); transition: width .2s; }
-
 .req-section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 10px 0 6px; }
 .req { display: flex; align-items: baseline; gap: 9px; padding: 4px 0; border-bottom: 1px solid var(--hairline); }
 .req:last-child { border-bottom: none; }
@@ -284,7 +281,7 @@ h1 .accent { color: var(--accent); }
   vertical-align: middle; white-space: nowrap; cursor: pointer;
 }
 .crafted-tag:hover { border-color: var(--good); }
-.desc { color: var(--muted); font-size: 13px; white-space: pre-wrap; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+.desc { color: var(--muted); font-size: 13px; white-space: pre-wrap; margin-top: 12px; }
 
 /* shopping list */
 /* Capped to the viewport so a long plan doesn't run off-screen; the header
@@ -377,7 +374,6 @@ aside .sticky {
   header { padding: 16px 0 14px; }
   .toolbar { gap: 8px; }
   .card-top { padding: 10px 11px; gap: 8px; }
-  .card-side { flex-direction: row; align-items: center; gap: 8px; }
   .card-key { margin-left: 6px; white-space: normal; overflow-wrap: anywhere; } /* was nowrap -> could overflow */
   .card-body { padding: 0 11px 12px 36px; }
   .req { gap: 7px; }
