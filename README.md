@@ -9,58 +9,27 @@ Just open `index.html` in a browser. No server, no build step, no internet.
 
 ## Features
 
-- **All 91 upgrades** grouped by Progression / Island Upgrades / Island
-  Construction / Raid Upgrades / Raid Unlocks.
-- **Collapsible cards** — a vertical list you can scan at a glance, with
-  **Expand all / Collapse all**.
-- **Two ways to track each material** inside an upgrade:
-  - tick the line's checkbox = "I have one of these" (any alternative counts); or
-  - use the **− / +** steppers (or type a number) to count each alternative
-    separately. The whole line auto-checks the moment any one alternative
-    reaches its required quantity. Tool qualities & tools keep a simple checkbox.
-  A progress bar and `met/total` badge update live.
-- **Tool qualities are a shared, global registry**: since the tools that provide
-  them live permanently on the island, ticking e.g. *Hammering lvl 2* once marks
-  it satisfied in **every** upgrade that needs it (and unticking clears it
-  everywhere). Kept separate from per-upgrade material progress. Each quality
-  also lists a few **example items** that provide it at the required level or
-  higher (sourced from the game data), e.g. "*Hammering lvl 2 — e.g. breacher,
-  Halligan bar, ice axe and 8 more*".
-- **The Plan panel is interactive and linked**: ticking a material there marks
-  it gathered for every planned upgrade that needs it, and that instantly
-  reflects back in the cards (and vice-versa) — one shared state, no framework.
-- **Plan housekeeping** (buttons in the Plan panel header): *Clear* empties the
-  plan; *Remove finished* drops every planned upgrade you've marked crafted, so
-  only outstanding work stays in the plan.
-- **Mark upgrades complete** with the big checkbox on the left.
-- **Plan** button on each upgrade feeds the live **Plan panel** in the sidebar,
-  which aggregates every still-missing material across your planned upgrades
-  (warp shards get their own running total).
-- **Every item is a link** to the [CDDA Guide](https://cdda-guide.nornagon.net)
-  — materials/tools open `/item/<id>`, tool qualities open `/tool_quality/<id>`.
-- **Sticky expansion tooltips** on item-group (`LIST`) requirements: hovering
-  *cordage* shows "1 long string OR … OR 6 short leather laces". Keep hovering
-  ~1.4 s and the tooltip **freezes** (muted border turns vivid purple) so you
-  can move onto it — every option inside is itself a link to the CDDA Guide.
-- **Search** by upgrade name, effect, or required item.
-- **Filters**: hide completed, show only planned.
-- **Responsive / mobile**: on narrow screens the layout collapses to one column
-  and the Plan becomes a **pull-up bottom sheet** — a handle pinned to the bottom
-  shows a live summary (e.g. "3 planned · 12 to gather"); tap it (or the backdrop)
-  to slide the full plan up and back down.
-- **State is saved in your browser** (`localStorage`) and survives reloads even
-  when opened from a `file://` path.
-- **Export / Import** your whole progress as JSON via the clipboard, to back it
-  up or move it between machines/browsers.
-- **Import Save** reads a Cataclysm world's `master.gsav` file and marks
-  upgrades you've already completed in-game as done.
+- Collapsible, searchable, filterable list of upgrades and repeatable crafts,
+  grouped by category, each with live progress toward its materials.
+- Flexible material tracking — mark a requirement as gathered as a whole, or
+  count individual alternatives toward it.
+- Tool qualities are tracked globally: own a tool once, and it's satisfied
+  everywhere it's needed, with example items shown for each.
+- A linked Plan panel aggregates missing materials across everything you've
+  queued up, and stays in sync with the per-upgrade cards.
+- Every item and tool quality links out to the [CDDA Guide](https://cdda-guide.nornagon.net),
+  with expandable tooltips for grouped/alternative requirements.
+- Import your save file to auto-mark completed upgrades, or export/import your
+  tracked progress as JSON.
+- Responsive layout with a mobile-friendly Plan sheet; works fully offline,
+  even from a `file://` path, with progress saved in your browser.
 
 ## Files
 
 | File | Purpose |
 |---|---|
 | `index.html` | markup + layout |
-| `style.css` | styling (dark, warp-themed) |
+| `style.css` | styling (dark/light themes) |
 | `app.js` | all behaviour (vanilla JS, no framework) |
 | `data.json` | **canonical** generated data — pretty, diffable, loadable |
 | `data.js` | generated wrapper (`window.SKYISLAND_DATA = …`) mirroring `data.json`, loaded by the app so it works from `file://` |
@@ -108,9 +77,3 @@ The extractor:
 
 Point `CDDA_PATH` at your own Cataclysm-DDA checkout (e.g. in `mise.local.toml`
 or `export CDDA_PATH=…`); the script errors out if it isn't set.
-
-## Not yet covered
-
-Repeatable key-item crafts (things you make more than once — warped bags,
-homeward motes, infinity sources, etc.) are out of scope for this first version;
-it focuses on the one-time upgrade unlocks.
