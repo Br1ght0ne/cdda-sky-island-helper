@@ -200,10 +200,13 @@ h1 .accent { color: var(--accent); }
 .card.done { opacity: .62; }
 .card.done .card-title { text-decoration: line-through; text-decoration-color: var(--muted); }
 .card.planned { border-color: var(--accent2); box-shadow: 0 0 0 1px var(--accent2) inset; }
+.card.locked { opacity: .72; }
 
 .card-top { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; cursor: pointer; }
 .card-done { margin-top: 2px; }
 .card-done input { width: 18px; height: 18px; accent-color: var(--good); cursor: pointer; }
+.card-done input:disabled { cursor: not-allowed; opacity: .5; }
+.lock-note { color: var(--muted); font-size: 12px; margin-top: 4px; }
 .card-main { flex: 1; min-width: 0; }
 .card-title { font-weight: 600; font-size: 15px; }
 .card-key {

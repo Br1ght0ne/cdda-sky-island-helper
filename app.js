@@ -9,6 +9,84 @@
   const byId = Object.fromEntries(UP.map(u => [u.id, u]));
   const GROUPS = [...new Set(UP.map(u => u.group))];
 
+  // ---- ordered upgrade chains (Rank Up 1→2, Main Room 1→2→3→4, etc.) -------
+  // Many one-shot mission tiers must be completed strictly in order — the mod
+  // enforces this in-game via NPC dialogue gating, but the extracted data has
+  // no explicit "requires" field for it. We infer same-family chains
+  // automatically: upgrades (never repeatable crafts) that share an id prefix
+  // with an ascending numeric suffix form a chain, ordered by that number
+  // (gaps are fine, e.g. centralskylight2/3/4 — position in the sorted list
+  // is what matters, not the literal digit).
+  const requiresBefore = {}; // upgrade id -> [ids of upgrades that must ALL be done first]
+  (function buildChains() {
+    const groups = {};
+    UP.forEach(u => {
+      if (u.repeatable) return;
+      const m = /^(.*?)(\d+)$/.exec(u.id);
+      if (!m) return;
+      (groups[m[1]] = groups[m[1]] || []).push({ u, n: parseInt(m[2], 10) });
+    });
+    Object.values(groups).forEach(list => {
+      if (list.length < 2) return;
+      list.sort((a, b) => a.n - b.n);
+      for (let i = 1; i < list.length; i++) {
+        const id = list[i].u.id;
+        (requiresBefore[id] = requiresBefore[id] || []).push(list[i - 1].u.id);
+      }
+    });
+  })();
+  // Cross-family prerequisites the mod enforces via shared progress counters
+  // (e.g. Construct: West Room 1 is only offered once
+  // "skyisland_build_bigroom >= 1", i.e. Main Room 1 is done) that aren't
+  // visible from the id alone, since they reference a different family's
+  // counter. Manually verified against every `assign_mission` condition in
+  // data/mods/Sky_Island/dialog_statue.json. Conditions on "islandrank" (a
+  // general stat that rises through play, not through any single trackable
+  // upgrade) and on "hardestmissions" (a mission-completion tally, similarly
+  // untracked here) are deliberately omitted — this tracker has no checkbox
+  // for either, so gating on them would just look permanently locked.
+  const EXTRA_REQUIRES = {
+    SKYISLAND_UPGRADE_personal_temperature_adaptation: ["SKYISLAND_bunker_temperature_adaptation"],
+    SKYISLAND_UPGRADE_scoutingclairvoyance1: ["SKYISLAND_UPGRADE_scouting4"],
+    SKYISLAND_UPGRADE_landing_water_walking: ["SKYISLAND_UPGRADE_landing4"],
+    SKYISLAND_UPGRADE_landing_flight: ["SKYISLAND_UPGRADE_landing5"],
+    SKYISLAND_UPGRADE_landing_phase: ["SKYISLAND_UPGRADE_landing5"],
+    SKYISLAND_BUILD_bigroom1: ["SKYISLAND_BUILD_base1"],
+    SKYISLAND_BUILD_westroom1: ["SKYISLAND_BUILD_bigroom1"],
+    SKYISLAND_BUILD_westroom3: ["SKYISLAND_BUILD_bigroom2"],
+    SKYISLAND_BUILD_westroom4: ["SKYISLAND_BUILD_bigroom3"],
+    SKYISLAND_BUILD_west_side_rooms: ["SKYISLAND_BUILD_westroom3", "SKYISLAND_BUILD_bigroom3"],
+    SKYISLAND_BUILD_eastroom1: ["SKYISLAND_BUILD_bigroom1"],
+    SKYISLAND_BUILD_eastroom3: ["SKYISLAND_BUILD_bigroom2"],
+    SKYISLAND_BUILD_eastroom4: ["SKYISLAND_BUILD_bigroom3"],
+    SKYISLAND_BUILD_east_side_rooms: ["SKYISLAND_BUILD_eastroom3", "SKYISLAND_BUILD_bigroom3"],
+    SKYISLAND_BUILD_northroom1: ["SKYISLAND_BUILD_bigroom1"],
+    SKYISLAND_BUILD_northroom3: ["SKYISLAND_BUILD_bigroom2"],
+    SKYISLAND_BUILD_northroom4: ["SKYISLAND_BUILD_bigroom3"],
+    SKYISLAND_BUILD_north_side_rooms: ["SKYISLAND_BUILD_northroom3", "SKYISLAND_BUILD_bigroom3"],
+    SKYISLAND_BUILD_centralskylight2: ["SKYISLAND_BUILD_bigroom2"],
+    SKYISLAND_BUILD_centralskylight3: ["SKYISLAND_BUILD_bigroom3"],
+    SKYISLAND_BUILD_centralskylight4: ["SKYISLAND_BUILD_bigroom4"],
+    SKYISLAND_bunker_temperature_adaptation: ["SKYISLAND_BUILD_bigroom2"],
+    SKYISLAND_BUILD_south_greenhouse1: ["SKYISLAND_BUILD_base1"],
+    SKYISLAND_BUILD_south_greenhouse3: ["SKYISLAND_bunker_temperature_adaptation"],
+    SKYISLAND_BUILD_south_greenhouse_skylight1: ["SKYISLAND_BUILD_south_greenhouse1"],
+    SKYISLAND_BUILD_south_greenhouse_skylight2: ["SKYISLAND_BUILD_south_greenhouse2"],
+    SKYISLAND_UPGRADE_challenge_mode: ["SKYISLAND_UPGRADE_bonusmissions5", "SKYISLAND_UPGRADE_stability6"],
+  };
+  Object.keys(EXTRA_REQUIRES).forEach(id => {
+    if (!byId[id]) return; // defensive: skip if the mod's ids ever shift
+    const extra = EXTRA_REQUIRES[id].filter(rid => byId[rid]);
+    (requiresBefore[id] = requiresBefore[id] || []).push(...extra);
+  });
+  // Upgrades that must be finished before `u` can be marked done but aren't
+  // yet — empty array if `u` isn't (or is no longer) blocked.
+  function lockedBy(u) {
+    const reqIds = requiresBefore[u.id];
+    if (!reqIds) return [];
+    return reqIds.map(id => byId[id]).filter(req => req && !state.done[req.id]);
+  }
+
   const STORE_KEY = "skyisland.tracker.v1";
   const els = {
     list: document.getElementById("list"),
@@ -202,9 +280,10 @@
     const done = !!state.done[u.id];
     const planned = !!state.plan[u.id];
     const open = !!state.open[u.id];
+    const blockers = done ? [] : lockedBy(u);
 
     const card = document.createElement("div");
-    card.className = "card" + (done ? " done" : "") + (planned ? " planned" : "") + (open ? " open" : "");
+    card.className = "card" + (done ? " done" : "") + (planned ? " planned" : "") + (open ? " open" : "") + (blockers.length ? " locked" : "");
 
     // top row
     const top = document.createElement("div");
@@ -234,12 +313,18 @@
     } else {
       doneWrap = document.createElement("label");
       doneWrap.className = "card-done";
-      doneWrap.title = "Mark upgrade completed";
+      doneWrap.title = blockers.length
+        ? 'Complete ' + blockers.map(b => '"' + b.name + '"').join(" and ") + " first"
+        : "Mark upgrade completed";
       doneCb = document.createElement("input");
       doneCb.type = "checkbox";
       doneCb.checked = done;
+      doneCb.disabled = blockers.length > 0;
       doneCb.addEventListener("click", e => e.stopPropagation());
       doneCb.addEventListener("change", () => {
+        // `disabled` already stops real clicks, but guard the state change
+        // too in case this fires some other way while chain-locked.
+        if (blockers.length) { doneCb.checked = done; return; }
         // Marking a one-shot upgrade complete drops it from the plan right
         // away — there's no separate "remove finished" step.
         if (doneCb.checked) { state.done[u.id] = true; delete state.plan[u.id]; }
@@ -279,6 +364,12 @@
     eff.className = "card-effect";
     eff.textContent = u.effect || "";
     main.appendChild(title); main.appendChild(eff);
+    if (blockers.length) {
+      const lock = document.createElement("div");
+      lock.className = "lock-note";
+      lock.textContent = "🔒 Requires: " + blockers.map(b => b.name).join(", ");
+      main.appendChild(lock);
+    }
 
     const side = document.createElement("div");
     side.className = "card-side";
@@ -639,10 +730,12 @@
     els.planSummary.textContent = planned.length + " planned · " + itemsNeeded + " to gather";
 
     // Footer: upgrades whose every requirement (components, qualities, tools)
-    // is already met, ready to complete/craft straight from the sidebar.
+    // is already met, ready to complete/craft straight from the sidebar. A
+    // chain-locked upgrade (its predecessor tier isn't done yet) can't
+    // actually be completed yet, so it doesn't count as ready.
     const ready = planned.filter(u => {
       const prog = progress(u);
-      return prog.total > 0 && prog.met === prog.total;
+      return prog.total > 0 && prog.met === prog.total && lockedBy(u).length === 0;
     });
     els.planFooterSummary.textContent = ready.length + "/" + planned.length + " ready";
     els.planReadyList.innerHTML = "";

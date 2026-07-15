@@ -410,6 +410,85 @@ setTimeout(() => {
   assert(shardLineText.indexOf(">" + (shardCount - 1) + "×<") >= 0,
     "gathering 1 shard leaves (count-1) still needed, not the full count (" + shardLineText + ")");
 
+  // ---- ordered upgrade chains: Rank Up 1 must finish before Rank Up 2 -----
+  function doneCbOf(card) {
+    return (function walk(n) {
+      if (n.tagName === "input" && n.type === "checkbox") return n;
+      for (const c of n.children || []) { const r = walk(c); if (r) return r; }
+      return null;
+    })(card);
+  }
+  const rank1 = window.SKYISLAND_DATA.upgrades.find(u => u.id === "SKYISLAND_UPGRADE_rankup1");
+  const rank2 = window.SKYISLAND_DATA.upgrades.find(u => u.id === "SKYISLAND_UPGRADE_rankup2");
+  assert(!!rank1 && !!rank2, "rank-up 1 and 2 both extracted");
+  promptReturn = JSON.stringify({ done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: { [rank1.id]: true, [rank2.id]: true }, crafted: {} });
+  impBtn2.dispatch("click");
+  searchEl.value = ""; searchEl.dispatch("input");
+  let rank1Card = findCardByName(rank1.name);
+  let rank2Card = findCardByName(rank2.name);
+  assert(!!rank1Card && !!rank2Card, "rank-up 1 and 2 cards rendered");
+  let rank2Done = doneCbOf(rank2Card);
+  assert(!!rank2Done && rank2Done.disabled === true, "rank-up 2 is chain-locked until rank-up 1 is done");
+  // Defensive guard: forcing the change event anyway must not mark it done.
+  rank2Done.checked = true; rank2Done.dispatch("change");
+  const afterLockedAttempt = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  assert(!afterLockedAttempt.done[rank2.id], "checking a chain-locked upgrade is ignored");
+  // Complete rank-up 1; rank-up 2 should unlock on the next render.
+  const rank1Done = doneCbOf(rank1Card);
+  rank1Done.checked = true; rank1Done.dispatch("change");
+  rank2Card = findCardByName(rank2.name);
+  rank2Done = doneCbOf(rank2Card);
+  assert(rank2Done.disabled === false, "rank-up 2 unlocks once rank-up 1 is marked done");
+
+  // ---- cross-family construction prerequisites (Main Room -> West Room, etc.) ---
+  // These come from the mod's own NPC dialogue conditions (dialog_statue.json),
+  // not from the id-prefix heuristic above, since e.g. "bigroom" and
+  // "westroom" don't share a prefix.
+  const base1 = window.SKYISLAND_DATA.upgrades.find(u => u.id === "SKYISLAND_BUILD_base1");
+  const bigroom1 = window.SKYISLAND_DATA.upgrades.find(u => u.id === "SKYISLAND_BUILD_bigroom1");
+  const bigroom2 = window.SKYISLAND_DATA.upgrades.find(u => u.id === "SKYISLAND_BUILD_bigroom2");
+  const bigroom3 = window.SKYISLAND_DATA.upgrades.find(u => u.id === "SKYISLAND_BUILD_bigroom3");
+  const skylight2 = window.SKYISLAND_DATA.upgrades.find(u => u.id === "SKYISLAND_BUILD_centralskylight2");
+  const westroom3 = window.SKYISLAND_DATA.upgrades.find(u => u.id === "SKYISLAND_BUILD_westroom3");
+  const westSide = window.SKYISLAND_DATA.upgrades.find(u => u.id === "SKYISLAND_BUILD_west_side_rooms");
+  assert([base1, bigroom1, bigroom2, bigroom3, skylight2, westroom3, westSide].every(Boolean),
+    "construction chain upgrades all extracted");
+
+  // Main Room 1 is locked behind Bunker Entrance despite the different id prefix.
+  promptReturn = JSON.stringify({ done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: {}, crafted: {} });
+  impBtn2.dispatch("click");
+  searchEl.value = ""; searchEl.dispatch("input");
+  const bigroom1Done = doneCbOf(findCardByName(bigroom1.name));
+  assert(bigroom1Done.disabled === true, "Main Room 1 is locked until Bunker Entrance is done");
+
+  // Central Skylight 2 needs Main Room 2 specifically, not Main Room 1 — the
+  // exact case that prompted this feature (it doesn't come with Main Room 1).
+  promptReturn = JSON.stringify({ done: { [base1.id]: true, [bigroom1.id]: true }, plan: {}, have: {}, qty: {}, tools: {}, open: {}, crafted: {} });
+  impBtn2.dispatch("click");
+  searchEl.dispatch("input");
+  let skylight2Done = doneCbOf(findCardByName(skylight2.name));
+  assert(skylight2Done.disabled === true, "Central Skylight 2 stays locked with only Main Room 1 done (it needs Main Room 2)");
+
+  promptReturn = JSON.stringify({ done: { [base1.id]: true, [bigroom1.id]: true, [bigroom2.id]: true }, plan: {}, have: {}, qty: {}, tools: {}, open: {}, crafted: {} });
+  impBtn2.dispatch("click");
+  searchEl.dispatch("input");
+  skylight2Done = doneCbOf(findCardByName(skylight2.name));
+  assert(skylight2Done.disabled === false, "Central Skylight 2 unlocks once Main Room 2 is done");
+
+  // West Side Rooms needs BOTH West Room 3 and Main Room 3 (a two-requirement
+  // lock) — doing only one of the two must not unlock it.
+  promptReturn = JSON.stringify({ done: { [bigroom3.id]: true }, plan: {}, have: {}, qty: {}, tools: {}, open: {}, crafted: {} });
+  impBtn2.dispatch("click");
+  searchEl.dispatch("input");
+  let westSideDone = doneCbOf(findCardByName(westSide.name));
+  assert(westSideDone.disabled === true, "West Side Rooms stays locked with only Main Room 3 done (also needs West Room 3)");
+
+  promptReturn = JSON.stringify({ done: { [bigroom3.id]: true, [westroom3.id]: true }, plan: {}, have: {}, qty: {}, tools: {}, open: {}, crafted: {} });
+  impBtn2.dispatch("click");
+  searchEl.dispatch("input");
+  westSideDone = doneCbOf(findCardByName(westSide.name));
+  assert(westSideDone.disabled === false, "West Side Rooms unlocks once both Main Room 3 and West Room 3 are done");
+
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;
   assert(autoBtn.getAttribute("aria-pressed") === "true", "theme toggle starts on Auto");
