@@ -85,7 +85,7 @@ header {
 h1 { margin: 0; font-size: 28px; letter-spacing: .3px; }
 h1 .accent { color: var(--accent); }
 .sub { margin: 6px 0 0; color: var(--muted); }
-.sub em { color: var(--text); font-style: normal; }
+.sub em { color: var(--accent); font-style: normal; }
 
 /* Lines up with .layout's 1fr / 420px columns, so the action buttons sit
    directly above the Plan sidebar. */
