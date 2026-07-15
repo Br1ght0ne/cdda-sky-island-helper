@@ -1,5 +1,5 @@
+// @ts-nocheck
 // Minimal DOM shim to smoke-test app.js under node (no jsdom).
-const fs = require("fs");
 const path = require("path");
 const ROOT = path.dirname(__dirname);
 
@@ -12,17 +12,28 @@ function mkEl(tag) {
     set innerHTML(v) { this._html = v; this.children = []; },
     get innerHTML() { return this._html; },
     appendChild(c) { this.children.push(c); return c; },
+    append(...args) { args.forEach(c => this.children.push(c)); },
+    replaceChildren(...args) { this.children = [...args]; },
     insertBefore(c, ref) {
       const i = this.children.indexOf(ref);
       if (i === -1) this.children.push(c); else this.children.splice(i, 0, c);
       return c;
     },
     removeChild(c) { this.children = this.children.filter(x => x !== c); },
+    remove() { /* no-op in shim — elements aren't parented */ },
     addEventListener(ev, fn) { (this._listeners[ev] = this._listeners[ev] || []).push(fn); },
     dispatch(ev, e) { (this._listeners[ev] || []).forEach(fn => fn(e || { stopPropagation() {} })); },
     setAttribute(k, v) { this._attrs[k] = String(v); },
     getAttribute(k) { return k in this._attrs ? this._attrs[k] : null; },
-    querySelector() { return null; },
+    get classList() {
+      const el = this;
+      return {
+        add(cls) { if (!el.className.split(" ").includes(cls)) el.className = el.className ? el.className + " " + cls : cls; },
+        remove(cls) { el.className = el.className.split(" ").filter(c => c !== cls).join(" "); },
+        toggle(cls) { if (el.className.split(" ").includes(cls)) this.remove(cls); else this.add(cls); },
+        contains(cls) { return el.className.split(" ").includes(cls); },
+      };
+    },
     closest() { return null; },
     getBoundingClientRect() { return { left: 0, top: 0, right: 0, bottom: 0 }; },
     select() {},
@@ -41,8 +52,16 @@ const registry = {};
 function getEl(id) { return registry[id] || (registry[id] = mkEl("div")); }
 
 // Pre-create the elements index.html references by id.
-["list","search","search-clear","hide-done","only-plan","clear-plan","shopping","plan-hint","stats","foot"]
-  .forEach(id => { registry[id] = mkEl(id === "search" ? "input" : id === "search-clear" ? "button" : "div"); registry[id].value = ""; registry[id].checked = false; });
+["list","search","search-clear","hide-done","only-plan","clear-plan","shopping","plan-hint","stats","foot","toast"]
+  .forEach(id => {
+    let tag;
+    if (id === "search") tag = "input";
+    else if (id === "search-clear") tag = "button";
+    else tag = "div";
+    registry[id] = mkEl(tag);
+    registry[id].value = "";
+    registry[id].checked = false;
+  });
 const toolbar = mkEl("div");
 
 // Static #toolbar-actions layout from index.html: a checkbox group placeholder
@@ -68,7 +87,11 @@ registry["theme-toggle"] = themeToggle;
 
 global.document = {
   getElementById: getEl,
-  querySelector: sel => sel === ".toolbar" ? toolbar : null,
+  querySelector: sel => {
+    if (sel === ".toolbar") return toolbar;
+    if (sel.startsWith("#")) return getEl(sel.slice(1));
+    return null;
+  },
   querySelectorAll: sel => sel === "#theme-toggle .theme-btn" ? themeButtons : [],
   createElement: mkEl,
   createTextNode: t => ({ nodeType: 3, textContent: t, _text: t }),
@@ -78,6 +101,10 @@ global.document = {
   execCommand: () => true,
 };
 const storeBacking = {};
+function getState() {
+  try { return JSON.parse(storeBacking["skyisland.tracker.v1"]); }
+  catch (e) { throw new Error("state JSON corrupted: " + e.message); }
+}
 global.localStorage = {
   getItem: k => (k in storeBacking ? storeBacking[k] : null),
   setItem: (k, v) => { storeBacking[k] = String(v); },
@@ -99,7 +126,7 @@ require(path.join(ROOT, "data.js"));
 require(path.join(ROOT, "app.js"));
 
 // ---- assertions ----
-function assert(c, m) { if (!c) { console.error("FAIL:", m); process.exitCode = 1; } else console.log("ok  -", m); }
+function assert(c, m) { if (!c) { console.error("FAIL:", m); process.exitCode = 1; } else process.stdout.write("ok  - " + m + "\n"); }
 
 const list = registry["list"];
 const actions = registry["toolbar-actions"]; // Expand/Collapse live here
@@ -122,15 +149,13 @@ assert(planButtons.length > 0, "plan buttons exist (" + planButtons.length + ")"
 planButtons[0].dispatch("click");
 planButtons[1] && planButtons[1].dispatch("click");
 planButtons[2] && planButtons[2].dispatch("click");
-assert(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan && Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length >= 1, "planning persists to localStorage");
+assert(getState().plan && Object.keys(getState().plan).length >= 1, "planning persists to localStorage");
 
-// Plan footer: shows once something is planned, with an "X/Y ready" summary
-// (nothing gathered yet, so 0 are ready).
-const planFooter = registry["plan-footer"];
+// Plan ready badge: shows the x/y ready count in the header once something is planned.
 const planFooterSummary = registry["plan-footer-summary"];
-const plannedCount = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length;
-assert(planFooter.hidden === false && planFooterSummary.textContent === "0/" + plannedCount + " ready",
-  "plan footer shows the ready/planned count once something is planned");
+const plannedCount = Object.keys(getState().plan).length;
+assert(planFooterSummary.textContent === "0/" + plannedCount + " ready",
+  "plan ready badge shows the ready/planned count once something is planned");
 
 // Toolbar order: checkboxes, then Expand/Collapse, then the main action
 // buttons (pushed right), with Reset last of those.
@@ -138,20 +163,20 @@ const viewGroupIdx = actions.children.findIndex(c => findByText(c, "Expand all")
 const mainActionsIdx = actions.children.indexOf(registry["main-actions"]);
 assert(viewGroupIdx !== -1 && viewGroupIdx < mainActionsIdx,
   "Expand/Collapse group sits to the left of the main action buttons");
-assert(registry["main-actions"].children[registry["main-actions"].children.length - 1]._text === "Reset",
+assert(registry["main-actions"].children.at(-1)._text === "Reset",
   "Reset is the rightmost main action button");
 
 // Expand all / Collapse all — now also affects collapsible sections
 const expandAll = findByText(actions, "Expand all");
 const collapseAll = findByText(actions, "Collapse all");
 assert(!!expandAll && !!collapseAll, "Expand all / Collapse all buttons present");
-const countCards = () => { let n=0; (function w(x){ if(typeof x.className==="string" && (x.className==="card"||x.className.indexOf("card ")===0)) n++; (x.children||[]).forEach(w); })(list); return n; };
-const countHeads = () => { let n=0; (function w(x){ if(typeof x.className==="string" && x.className.indexOf("group-head")===0) n++; (x.children||[]).forEach(w); })(list); return n; };
+const countCards = () => { let n=0; (function w(x){ if(typeof x.className==="string" && (x.className==="card"||x.className.startsWith("card "))) n++; (x.children||[]).forEach(w); })(list); return n; };
+const countHeads = () => { let n=0; (function w(x){ if(typeof x.className==="string" && x.className.startsWith("group-head")) n++; (x.children||[]).forEach(w); })(list); return n; };
 expandAll.dispatch("click");
-let es = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+let es = getState();
 assert(Object.keys(es.open).length === window.SKYISLAND_DATA.upgrades.length && Object.keys(es.groupsCollapsed || {}).length === 0, "expand all opens every section + upgrade (" + window.SKYISLAND_DATA.upgrades.length + ")");
 collapseAll.dispatch("click");
-es = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+es = getState();
 assert(Object.keys(es.open).length === 0, "collapse all closes every upgrade");
 assert(Object.keys(es.groupsCollapsed || {}).length >= 5, "collapse all collapses every section");
 assert(countCards() === 0 && countHeads() >= 5, "collapsed sections hide cards but keep section names");
@@ -168,9 +193,9 @@ const checkboxes = [];
 (function walk(n){ if(n.tagName==="input" && n.type==="checkbox") checkboxes.push(n); (n.children||[]).forEach(walk); })(list);
 assert(checkboxes.length > 0, "requirement checkboxes rendered (" + checkboxes.length + ")");
 const reqCb = checkboxes.find(c => c._listeners.change);
-const planBeforeReq = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length;
+const planBeforeReq = Object.keys(getState().plan).length;
 reqCb.checked = true; reqCb.dispatch("change");
-const st = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+const st = getState();
 assert(st.have && Object.keys(st.have).length >= 1 || st.done && Object.keys(st.done).length >= 1, "checking an item persists");
 assert(Object.keys(st.plan).length === planBeforeReq - 1,
   "marking a one-shot upgrade complete drops it from the plan immediately (no Remove finished step)");
@@ -181,7 +206,7 @@ assert(Object.keys(st.plan).length === planBeforeReq - 1,
 // mutates the real `state` object, which is all these listeners touch).
 assert(Object.keys(st.done).length >= 1, "sanity: rank-up #1 is currently done");
 planButtons[0].dispatch("click");
-const afterReplan = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+const afterReplan = getState();
 assert(Object.keys(afterReplan.done).length === 0, "re-planning a done upgrade clears its done status");
 assert(Object.keys(afterReplan.plan).length === planBeforeReq, "and adds it back to the plan");
 
@@ -190,27 +215,27 @@ const stepPlus = [];
 (function walk(n){ if(n.tagName==="button" && n.className==="step" && n._text==="+") stepPlus.push(n); (n.children||[]).forEach(walk); })(list);
 assert(stepPlus.length > 0, "quantity steppers rendered (" + stepPlus.length + " + buttons)");
 stepPlus[0].dispatch("click");
-assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).qty || {}).length >= 1, "stepping + records a tracked quantity");
+assert(Object.keys(getState().qty || {}).length >= 1, "stepping + records a tracked quantity");
 
 // The shopping list checkbox writes the same state the cards read.
 const shopChecks = [];
 (function walk(n){ if(n.tagName==="input" && n.className==="shop-check") shopChecks.push(n); (n.children||[]).forEach(walk); })(shopping);
 assert(shopChecks.length > 0, "shopping list rows have checkboxes (" + shopChecks.length + ")");
-const haveBefore = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).have || {}).length;
+const haveBefore = Object.keys(getState().have || {}).length;
 shopChecks[0].checked = true; shopChecks[0].dispatch("change");
-assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).have).length > haveBefore, "ticking a shopping line marks its contributing groups met");
+assert(Object.keys(getState().have).length > haveBefore, "ticking a shopping line marks its contributing groups met");
 
 // Tool qualities are a GLOBAL registry: ticking one syncs everywhere.
-const qualRows = () => { const r=[]; (function w(n){ if(n.tagName==="div" && typeof n.className==="string" && n.className.indexOf("req qual")===0) r.push(n); (n.children||[]).forEach(w); })(list); return r; };
-const qidOf = row => { let id=null; (function w(n){ if(id) return; if(n.tagName==="a" && n.href && n.href.indexOf("/tool_quality/")>=0) id=n.href.split("/tool_quality/")[1]; (n.children||[]).forEach(w); })(row); return id; };
+const qualRows = () => { const r=[]; (function w(n){ if(n.tagName==="div" && typeof n.className==="string" && n.className.startsWith("req qual")) r.push(n); (n.children||[]).forEach(w); })(list); return r; };
+const qidOf = row => { let id=null; (function w(n){ if(id) return; if(n.tagName==="a" && n.href && n.href.includes("/tool_quality/")) id=n.href.split("/tool_quality/")[1]; (n.children||[]).forEach(w); })(row); return id; };
 const cbOf = row => (row.children||[]).find(c => c.tagName==="input");
-let qrows = qualRows();
+const qrows = qualRows();
 assert(qrows.length > 0, "tool-quality rows rendered (" + qrows.length + ")");
 const byQ = {}; qrows.forEach(r => { const q=qidOf(r); (byQ[q]=byQ[q]||[]).push(r); });
 const sharedQ = Object.keys(byQ).find(q => byQ[q].length >= 2);
 assert(!!sharedQ, "a tool quality is shared by multiple upgrades (" + sharedQ + " ×" + (sharedQ?byQ[sharedQ].length:0) + ")");
 cbOf(byQ[sharedQ][0]).checked = true; cbOf(byQ[sharedQ][0]).dispatch("change");
-assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).tools || {}).length >= 1, "owning a quality persists to global state.tools");
+assert(Object.keys(getState().tools || {}).length >= 1, "owning a quality persists to global state.tools");
 assert(qualRows().filter(r => qidOf(r)===sharedQ).every(r => cbOf(r).checked === true), "checking a quality syncs to every upgrade that needs it");
 // Quality example items sourced from the game data
 const qi = window.SKYISLAND_DATA.quality_items || {};
@@ -266,7 +291,7 @@ setTimeout(() => {
   promptReturn = JSON.stringify({ plan: { "SKYISLAND_UPGRADE_landing1": true }, done: {}, have: {}, open: {} });
   const impBtn = headerActions.children.find(c => c._text === "Import");
   impBtn.dispatch("click");
-  const after = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  const after = getState();
   assert(after.plan["SKYISLAND_UPGRADE_landing1"] === true, "import replaced state from JSON");
 
   // Import Save reads a master.gsav, matching mission type_id -> upgrade id
@@ -282,7 +307,7 @@ setTimeout(() => {
   const fileInput = registry["import-save-file"];
   fileInput.files = [{ _text: gsav }];
   fileInput.dispatch("change");
-  const afterSaveImport = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  const afterSaveImport = getState();
   assert(afterSaveImport.done["SKYISLAND_UPGRADE_landing1"] === true,
     "Import Save marks a mission with status success as done");
   assert(!afterSaveImport.done["SKYISLAND_UPGRADE_exit1"],
@@ -293,7 +318,7 @@ setTimeout(() => {
   const resetBtn = headerActions.children.find(c => c._text === "Reset");
   assert(!!resetBtn, "Reset button present");
   resetBtn.dispatch("click");
-  const cleared = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  const cleared = getState();
   assert(Object.keys(cleared.plan).length === 0 && Object.keys(cleared.have).length === 0 &&
          Object.keys(cleared.done).length === 0, "reset clears all progress");
 
@@ -315,16 +340,16 @@ setTimeout(() => {
   // same exact-match convention as countCards() above) whose text includes tree.name
   function findCardByName(name) {
     const cards = [];
-    (function walk(n){ if (typeof n.className === "string" && (n.className === "card" || n.className.indexOf("card ") === 0)) cards.push(n); (n.children || []).forEach(walk); })(list);
+    (function walk(n){ if (typeof n.className === "string" && (n.className === "card" || n.className.startsWith("card "))) cards.push(n); (n.children || []).forEach(walk); })(list);
     return cards.find(c => (function walk2(n){
-      if (n._text && n._text.indexOf(name) >= 0) return true;
+      if (n._text && n._text.includes(name)) return true;
       for (const ch of n.children || []) if (walk2(ch)) return true;
       return false;
     })(c));
   }
   let treeCard = findCardByName(tree.name);
   assert(!!treeCard, "infinity tree card rendered");
-  const craftBtnOf = card => (function walk(n){ if(n.tagName==="button" && n.className && n.className.indexOf("craft-btn")===0) return n; for(const c of n.children||[]){const r=walk(c); if(r) return r;} return null; })(card);
+  const craftBtnOf = card => (function walk(n){ if(n.tagName==="button" && n.className && n.className.startsWith("craft-btn")) return n; for(const c of n.children||[]){const r=walk(c); if(r) return r;} return null; })(card);
   let craftBtn = craftBtnOf(treeCard);
   assert(!!craftBtn, "tree card has a Craft button");
   assert(craftBtn.disabled === true, "Craft button disabled before ingredients met");
@@ -339,13 +364,13 @@ setTimeout(() => {
   craftBtn = craftBtnOf(treeCard);
   assert(craftBtn.disabled === false, "Craft button enabled after all ingredient groups met");
   // Seed a global tool-quality so we can prove it survives the craft.
-  const ownQualBefore = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).tools || {}).length;
+  const ownQualBefore = Object.keys(getState().tools || {}).length;
   craftBtn.dispatch("click");
-  const afterCraft = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  const afterCraft = getState();
   assert((afterCraft.crafted[tree.id] || 0) === 1, "pressing Craft tallies crafted:1");
-  assert(Object.keys(afterCraft.have).filter(k => k.indexOf(tree.id + "::comp::") === 0).length === 0,
+  assert(Object.keys(afterCraft.have).filter(k => k.startsWith(tree.id + "::comp::")).length === 0,
     "Craft clears the upgrade's have flags");
-  assert(Object.keys(afterCraft.qty).filter(k => k.indexOf(tree.id + "::comp::") === 0).length === 0,
+  assert(Object.keys(afterCraft.qty).filter(k => k.startsWith(tree.id + "::comp::")).length === 0,
     "Craft clears the upgrade's per-alternative quantities");
   assert(Object.keys(afterCraft.tools || {}).length === ownQualBefore,
     "global tool qualities survive a Craft");
@@ -366,7 +391,7 @@ setTimeout(() => {
   const footerCraftBtn = (planReadyList.children || []).map(row => (row.children || []).find(c => c.tagName === "button")).find(Boolean);
   assert(!!footerCraftBtn, "ready repeatable craft appears in the plan footer with a Craft button");
   footerCraftBtn.dispatch("click");
-  const afterFooterCraft = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  const afterFooterCraft = getState();
   assert((afterFooterCraft.crafted[tree.id] || 0) === 1, "crafting from the plan footer tallies the same as the card");
   assert(!!afterFooterCraft.plan[tree.id], "a repeatable craft stays planned after crafting from the footer");
 
@@ -386,7 +411,7 @@ setTimeout(() => {
   const footerCheck = (planReadyList.children || []).map(row => (row.children || []).find(c => c.tagName === "input")).find(Boolean);
   assert(!!footerCheck, "ready one-shot upgrade appears in the plan footer with a checkbox");
   footerCheck.checked = true; footerCheck.dispatch("change");
-  const afterFooterDone = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  const afterFooterDone = getState();
   assert(afterFooterDone.done[oneShot.id] === true, "checking the footer checkbox marks the upgrade done");
   assert(!afterFooterDone.plan[oneShot.id], "and immediately drops it from the plan");
 
@@ -417,11 +442,11 @@ setTimeout(() => {
   assert(!!shardRowCb, "shard row has a checkbox like other plan materials");
   const shardCount = shardUp.components[shardGi][0].count;
   const shardRowText = textOf(shardRow);
-  assert(shardRowText.indexOf("1/" + shardCount + " gathered") >= 0,
+  assert(shardRowText.includes("1/" + shardCount + " gathered"),
     "gathering 1 of " + shardCount + " shards shows partial progress (" + shardRowText + ")");
-  assert(shopping.children.indexOf(shardRow) === 0, "shard row is pinned first in the plan panel");
+  assert(shopping.children[0] === shardRow, "shard row is pinned first in the plan panel");
   shardRowCb.checked = true; shardRowCb.dispatch("change");
-  const afterShardCheck = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  const afterShardCheck = getState();
   assert(afterShardCheck.have[shardUp.id + "::comp::" + shardGi] === true,
     "checking the shard row marks the group met just like other plan materials");
 
@@ -439,14 +464,14 @@ setTimeout(() => {
   promptReturn = JSON.stringify({ done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: { [rank1.id]: true, [rank2.id]: true }, crafted: {} });
   impBtn2.dispatch("click");
   searchEl.value = ""; searchEl.dispatch("input");
-  let rank1Card = findCardByName(rank1.name);
+  const rank1Card = findCardByName(rank1.name);
   let rank2Card = findCardByName(rank2.name);
   assert(!!rank1Card && !!rank2Card, "rank-up 1 and 2 cards rendered");
   let rank2Done = doneCbOf(rank2Card);
   assert(!!rank2Done && rank2Done.disabled === true, "rank-up 2 is chain-locked until rank-up 1 is done");
   // Defensive guard: forcing the change event anyway must not mark it done.
   rank2Done.checked = true; rank2Done.dispatch("change");
-  const afterLockedAttempt = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  const afterLockedAttempt = getState();
   assert(!afterLockedAttempt.done[rank2.id], "checking a chain-locked upgrade is ignored");
   // Complete rank-up 1; rank-up 2 should unlock on the next render.
   const rank1Done = doneCbOf(rank1Card);
@@ -518,5 +543,5 @@ setTimeout(() => {
   assert(!("theme" in global.document.documentElement.dataset), "clicking Auto clears data-theme");
   assert(!("skyisland.theme" in storeBacking), "Auto choice clears the persisted theme");
 
-  console.log(process.exitCode ? "\nSMOKE TEST FAILED" : "\nAll smoke checks passed");
+  process.stdout.write(process.exitCode ? "\nSMOKE TEST FAILED\n" : "\nAll smoke checks passed\n");
 }, 10);

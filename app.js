@@ -89,25 +89,26 @@
 
   const STORE_KEY = "skyisland.tracker.v1";
   const els = {
-    list: document.getElementById("list"),
-    search: document.getElementById("search"),
-    searchClear: document.getElementById("search-clear"),
-    hideDone: document.getElementById("hide-done"),
-    onlyPlan: document.getElementById("only-plan"),
-    clearPlan: document.getElementById("clear-plan"),
-    planActions: document.getElementById("plan-actions"),
-    planPanel: document.getElementById("plan-panel"),
-    planHandle: document.getElementById("plan-handle"),
-    planSummary: document.getElementById("plan-summary"),
-    shopping: document.getElementById("shopping"),
-    planHint: document.getElementById("plan-hint"),
-    stats: document.getElementById("stats"),
-    foot: document.getElementById("foot"),
-    toolbarActions: document.getElementById("toolbar-actions"),
-    mainActions: document.getElementById("main-actions"),
-    planFooterSummary: document.getElementById("plan-footer-summary"),
-    planReadyList: document.getElementById("plan-ready-list"),
-    importSaveFile: document.getElementById("import-save-file"),
+    list: document.querySelector("#list"),
+    search: document.querySelector("#search"),
+    searchClear: document.querySelector("#search-clear"),
+    hideDone: document.querySelector("#hide-done"),
+    onlyPlan: document.querySelector("#only-plan"),
+    clearPlan: document.querySelector("#clear-plan"),
+    planActions: document.querySelector("#plan-actions"),
+    planPanel: document.querySelector("#plan-panel"),
+    planHandle: document.querySelector("#plan-handle"),
+    planSummary: document.querySelector("#plan-summary"),
+    shopping: document.querySelector("#shopping"),
+    planHint: document.querySelector("#plan-hint"),
+    stats: document.querySelector("#stats"),
+    foot: document.querySelector("#foot"),
+    toolbarActions: document.querySelector("#toolbar-actions"),
+    mainActions: document.querySelector("#main-actions"),
+    planFooterSummary: document.querySelector("#plan-footer-summary"),
+    planReadyList: document.querySelector("#plan-ready-list"),
+    importSaveFile: document.querySelector("#import-save-file"),
+    toast: document.querySelector("#toast"),
   };
 
   // ---- state ---------------------------------------------------------------
@@ -219,9 +220,12 @@
       shown++;
     });
 
-    els.list.innerHTML = "";
+    els.list.replaceChildren();
     if (!shown) {
-      els.list.innerHTML = '<div class="empty">No upgrades match your filters.</div>';
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No upgrades match your filters.";
+      els.list.append(empty);
     } else {
       const searching = !!q;
       for (const group of Object.keys(groups)) {
@@ -239,20 +243,20 @@
         const cnt = document.createElement("span");
         cnt.className = "group-count";
         cnt.textContent = gcount;
-        gh.appendChild(caret); gh.appendChild(label); gh.appendChild(cnt);
+        gh.append(caret); gh.append(label); gh.append(cnt);
         gh.addEventListener("click", () => {
           if (state.groupsCollapsed[group]) delete state.groupsCollapsed[group];
           else state.groupsCollapsed[group] = true;
           render();
         });
-        els.list.appendChild(gh);
+        els.list.append(gh);
         if (collapsed) continue;
         for (const cat of Object.keys(groups[group])) {
           const ch = document.createElement("div");
           ch.className = "cat-head";
           ch.textContent = cat;
-          els.list.appendChild(ch);
-          groups[group][cat].forEach(u => els.list.appendChild(card(u)));
+          els.list.append(ch);
+          groups[group][cat].forEach(u => els.list.append(card(u)));
         }
       }
     }
@@ -305,7 +309,7 @@
         resetComponents(u);
         render();
       });
-      doneWrap.appendChild(craftBtn);
+      doneWrap.append(craftBtn);
     } else {
       const cbLabel = document.createElement("label");
       cbLabel.title = blockers.length
@@ -326,8 +330,8 @@
         else delete state.done[u.id];
         render();
       });
-      cbLabel.appendChild(doneCb);
-      doneWrap.appendChild(cbLabel);
+      cbLabel.append(doneCb);
+      doneWrap.append(cbLabel);
     }
     // Chevron beside the checkbox/button, purely a visual open/closed
     // indicator — a sibling of the label (not inside it) so clicking it
@@ -338,7 +342,7 @@
     const chevron = document.createElement("span");
     chevron.className = "card-chevron";
     chevron.setAttribute("aria-hidden", "true");
-    doneWrap.appendChild(chevron);
+    doneWrap.append(chevron);
 
     const main = document.createElement("div");
     main.className = "card-main";
@@ -349,7 +353,7 @@
       const key = document.createElement("span");
       key.className = "card-key";
       key.textContent = "Craft: " + u.key_name;
-      title.appendChild(key);
+      title.append(key);
     }
     const craftedN = state.crafted[u.id] || 0;
     if (craftedN > 0) {
@@ -364,14 +368,14 @@
           render();
         }
       });
-      title.appendChild(tag);
+      title.append(tag);
     }
-    main.appendChild(title);
+    main.append(title);
     if (blockers.length) {
       const lock = document.createElement("div");
       lock.className = "lock-note";
       lock.textContent = "🔒 Requires: " + blockers.map(b => b.name).join(", ");
-      main.appendChild(lock);
+      main.append(lock);
     }
 
     const side = document.createElement("div");
@@ -379,7 +383,11 @@
     const badge = document.createElement("div");
     const complete = prog.total > 0 && prog.met === prog.total;
     badge.className = "progress-badge" + (complete ? " complete" : "");
-    badge.textContent = prog.total ? (complete ? "✓ ready" : prog.met + "/" + prog.total) : "—";
+    if (prog.total === 0) {
+      badge.textContent = "—";
+    } else {
+      badge.textContent = complete ? "✓ ready" : prog.met + "/" + prog.total;
+    }
     const planBtn = document.createElement("button");
     planBtn.type = "button";
     planBtn.className = "plan-btn" + (planned ? " on" : "");
@@ -393,39 +401,39 @@
       else { state.plan[u.id] = true; delete state.done[u.id]; }
       render();
     });
-    side.appendChild(badge); side.appendChild(planBtn);
+    side.append(badge); side.append(planBtn);
 
-    top.appendChild(doneWrap); top.appendChild(main); top.appendChild(side);
+    top.append(doneWrap); top.append(main); top.append(side);
     top.addEventListener("click", () => {
       if (open) delete state.open[u.id]; else state.open[u.id] = true;
       render();
     });
-    card.appendChild(top);
+    card.append(top);
 
     // body
     const body = document.createElement("div");
     body.className = "card-body";
 
     if (u.components.length) {
-      body.appendChild(sectionLabel("Materials"));
-      u.components.forEach((alts, i) => body.appendChild(componentRow(u, i, alts)));
+      body.append(sectionLabel("Materials"));
+      u.components.forEach((alts, i) => body.append(componentRow(u, i, alts)));
     }
     if (u.qualities.length) {
-      body.appendChild(sectionLabel("Tool qualities (shared — kept on the island)"));
-      u.qualities.forEach(q => body.appendChild(qualityRow(u, q)));
+      body.append(sectionLabel("Tool qualities (shared — kept on the island)"));
+      u.qualities.forEach(q => body.append(qualityRow(u, q)));
     }
     if (u.tools.length) {
-      body.appendChild(sectionLabel("Tools"));
-      u.tools.forEach((t, i) => body.appendChild(reqRow(u, "tool", i, [itemLink(t.id, t.name, false, t.tip)])));
+      body.append(sectionLabel("Tools"));
+      u.tools.forEach((t, i) => body.append(reqRow(u, "tool", i, [itemLink(t.id, t.name, false, t.tip)])));
     }
 
     if (u.description) {
       const d = document.createElement("div");
       d.className = "desc";
       d.textContent = u.description;
-      body.appendChild(d);
+      body.append(d);
     }
-    card.appendChild(body);
+    card.append(body);
     return card;
   }
 
@@ -483,12 +491,12 @@
     const text = document.createElement("span");
     text.className = "req-text";
     alts.forEach((a, i) => {
-      if (i) { const or = document.createElement("span"); or.className = "or"; or.textContent = "or"; text.appendChild(or); }
-      text.appendChild(stepper(u, gi, a, locked));
-      text.appendChild(textNode(" "));
-      text.appendChild(itemLink(a.id, a.name, a.list, a.tip, a.expand));
+      if (i) { const or = document.createElement("span"); or.className = "or"; or.textContent = "or"; text.append(or); }
+      text.append(stepper(u, gi, a, locked));
+      text.append(textNode(" "));
+      text.append(itemLink(a.id, a.name, a.list, a.tip, a.expand));
     });
-    row.appendChild(cb); row.appendChild(text);
+    row.append(cb); row.append(text);
     return row;
   }
 
@@ -521,7 +529,7 @@
     plus.title = "Have one more";
     plus.addEventListener("click", e => { e.stopPropagation(); setQty(u, gi, a, have + 1); });
 
-    wrap.appendChild(minus); wrap.appendChild(qty); wrap.appendChild(sep); wrap.appendChild(plus);
+    wrap.append(minus); wrap.append(qty); wrap.append(sep); wrap.append(plus);
     return wrap;
   }
 
@@ -541,8 +549,8 @@
     // Plain span (not a <label>): clicking the text/link must NOT toggle the box.
     const text = document.createElement("span");
     text.className = "req-text";
-    (Array.isArray(contentNodes) ? contentNodes : [contentNodes]).forEach(n => text.appendChild(n));
-    row.appendChild(cb); row.appendChild(text);
+    (Array.isArray(contentNodes) ? contentNodes : [contentNodes]).forEach(n => text.append(n));
+    row.append(cb); row.append(text);
     return row;
   }
 
@@ -551,31 +559,31 @@
   // (which omits examples — too verbose alongside every planned upgrade's name).
   function qualityLabel(q, withExamples) {
     const wrap = document.createElement("span");
-    wrap.appendChild(guideLink("tool_quality", q.id, q.name));
-    wrap.appendChild(textNode(" "));
-    wrap.appendChild(tagNode("lvl " + q.level));
+    wrap.append(guideLink("tool_quality", q.id, q.name));
+    wrap.append(textNode(" "));
+    wrap.append(tagNode("lvl " + q.level));
     const info = withExamples && (DATA.quality_items || {})[toolKey(q)];
     if (info && info.examples.length) {
       const egs = document.createElement("span");
       egs.className = "quality-egs";
-      egs.appendChild(textNode(" — e.g. "));
+      egs.append(textNode(" — e.g. "));
       info.examples.forEach((e, i) => {
-        if (i) egs.appendChild(textNode(", "));
-        egs.appendChild(guideLink("item", e.id, e.name));
+        if (i) egs.append(textNode(", "));
+        egs.append(guideLink("item", e.id, e.name));
       });
       const more = info.total - info.examples.length;
       if (more > 0) {
-        egs.appendChild(textNode(" and "));
-        egs.appendChild(guideLink("tool_quality", q.id, more + " more"));
+        egs.append(textNode(" and "));
+        egs.append(guideLink("tool_quality", q.id, more + " more"));
       }
-      wrap.appendChild(egs);
+      wrap.append(egs);
     }
     return wrap;
   }
 
   // A tool-quality row bound to the GLOBAL registry: ticking it here reflects in
   // every other upgrade that needs the same quality (they're kept on the island).
-  function qualityRow(u, q) {
+  function qualityRow(_u, q) {
     const owned = qualOwned(q);
     const row = document.createElement("div");
     row.className = "req qual" + (owned ? " have" : "");
@@ -586,8 +594,8 @@
     cb.addEventListener("change", () => setQualOwned(q, cb.checked));
     const text = document.createElement("span");
     text.className = "req-text";
-    text.appendChild(qualityLabel(q, true));
-    row.appendChild(cb); row.appendChild(text);
+    text.append(qualityLabel(q, true));
+    row.append(cb); row.append(text);
     return row;
   }
 
@@ -607,14 +615,14 @@
 
     const name = document.createElement("div");
     name.className = "shop-name";
-    name.appendChild(qualityLabel(rec.qual, false));
+    name.append(qualityLabel(rec.qual, false));
     const from = document.createElement("div");
     from.className = "shop-from";
     from.textContent = [...rec.from].join(", ");
     const col = document.createElement("div");
     col.style.flex = "1";
-    col.appendChild(name); col.appendChild(from);
-    row.appendChild(cb); row.appendChild(col);
+    col.append(name); col.append(from);
+    row.append(cb); row.append(col);
     return row;
   }
 
@@ -635,7 +643,7 @@
         resetComponents(u);
         render();
       });
-      row.appendChild(btn);
+      row.append(btn);
     } else {
       const cb = document.createElement("input");
       cb.type = "checkbox";
@@ -645,12 +653,12 @@
         if (cb.checked) { state.done[u.id] = true; delete state.plan[u.id]; }
         render();
       });
-      row.appendChild(cb);
+      row.append(cb);
     }
     const name = document.createElement("span");
     name.className = "plan-ready-name";
     name.textContent = u.name;
-    row.appendChild(name);
+    row.append(name);
     return row;
   }
 
@@ -659,11 +667,11 @@
     const planned = UP.filter(u => state.plan[u.id]);
     els.planHint.style.display = planned.length ? "none" : "block";
     els.planActions.style.display = planned.length ? "flex" : "none";
-    els.shopping.innerHTML = "";
+    els.shopping.replaceChildren();
     if (!planned.length) {
       els.planSummary.textContent = "nothing planned yet";
       els.planFooterSummary.textContent = "";
-      els.planReadyList.innerHTML = "";
+      els.planReadyList.replaceChildren();
       return;
     }
 
@@ -731,9 +739,9 @@
       const name = document.createElement("div");
       name.className = "shop-name";
       rec.alts.forEach((a, i) => {
-        if (i) { const or = document.createElement("span"); or.className = "or"; or.textContent = " or "; name.appendChild(or); }
+        if (i) { const or = document.createElement("span"); or.className = "or"; or.textContent = " or "; name.append(or); }
         const c = document.createElement("span"); c.className = "count"; c.textContent = (counts[a.id] || 0) + "× ";
-        name.appendChild(c); name.appendChild(itemLink(a.id, a.name, a.list, a.tip, a.expand));
+        name.append(c); name.append(itemLink(a.id, a.name, a.list, a.tip, a.expand));
       });
       const from = document.createElement("div");
       from.className = "shop-from";
@@ -749,9 +757,9 @@
       }
       const col = document.createElement("div");
       col.style.flex = "1";
-      col.appendChild(name); col.appendChild(from);
-      row.appendChild(cb); row.appendChild(col);
-      els.shopping.appendChild(row);
+      col.append(name); col.append(from);
+      row.append(cb); row.append(col);
+      els.shopping.append(row);
     });
 
     const qualRows = Object.values(qualAgg).map(rec => ({ rec, met: qualOwned(rec.qual) }))
@@ -762,19 +770,20 @@
 
     let qualitiesNeeded = 0;
     if (qualRows.length) {
-      els.shopping.appendChild(sectionLabel("Tool qualities (shared)"));
+      els.shopping.append(sectionLabel("Tool qualities (shared)"));
       qualRows.forEach(({ rec, met }) => {
         if (!met) qualitiesNeeded++;
-        els.shopping.appendChild(planQualityRow(rec, met));
+        els.shopping.append(planQualityRow(rec, met));
       });
     }
 
     const tot = document.createElement("div");
     tot.className = "shop-total";
+    const qualLabel = qualitiesNeeded === 1 ? "quality" : "qualities";
     tot.textContent = itemsNeeded + " material line(s)" +
-      (qualRows.length ? " and " + qualitiesNeeded + " tool " + (qualitiesNeeded === 1 ? "quality" : "qualities") : "") +
+      (qualRows.length ? " and " + qualitiesNeeded + " tool " + qualLabel : "") +
       " still to gather.";
-    els.shopping.appendChild(tot);
+    els.shopping.append(tot);
 
     els.planSummary.textContent = planned.length + " planned · " + itemsNeeded +
       (qualRows.length ? " + " + qualitiesNeeded + " qual" : "") + " to gather";
@@ -788,26 +797,64 @@
       return prog.total > 0 && prog.met === prog.total && lockedBy(u).length === 0;
     });
     els.planFooterSummary.textContent = ready.length + "/" + planned.length + " ready";
-    els.planReadyList.innerHTML = "";
+    els.planReadyList.replaceChildren();
     if (ready.length) {
-      els.planReadyList.appendChild(sectionLabel("Ready to craft"));
-      ready.forEach(u => els.planReadyList.appendChild(planReadyRow(u)));
+      els.planReadyList.append(sectionLabel("Ready to craft"));
+      ready.forEach(u => els.planReadyList.append(planReadyRow(u)));
     }
   }
 
   function renderStats() {
     const total = UP.length;
     const crafted = Object.values(state.crafted || {}).reduce((a, b) => a + (b || 0), 0);
-    els.stats.innerHTML = crafted > 0 ? "<b>" + crafted + "</b> crafted" : "";
+    els.stats.replaceChildren();
+    if (crafted > 0) {
+      const b = document.createElement("b");
+      b.textContent = String(crafted);
+      els.stats.append(b);
+      els.stats.append(document.createTextNode(" crafted"));
+    }
     els.foot.textContent = total + " upgrades tracked";
+  }
+
+  // ---- notification helpers ------------------------------------------------
+  function notify(msg) {
+    const t = els.toast;
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(t._notifyTimer);
+    t._notifyTimer = setTimeout(() => t.classList.remove("show"), 3500);
+  }
+
+  // Shown when the clipboard API is unavailable — lets the user copy manually.
+  function showExportFallback(json) {
+    const overlay = document.createElement("div");
+    overlay.className = "export-overlay";
+    const box = document.createElement("div");
+    box.className = "export-box";
+    const msg = document.createElement("p");
+    msg.textContent = "Couldn't copy to clipboard — select all and copy manually:";
+    const ta = document.createElement("textarea");
+    ta.className = "export-ta";
+    ta.value = json;
+    ta.readOnly = true;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn ghost tiny";
+    btn.textContent = "Close";
+    btn.addEventListener("click", () => overlay.remove());
+    box.append(msg, ta, btn);
+    overlay.append(box);
+    document.body.append(overlay);
+    ta.select();
   }
 
   // ---- import / export -----------------------------------------------------
   function exportState() {
     const json = JSON.stringify(state);
     copyToClipboard(json).then(ok => {
-      alert(ok ? "Progress copied to clipboard as JSON.\nPaste it somewhere safe to back it up."
-               : "Couldn't access clipboard. Here is your JSON:\n\n" + json);
+      if (ok) notify("Progress copied to clipboard — paste somewhere safe to back it up.");
+      else showExportFallback(json);
     });
   }
   function importState() {
@@ -818,9 +865,9 @@
       state = Object.assign(blankState(), parsed);
       save();
       render();
-      alert("Progress imported.");
+      notify("Progress imported.");
     } catch (e) {
-      alert("That doesn't look like valid exported JSON.");
+      notify("That doesn't look like valid exported JSON.");
     }
   }
   // Parses a Cataclysm: DDA `master.gsav` (world save-directory file, not the
@@ -831,7 +878,9 @@
   function importSaveFromGsav(text) {
     const jsonStart = text.indexOf("{");
     if (jsonStart < 0) throw new Error("no JSON object found");
-    const data = JSON.parse(text.slice(jsonStart));
+    let data;
+    try { data = JSON.parse(text.slice(jsonStart)); }
+    catch (e) { throw new Error("invalid JSON in save file: " + e.message); }
     if (!Array.isArray(data.active_missions)) {
       throw new Error("missing active_missions — not a master.gsav file");
     }
@@ -852,18 +901,16 @@
       try {
         result = importSaveFromGsav(String(reader.result));
       } catch (e) {
-        alert("Couldn't read that as a Cataclysm master.gsav file.\n\n"
-          + "Pick master.gsav from your save's world folder, e.g.\n"
-          + "~/Library/Application Support/Cataclysm/save/<world name>/master.gsav");
+        notify("Couldn't read that file as a Cataclysm master.gsav — pick master.gsav from your save's world folder.");
         return;
       }
       const { matched, unrecognized, newlyDone } = result;
       if (!matched.length) {
-        alert("No completed Sky Island upgrades found in that save.");
+        notify("No completed Sky Island upgrades found in that save.");
         return;
       }
       if (!newlyDone.length) {
-        alert(matched.length + " completed upgrade(s) found in the save, but all are already marked done here.");
+        notify(matched.length + " completed upgrade(s) found in the save, but all are already marked done here.");
         return;
       }
       const names = newlyDone.map(id => byId[id].name).sort();
@@ -873,9 +920,9 @@
       newlyDone.forEach(id => { state.done[id] = true; });
       save();
       render();
-      alert("Marked " + newlyDone.length + " upgrade(s) as done.");
+      notify("Marked " + newlyDone.length + " upgrade(s) as done.");
     };
-    reader.onerror = () => alert("Couldn't read that file.");
+    reader.onerror = () => notify("Couldn't read that file.");
     reader.readAsText(file);
   }
   function copyToClipboard(text) {
@@ -888,7 +935,7 @@
     try {
       const ta = document.createElement("textarea");
       ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
-      document.body.appendChild(ta); ta.select();
+      document.body.append(ta); ta.select();
       const ok = document.execCommand("copy");
       document.body.removeChild(ta);
       return ok;
@@ -916,8 +963,8 @@
     collapse.addEventListener("click", () => setAllOpen(false));
     const viewGroup = document.createElement("div");
     viewGroup.className = "toolbar-group"; viewGroup.id = "view-actions";
-    viewGroup.appendChild(expand);
-    viewGroup.appendChild(collapse);
+    viewGroup.append(expand);
+    viewGroup.append(collapse);
     els.toolbarActions.insertBefore(viewGroup, els.mainActions);
 
     const exp = document.createElement("button");
@@ -947,10 +994,10 @@
         render();
       }
     });
-    els.mainActions.appendChild(exp);
-    els.mainActions.appendChild(imp);
-    els.mainActions.appendChild(impSave);
-    els.mainActions.appendChild(reset);
+    els.mainActions.append(exp);
+    els.mainActions.append(imp);
+    els.mainActions.append(impSave);
+    els.mainActions.append(reset);
   }
 
   // ---- hover tooltips, CRPG-style ------------------------------------------
@@ -966,7 +1013,7 @@
     tip.className = "tooltip";
     tip.style.display = "none";
     tip.style.pointerEvents = "none";
-    document.body.appendChild(tip);
+    document.body.append(tip);
     let current = null, frozen = false, freezeTimer = null, hideTimer = null;
 
     const clearFreeze = () => { if (freezeTimer) { clearTimeout(freezeTimer); freezeTimer = null; } };
@@ -1000,13 +1047,13 @@
       if (items && items.length) {
         tip.textContent = "";
         items.forEach((it, i) => {
-          if (i) { const or = document.createElement("span"); or.className = "or"; or.textContent = " OR "; tip.appendChild(or); }
+          if (i) { const or = document.createElement("span"); or.className = "or"; or.textContent = " OR "; tip.append(or); }
           const a = document.createElement("a");
           a.className = "item-link";
           a.href = GUIDE + "item/" + encodeURIComponent(it.id);
           a.target = "_blank"; a.rel = "noopener noreferrer";
           a.textContent = it.label;
-          tip.appendChild(a);
+          tip.append(a);
         });
       } else {
         tip.textContent = target.getAttribute("data-tip") || "";
@@ -1062,7 +1109,7 @@
   function setupPlanSheet() {
     const backdrop = document.createElement("div");
     backdrop.className = "plan-backdrop";
-    document.body.appendChild(backdrop);
+    document.body.append(backdrop);
     let open = false;
     function setOpen(v) {
       open = v;

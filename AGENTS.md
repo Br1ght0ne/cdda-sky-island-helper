@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD013 -->
 # AGENTS.md
 
 Context for AI agents (and humans) working on **cdda-sky-island-helper** — a
@@ -18,7 +19,7 @@ not a JSON file loaded at runtime.
 ## Files
 
 | File | Role |
-|---|---|
+| --- | --- |
 | `index.html` | markup / layout |
 | `style.css` | all styling (green-on-black terminal theme, with a light-mode complement) |
 | `app.js` | all behaviour — one big IIFE, no framework |
@@ -162,3 +163,49 @@ Caveat: the shim verifies **logic**, not visual layout. CSS/responsive changes
 can't be visually confirmed here — call that out and ask the user to eyeball
 devtools (e.g. at 375px) when you touch layout. When adding a DOM API in
 `app.js` that the shim lacks, extend the shim (`mkEl`, `global.document`).
+
+## Idiomatic patterns (enforced by the linter — don't regress)
+
+### DOM manipulation
+
+- **`el.append(child)`** instead of `el.appendChild(child)`. (`append` accepts
+  multiple args and strings; `appendChild` is legacy.)
+- **`el.replaceChildren()`** (no args) to clear an element instead of
+  `el.innerHTML = ""`.
+- **`document.querySelector("#id")`** instead of `document.getElementById("id")`.
+- When adding a new DOM method to `app.js`, add the corresponding stub to
+  `mkEl` / `global.document` in `build/smoke.js` at the same time.
+  Currently implemented: `append`, `replaceChildren`, `classList`
+  (add/remove/toggle/contains), `remove`.
+
+### User notifications
+
+- **`notify(msg)`** for all user-facing status messages — renders a brief
+  auto-dismissing toast (`#toast`). **Never use `alert()`.**
+- When the clipboard API is unavailable during export, call
+  **`showExportFallback(json)`** instead — shows an overlay with a selectable
+  `<textarea>` the user can copy from manually.
+- `confirm()` is still acceptable for destructive-action guards (e.g. reset,
+  import-save confirmation) because those block intentionally.
+
+### Code style
+
+- **No nested ternaries.** Extract the inner condition to a `const` first:
+
+  ```js
+  // ✗  a ? (b ? x : y) : z
+  const val = b ? x : y;
+  // ✓  a ? val : z
+  ```
+
+- **`str.startsWith(prefix)`** / **`str.endsWith(suffix)`** instead of
+  `str.indexOf(prefix) === 0` / similar.
+- **`arr.includes(item)`** instead of `arr.indexOf(item) >= 0` for existence
+  checks.
+- **`arr.at(-1)`** instead of `arr[arr.length - 1]` for last-element access.
+- Wrap `JSON.parse` in a try/catch (or delegate to a helper that does) whenever
+  it could receive untrusted input. In `build/smoke.js` the `getState()` helper
+  centralises this for `localStorage` reads.
+- In Node scripts (`build/smoke.js`) use **`process.stdout.write()`** for
+  informational output — `console.log/debug/warn` is reserved for actual
+  errors or is banned outright by the linter rule `no-console-except-error-js`.

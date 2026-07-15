@@ -398,3 +398,31 @@ footer a:has(code) { border-bottom: none; } /* the code pill's own background al
 footer a code { color: inherit; }
 code { background: var(--bg2); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
 .empty { color: var(--muted); padding: 40px 0; text-align: center; }
+
+/* ---- toast notification ---- */
+#toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px);
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 18px; font-size: 13px; color: var(--text);
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+  z-index: 200; max-width: min(480px, calc(100vw - 32px)); text-align: center;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+
+/* ---- export fallback modal ---- */
+.export-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center;
+}
+.export-box {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px; display: flex; flex-direction: column; gap: 10px;
+  width: min(520px, calc(100vw - 32px));
+}
+.export-box p { margin: 0; font-size: 13px; }
+.export-ta {
+  width: 100%; height: 160px; resize: vertical;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text); font-family: monospace; font-size: 12px; padding: 8px;
+}
