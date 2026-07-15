@@ -21,7 +21,6 @@
     <div class="wrap header-inner">
       <div class="header-text">
         <h1><span class="accent">CDDA</span> Sky Island <span class="accent">Helper</span></h1>
-        <p class="sub">Track what items you need for upgrades, constructions &amp; raid unlocks in the CDDA <em>Sky Island</em> mod.</p>
       </div>
       <div class="header-actions" id="header-actions">
         <div class="theme-toggle" id="theme-toggle" role="group" aria-label="Theme">
@@ -35,9 +34,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
         </div>
-        <div class="header-buttons" id="header-buttons">
-          <input type="file" id="import-save-file" accept=".gsav" hidden>
-        </div>
+        <input type="file" id="import-save-file" accept=".gsav" hidden>
       </div>
     </div>
   </header>
@@ -58,6 +55,7 @@
             <label class="chk"><input type="checkbox" id="hide-done"><span>Hide done</span></label>
             <label class="chk"><input type="checkbox" id="only-plan"><span>Only in plan</span></label>
           </div>
+          <div class="toolbar-group" id="main-actions"></div>
         </div>
       </div>
       <div id="stats" class="stats"></div>
@@ -75,7 +73,7 @@
           </span>
         </button>
         <div class="panel-head">
-          <h2>Plan</h2>
+          <h2>Plan<span class="plan-count-tag" id="plan-count-tag" hidden></span></h2>
           <div class="panel-actions" id="plan-actions">
             <button id="remove-finished" class="btn ghost tiny" type="button" title="Remove crafted (completed) upgrades from your plan">Remove finished</button>
             <button id="clear-plan" class="btn ghost tiny" type="button">Clear</button>

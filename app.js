@@ -27,7 +27,8 @@
     stats: document.getElementById("stats"),
     foot: document.getElementById("foot"),
     toolbarActions: document.getElementById("toolbar-actions"),
-    headerButtons: document.getElementById("header-buttons"),
+    mainActions: document.getElementById("main-actions"),
+    planCountTag: document.getElementById("plan-count-tag"),
     importSaveFile: document.getElementById("import-save-file"),
   };
 
@@ -500,6 +501,8 @@
     const planned = UP.filter(u => state.plan[u.id]);
     els.planHint.style.display = planned.length ? "none" : "block";
     els.planActions.style.display = planned.length ? "flex" : "none";
+    els.planCountTag.hidden = !planned.length;
+    els.planCountTag.textContent = String(planned.length);
     els.shopping.innerHTML = "";
     if (!planned.length) { els.planSummary.textContent = "nothing planned yet"; return; }
 
@@ -595,12 +598,8 @@
 
   function renderStats() {
     const total = UP.length;
-    const done = UP.filter(u => state.done[u.id]).length;
-    const planned = UP.filter(u => state.plan[u.id]).length;
-    let html = "<b>" + done + "</b>/" + total + " completed · <b>" + planned + "</b> planned";
     const crafted = Object.values(state.crafted || {}).reduce((a, b) => a + (b || 0), 0);
-    if (crafted > 0) html += " · <b>" + crafted + "</b> crafted";
-    els.stats.innerHTML = html;
+    els.stats.innerHTML = crafted > 0 ? "<b>" + crafted + "</b> crafted" : "";
     els.foot.textContent = total + " upgrades tracked";
   }
 
@@ -711,17 +710,16 @@
 
   function addToolbarButtons() {
     const expand = document.createElement("button");
-    expand.type = "button"; expand.className = "btn ghost"; expand.textContent = "Expand all";
+    expand.type = "button"; expand.className = "btn"; expand.textContent = "Expand all";
     expand.addEventListener("click", () => setAllOpen(true));
     const collapse = document.createElement("button");
-    collapse.type = "button"; collapse.className = "btn ghost"; collapse.textContent = "Collapse all";
+    collapse.type = "button"; collapse.className = "btn"; collapse.textContent = "Collapse all";
     collapse.addEventListener("click", () => setAllOpen(false));
     const viewGroup = document.createElement("div");
-    viewGroup.className = "toolbar-group";
+    viewGroup.className = "toolbar-group"; viewGroup.id = "view-actions";
     viewGroup.appendChild(expand);
     viewGroup.appendChild(collapse);
-    els.toolbarActions.appendChild(viewGroup);
-    els.toolbarActions.appendChild(els.stats); // counters get their own row below Expand/Collapse all
+    els.toolbarActions.insertBefore(viewGroup, els.mainActions);
 
     const exp = document.createElement("button");
     exp.type = "button"; exp.className = "btn"; exp.textContent = "Export";
@@ -750,10 +748,10 @@
         render();
       }
     });
-    els.headerButtons.appendChild(exp);
-    els.headerButtons.appendChild(imp);
-    els.headerButtons.appendChild(impSave);
-    els.headerButtons.appendChild(reset);
+    els.mainActions.appendChild(exp);
+    els.mainActions.appendChild(imp);
+    els.mainActions.appendChild(impSave);
+    els.mainActions.appendChild(reset);
   }
 
   // ---- hover tooltips, CRPG-style ------------------------------------------

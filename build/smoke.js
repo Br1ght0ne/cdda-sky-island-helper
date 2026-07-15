@@ -12,6 +12,11 @@ function mkEl(tag) {
     set innerHTML(v) { this._html = v; this.children = []; },
     get innerHTML() { return this._html; },
     appendChild(c) { this.children.push(c); return c; },
+    insertBefore(c, ref) {
+      const i = this.children.indexOf(ref);
+      if (i === -1) this.children.push(c); else this.children.splice(i, 0, c);
+      return c;
+    },
     removeChild(c) { this.children = this.children.filter(x => x !== c); },
     addEventListener(ev, fn) { (this._listeners[ev] = this._listeners[ev] || []).push(fn); },
     dispatch(ev, e) { (this._listeners[ev] || []).forEach(fn => fn(e || { stopPropagation() {} })); },
@@ -39,6 +44,16 @@ function getEl(id) { return registry[id] || (registry[id] = mkEl("div")); }
 ["list","search","search-clear","hide-done","only-plan","clear-plan","shopping","plan-hint","stats","foot"]
   .forEach(id => { registry[id] = mkEl(id === "search" ? "input" : id === "search-clear" ? "button" : "div"); registry[id].value = ""; registry[id].checked = false; });
 const toolbar = mkEl("div");
+
+// Static #toolbar-actions layout from index.html: a checkbox group placeholder
+// followed by #main-actions, wired up front (not built by app.js) so
+// insertBefore(viewGroup, mainActions) lands in the right spot, same as
+// the real DOM.
+const toolbarActionsEl = mkEl("div");
+const mainActionsEl = mkEl("div");
+toolbarActionsEl.children = [mkEl("div"), mainActionsEl];
+registry["toolbar-actions"] = toolbarActionsEl;
+registry["main-actions"] = mainActionsEl;
 
 // Static theme-toggle buttons from index.html (not built by app.js, so the
 // shim fabricates them the same way it fakes ".toolbar" via querySelector).
@@ -88,7 +103,7 @@ function assert(c, m) { if (!c) { console.error("FAIL:", m); process.exitCode = 
 
 const list = registry["list"];
 const actions = registry["toolbar-actions"]; // Expand/Collapse live here
-const headerActions = registry["header-buttons"]; // Export/Import/Import Save/Reset live here
+const headerActions = registry["main-actions"]; // Export/Import/Import Save/Reset live here (sticky toolbar)
 assert(list.children.length > 0, "list rendered group/category/card nodes");
 
 // find first upgrade card's plan button and click it (Island Rank Up 1)
@@ -108,6 +123,21 @@ planButtons[0].dispatch("click");
 planButtons[1] && planButtons[1].dispatch("click");
 planButtons[2] && planButtons[2].dispatch("click");
 assert(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan && Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length >= 1, "planning persists to localStorage");
+
+// Plan count tag next to the "Plan" panel header
+const planCountTag = registry["plan-count-tag"];
+const plannedCount = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length;
+assert(planCountTag.hidden === false && planCountTag.textContent === String(plannedCount),
+  "plan count tag shows the number of planned upgrades");
+
+// Toolbar order: checkboxes, then Expand/Collapse, then the main action
+// buttons (pushed right), with Reset last of those.
+const viewGroupIdx = actions.children.findIndex(c => findByText(c, "Expand all"));
+const mainActionsIdx = actions.children.indexOf(registry["main-actions"]);
+assert(viewGroupIdx !== -1 && viewGroupIdx < mainActionsIdx,
+  "Expand/Collapse group sits to the left of the main action buttons");
+assert(registry["main-actions"].children[registry["main-actions"].children.length - 1]._text === "Reset",
+  "Reset is the rightmost main action button");
 
 // Expand all / Collapse all — now also affects collapsible sections
 const expandAll = findByText(actions, "Expand all");
