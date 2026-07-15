@@ -134,7 +134,14 @@ def _register(o, idx):
     if o.get("type") == "requirement" and isinstance(o.get("components"), list):
         for i in ids:
             idx["reqs"].setdefault(i, o["components"])
-    n, p = norm_name(o.get("name"))
+    # Only these two types define a real display name for the ids we care
+    # about (items, and tool qualities). Every other type ("material",
+    # "recipe", "furniture", ...) can share an id with an item — e.g.
+    # "ammonia_hydroxide" is both a material and an item, and recipes key
+    # their own crafting-menu label (often a "%s using X" template) off their
+    # "result" id — but its "name" describes that other thing, not the item.
+    # Allowlisting avoids re-litigating this bug for every new stray type.
+    n, p = norm_name(o.get("name")) if o.get("type") in ("ITEM", "tool_quality") else (None, None)
     cf = o.get("copy-from")
     for i in ids:
         if n and i not in idx["names"]:
@@ -245,7 +252,7 @@ def build_quality_index(idx, ql_pairs, sample=3):
 
     out = {}
     for q, level in ql_pairs:
-        sat = sorted((t for t in qmap.get(q, []) if t[0] >= level), key=lambda t: (t[0], t[1].lower()))
+        sat = sorted((t for t in qmap.get(q, []) if t[0] >= level), key=lambda t: (t[0], t[1].lower(), t[2]))
         out[f"{q}::{level}"] = {
             "examples": [{"id": i, "name": nm} for (_lvl, nm, i) in sat[:sample]],
             "total": len(sat),
@@ -398,7 +405,7 @@ def main():
     upgrades.extend(parse_repeatable_crafts(idx))
 
     # Example items that satisfy each required tool quality, from the game source.
-    ql_pairs = {(q["id"], q["level"]) for u in upgrades for q in u["qualities"]}
+    ql_pairs = sorted({(q["id"], q["level"]) for u in upgrades for q in u["qualities"]})
     quality_items = build_quality_index(idx, ql_pairs)
 
     payload = {

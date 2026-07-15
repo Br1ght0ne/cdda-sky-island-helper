@@ -380,7 +380,7 @@
           {
             "id": "ammonia_hydroxide",
             "count": 30,
-            "name": "Ammonia Hydroxide",
+            "name": "ammonia solution",
             "list": false
           }
         ],
@@ -410,7 +410,7 @@
           {
             "id": "soap",
             "count": 10,
-            "name": "%s from potassium hydroxide",
+            "name": "soap bar",
             "list": false
           },
           {
@@ -561,7 +561,7 @@
           {
             "id": "plant_fibre",
             "count": 500,
-            "name": "%s using scutcher",
+            "name": "plant fiber",
             "list": false
           },
           {
@@ -602,13 +602,13 @@
           {
             "id": "bio_climate",
             "count": 1,
-            "name": "Internal Climate Control",
+            "name": "Internal Climate Control CBM",
             "list": false
           },
           {
             "id": "bio_heatsink",
             "count": 1,
-            "name": "Thermal Dissipation",
+            "name": "Thermal Dissipation CBM",
             "list": false
           },
           {
@@ -1044,7 +1044,7 @@
           {
             "id": "rock",
             "count": 10,
-            "name": "rocks",
+            "name": "rock",
             "list": false
           }
         ],
@@ -1052,7 +1052,7 @@
           {
             "id": "pebble",
             "count": 10,
-            "name": "pebbles",
+            "name": "pebble",
             "list": false
           }
         ],
@@ -1115,7 +1115,7 @@
           {
             "id": "nail",
             "count": 20,
-            "name": "nails",
+            "name": "nail",
             "list": false
           }
         ],
@@ -1817,7 +1817,7 @@
           {
             "id": "diamond",
             "count": 8,
-            "name": "Diamond",
+            "name": "diamond",
             "list": false
           },
           {
@@ -2103,7 +2103,7 @@
           {
             "id": "nail",
             "count": 20,
-            "name": "nails",
+            "name": "nail",
             "list": false
           }
         ],
@@ -2198,7 +2198,7 @@
           {
             "id": "nail",
             "count": 20,
-            "name": "nails",
+            "name": "nail",
             "list": false
           }
         ],
@@ -2513,7 +2513,7 @@
           {
             "id": "nail",
             "count": 20,
-            "name": "nails",
+            "name": "nail",
             "list": false
           }
         ],
@@ -3118,7 +3118,7 @@
           {
             "id": "nail",
             "count": 20,
-            "name": "nails",
+            "name": "nail",
             "list": false
           }
         ],
@@ -3724,7 +3724,7 @@
           {
             "id": "nail",
             "count": 20,
-            "name": "nails",
+            "name": "nail",
             "list": false
           }
         ],
@@ -4427,7 +4427,7 @@
           {
             "id": "tinder",
             "count": 10,
-            "name": "soft %s",
+            "name": "tinder",
             "list": false
           }
         ],
@@ -4666,7 +4666,7 @@
           {
             "id": "faux_fur",
             "count": 20,
-            "name": "Faux Fur",
+            "name": "faux fur patch",
             "list": false
           }
         ],
@@ -4761,7 +4761,7 @@
           {
             "id": "fur",
             "count": 40,
-            "name": "Fur",
+            "name": "fur patch",
             "list": false
           }
         ],
@@ -5345,7 +5345,7 @@
           {
             "id": "soup_fish",
             "count": 10,
-            "name": "%s in jar",
+            "name": "fish soup",
             "list": false
           }
         ]
@@ -5443,13 +5443,13 @@
           {
             "id": "bio_probability_travel",
             "count": 1,
-            "name": "Probability Travel",
+            "name": "Probability Travel CBM",
             "list": false
           },
           {
             "id": "bio_teleport",
             "count": 1,
-            "name": "Teleportation Unit",
+            "name": "Teleportation Unit CBM",
             "list": false
           },
           {
@@ -5577,7 +5577,7 @@
           {
             "id": "tinder",
             "count": 5,
-            "name": "soft %s",
+            "name": "tinder",
             "list": false
           }
         ],
@@ -6085,37 +6085,37 @@
           {
             "id": "bio_eye_optic",
             "count": 1,
-            "name": "Telescopic Eyes",
+            "name": "Telescopic Eyes CBM",
             "list": false
           },
           {
             "id": "bio_armor_eyes",
             "count": 1,
-            "name": "Protective Lenses",
+            "name": "Protective Lenses CBM",
             "list": false
           },
           {
             "id": "bio_ar",
             "count": 1,
-            "name": "Integrated AR System",
+            "name": "Integrated AR System CBM",
             "list": false
           },
           {
             "id": "bio_eye_enhancer",
             "count": 1,
-            "name": "Ocular Amplifiers",
+            "name": "Ocular Amplifiers CBM",
             "list": false
           },
           {
             "id": "bio_infrared",
             "count": 1,
-            "name": "Infrared Vision",
+            "name": "Infrared Vision CBM",
             "list": false
           },
           {
             "id": "bio_night_vision",
             "count": 1,
-            "name": "Implanted Night Vision",
+            "name": "Implanted Night Vision CBM",
             "list": false
           }
         ],
@@ -6585,7 +6585,7 @@
           {
             "id": "mutagen_medical",
             "count": 1,
-            "name": "Medical Primer",
+            "name": "medical mutagen",
             "list": false
           },
           {
@@ -6736,7 +6736,7 @@
           {
             "id": "plut_cell",
             "count": 5,
-            "name": "Energetic Nanocompound",
+            "name": "plutonium fuel cell",
             "list": false
           }
         ],
@@ -7437,7 +7437,7 @@
           {
             "id": "diamond",
             "count": 5,
-            "name": "Diamond",
+            "name": "diamond",
             "list": false
           }
         ],
@@ -7659,7 +7659,7 @@
           {
             "id": "paper",
             "count": 1,
-            "name": "Paper",
+            "name": "paper",
             "list": false
           }
         ]
@@ -7743,7 +7743,7 @@
           {
             "id": "9mm",
             "count": 50,
-            "name": "9x19mm",
+            "name": "9x19mm JHP",
             "list": false
           },
           {
@@ -7948,7 +7948,7 @@
           {
             "id": "grapnel",
             "count": 1,
-            "name": "%s from scratch",
+            "name": "grappling hook",
             "list": false
           }
         ],
@@ -8452,7 +8452,7 @@
           {
             "id": "plut_cell",
             "count": 5,
-            "name": "Energetic Nanocompound",
+            "name": "plutonium fuel cell",
             "list": false
           }
         ],
@@ -8482,7 +8482,7 @@
           {
             "id": "mutagen",
             "count": 2,
-            "name": "Mutation Withdrawal",
+            "name": "mutagenic slurry",
             "list": false
           },
           {
@@ -8809,7 +8809,7 @@
               },
               {
                 "id": "blood",
-                "label": "1 Blood"
+                "label": "1 blood"
               },
               {
                 "id": "mutant_human_blood",
@@ -8828,7 +8828,7 @@
                 "label": "1 tainted human blood"
               }
             ],
-            "tip": "1 animal blood OR 1 mutant blood OR 1 Blood OR 1 mutant human blood OR 1 demihuman blood OR 1 tainted blood OR 1 tainted human blood"
+            "tip": "1 animal blood OR 1 mutant blood OR 1 blood OR 1 mutant human blood OR 1 demihuman blood OR 1 tainted blood OR 1 tainted human blood"
           }
         ],
         [
@@ -8892,7 +8892,7 @@
               },
               {
                 "id": "canned_liver",
-                "label": "4 %s in jars"
+                "label": "4 canned liver"
               },
               {
                 "id": "mutant_liver",
@@ -8935,7 +8935,7 @@
                 "label": "1 mutant organs"
               }
             ],
-            "tip": "4 of raw heart pieces OR 4 of raw human heart pieces OR 4 of raw demihuman heart pieces OR 4 of raw mutant heart pieces OR 4 of raw mutant humanoid heart pieces OR 4 of raw lung pieces OR 4 of raw human lung pieces OR 4 of raw demihuman lung pieces OR 4 of raw mutant lung pieces OR 4 of raw mutant lung pieces OR 4 of raw liver pieces OR 4 of raw human liver pieces OR 4 of raw demihuman liver pieces OR 4 %s in jars OR 4 of raw mutant liver pieces OR 4 of raw kidney pieces OR 4 of raw human kidney pieces OR 4 of raw demihuman kidney pieces OR 4 of raw mutant kidney pieces OR 4 of raw sweetbread pieces OR 4 of raw human sweetbread pieces OR 4 of raw demihuman sweetbread pieces OR 1 raw offal OR 1 mutant organs"
+            "tip": "4 of raw heart pieces OR 4 of raw human heart pieces OR 4 of raw demihuman heart pieces OR 4 of raw mutant heart pieces OR 4 of raw mutant humanoid heart pieces OR 4 of raw lung pieces OR 4 of raw human lung pieces OR 4 of raw demihuman lung pieces OR 4 of raw mutant lung pieces OR 4 of raw mutant lung pieces OR 4 of raw liver pieces OR 4 of raw human liver pieces OR 4 of raw demihuman liver pieces OR 4 canned liver OR 4 of raw mutant liver pieces OR 4 of raw kidney pieces OR 4 of raw human kidney pieces OR 4 of raw demihuman kidney pieces OR 4 of raw mutant kidney pieces OR 4 of raw sweetbread pieces OR 4 of raw human sweetbread pieces OR 4 of raw demihuman sweetbread pieces OR 1 raw offal OR 1 mutant organs"
           }
         ]
       ],
@@ -9042,7 +9042,7 @@
           {
             "id": "rock",
             "count": 1,
-            "name": "rocks",
+            "name": "rock",
             "list": false
           }
         ]
@@ -9465,7 +9465,7 @@
           {
             "id": "rock",
             "count": 10,
-            "name": "rocks",
+            "name": "rock",
             "list": false
           }
         ],
@@ -9656,7 +9656,7 @@
           {
             "id": "nail",
             "count": 40,
-            "name": "nails",
+            "name": "nail",
             "list": false
           }
         ]
@@ -9782,7 +9782,7 @@
           {
             "id": "diazepam",
             "count": 5,
-            "name": "Diazepam Withdrawal",
+            "name": "prescription sedative",
             "list": false
           }
         ],
@@ -9824,22 +9824,125 @@
     }
   ],
   "quality_items": {
-    "STRAIN::1": {
+    "BLOW_HOT_AIR::1": {
       "examples": [
         {
-          "id": "sieve_steel_makeshift",
-          "name": "makeshift sieve"
+          "id": "hair_dryer",
+          "name": "hair dryer"
+        }
+      ],
+      "total": 1
+    },
+    "BOIL::2": {
+      "examples": [
+        {
+          "id": "aluminum_pan",
+          "name": "aluminum frying pan"
         },
         {
-          "id": "colander_steel",
-          "name": "mesh colander"
+          "id": "keg",
+          "name": "aluminum keg"
         },
         {
-          "id": "sieve_steel",
-          "name": "sieve"
+          "id": "pot_aluminum",
+          "name": "aluminum pot"
+        }
+      ],
+      "total": 61
+    },
+    "BUTCHER::16": {
+      "examples": [
+        {
+          "id": "crash_axe",
+          "name": "crash axe"
+        },
+        {
+          "id": "knife_rm42",
+          "name": "F-S fighting knife"
+        },
+        {
+          "id": "ch_kukri",
+          "name": "hardened steel kukri"
+        }
+      ],
+      "total": 25
+    },
+    "CHEM::2": {
+      "examples": [
+        {
+          "id": "chemistry_set_basic",
+          "name": "basic chemistry set"
+        },
+        {
+          "id": "chemistry_set",
+          "name": "chemistry set"
+        }
+      ],
+      "total": 2
+    },
+    "CUT_FINE::2": {
+      "examples": [
+        {
+          "id": "misc_repairkit",
+          "name": "miscellaneous repair kit"
+        },
+        {
+          "id": "xacto",
+          "name": "X-Acto knife"
+        },
+        {
+          "id": "scalpel",
+          "name": "scalpel"
+        }
+      ],
+      "total": 4
+    },
+    "DIG::1": {
+      "examples": [
+        {
+          "id": "exodii_prybar",
+          "name": "breacher"
+        },
+        {
+          "id": "bronze_hoe",
+          "name": "bronze hoe"
+        },
+        {
+          "id": "digging_stick",
+          "name": "digging stick"
+        }
+      ],
+      "total": 13
+    },
+    "DRILL::1": {
+      "examples": [
+        {
+          "id": "makeshift_hand_drill",
+          "name": "makeshift hand drill"
+        },
+        {
+          "id": "hand_drill",
+          "name": "hand drill"
+        },
+        {
+          "id": "cordless_drill",
+          "name": "cordless drill"
         }
       ],
       "total": 5
+    },
+    "FABRIC_CUT::2": {
+      "examples": [
+        {
+          "id": "kevlar_shears",
+          "name": "Kevlar shears"
+        },
+        {
+          "id": "tailors_kit",
+          "name": "tailor's kit"
+        }
+      ],
+      "total": 2
     },
     "GLARE::1": {
       "examples": [
@@ -9858,6 +9961,23 @@
       ],
       "total": 8
     },
+    "HAMMER::2": {
+      "examples": [
+        {
+          "id": "exodii_prybar",
+          "name": "breacher"
+        },
+        {
+          "id": "halligan",
+          "name": "Halligan bar"
+        },
+        {
+          "id": "iceaxe",
+          "name": "ice axe"
+        }
+      ],
+      "total": 11
+    },
     "HAMMER_FINE::1": {
       "examples": [
         {
@@ -9871,6 +9991,189 @@
         {
           "id": "small_repairkit",
           "name": "firearm repair kit"
+        }
+      ],
+      "total": 6
+    },
+    "HOSE::1": {
+      "examples": [
+        {
+          "id": "hose_garden",
+          "name": "garden hose"
+        },
+        {
+          "id": "makeshift_hose",
+          "name": "leather hose"
+        },
+        {
+          "id": "hose",
+          "name": "rubber hose"
+        }
+      ],
+      "total": 3
+    },
+    "JACK::1": {
+      "examples": [
+        {
+          "id": "nose_plate",
+          "name": "nose plate"
+        },
+        {
+          "id": "jack_makeshift",
+          "name": "makeshift jack"
+        },
+        {
+          "id": "jack_small",
+          "name": "scissor jack"
+        }
+      ],
+      "total": 4
+    },
+    "JACK::4": {
+      "examples": [
+        {
+          "id": "jack_small",
+          "name": "scissor jack"
+        },
+        {
+          "id": "jack",
+          "name": "bottle jack"
+        }
+      ],
+      "total": 2
+    },
+    "JACK::16": {
+      "examples": [
+        {
+          "id": "jack",
+          "name": "bottle jack"
+        }
+      ],
+      "total": 1
+    },
+    "LIFT::8": {
+      "examples": [],
+      "total": 0
+    },
+    "LIFT::40": {
+      "examples": [],
+      "total": 0
+    },
+    "MOP::1": {
+      "examples": [
+        {
+          "id": "mop_folded",
+          "name": "collapsible mop"
+        },
+        {
+          "id": "mop",
+          "name": "mop"
+        }
+      ],
+      "total": 2
+    },
+    "PISTOL::1": {
+      "examples": [],
+      "total": 0
+    },
+    "PRY::2": {
+      "examples": [
+        {
+          "id": "crowbar_warhammer",
+          "name": "bec de crowbar"
+        },
+        {
+          "id": "claw_bar",
+          "name": "claw bar"
+        },
+        {
+          "id": "crash_axe",
+          "name": "crash axe"
+        }
+      ],
+      "total": 10
+    },
+    "SAW_M::2": {
+      "examples": [
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        },
+        {
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
+        },
+        {
+          "id": "hacksaw",
+          "name": "hacksaw"
+        }
+      ],
+      "total": 5
+    },
+    "SAW_M_FINE::1": {
+      "examples": [
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        },
+        {
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
+        },
+        {
+          "id": "hacksaw",
+          "name": "hacksaw"
+        }
+      ],
+      "total": 5
+    },
+    "SAW_W::2": {
+      "examples": [
+        {
+          "id": "bow_saw",
+          "name": "bow saw"
+        },
+        {
+          "id": "saw_bronze",
+          "name": "bronze wood saw"
+        },
+        {
+          "id": "misc_repairkit",
+          "name": "miscellaneous repair kit"
+        }
+      ],
+      "total": 5
+    },
+    "SCREW::1": {
+      "examples": [
+        {
+          "id": "camping_multitool",
+          "name": "camping multitool"
+        },
+        {
+          "id": "cordless_drill",
+          "name": "cordless drill"
+        },
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        }
+      ],
+      "total": 14
+    },
+    "SCREW_FINE::1": {
+      "examples": [
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        },
+        {
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
+        },
+        {
+          "id": "robofac_gun_kit",
+          "name": "Hub 01 HWP maintenance kit"
         }
       ],
       "total": 6
@@ -9892,22 +10195,9 @@
       ],
       "total": 3
     },
-    "DRILL::1": {
-      "examples": [
-        {
-          "id": "makeshift_hand_drill",
-          "name": "makeshift hand drill"
-        },
-        {
-          "id": "hand_drill",
-          "name": "hand drill"
-        },
-        {
-          "id": "cordless_drill",
-          "name": "cordless drill"
-        }
-      ],
-      "total": 5
+    "SHOTGUN::1": {
+      "examples": [],
+      "total": 0
     },
     "SMOOTH::1": {
       "examples": [
@@ -9922,295 +10212,22 @@
       ],
       "total": 2
     },
-    "SCREW::1": {
+    "STRAIN::1": {
       "examples": [
         {
-          "id": "camping_multitool",
-          "name": "camping multitool"
+          "id": "sieve_steel_makeshift",
+          "name": "makeshift sieve"
         },
         {
-          "id": "cordless_drill",
-          "name": "cordless drill"
+          "id": "colander_steel",
+          "name": "mesh colander"
         },
         {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
-        }
-      ],
-      "total": 14
-    },
-    "DIG::1": {
-      "examples": [
-        {
-          "id": "exodii_prybar",
-          "name": "breacher"
-        },
-        {
-          "id": "bronze_hoe",
-          "name": "bronze hoe"
-        },
-        {
-          "id": "digging_stick",
-          "name": "digging stick"
-        }
-      ],
-      "total": 13
-    },
-    "CUT_FINE::2": {
-      "examples": [
-        {
-          "id": "misc_repairkit",
-          "name": "miscellaneous repair kit"
-        },
-        {
-          "id": "xacto",
-          "name": "X-Acto knife"
-        },
-        {
-          "id": "scalpel",
-          "name": "scalpel"
-        }
-      ],
-      "total": 4
-    },
-    "SHOTGUN::1": {
-      "examples": [],
-      "total": 0
-    },
-    "MOP::1": {
-      "examples": [
-        {
-          "id": "mop_folded",
-          "name": "collapsible mop"
-        },
-        {
-          "id": "mop",
-          "name": "mop"
-        }
-      ],
-      "total": 2
-    },
-    "BLOW_HOT_AIR::1": {
-      "examples": [
-        {
-          "id": "hair_dryer",
-          "name": "hair dryer"
-        }
-      ],
-      "total": 1
-    },
-    "BOIL::2": {
-      "examples": [
-        {
-          "id": "pot_copper",
-          "name": "%s by electrolysis"
-        },
-        {
-          "id": "aluminum_pan",
-          "name": "aluminum frying pan"
-        },
-        {
-          "id": "keg",
-          "name": "aluminum keg"
-        }
-      ],
-      "total": 61
-    },
-    "FABRIC_CUT::2": {
-      "examples": [
-        {
-          "id": "kevlar_shears",
-          "name": "Kevlar shears"
-        },
-        {
-          "id": "tailors_kit",
-          "name": "tailor's kit"
-        }
-      ],
-      "total": 2
-    },
-    "WINNOW::1": {
-      "examples": [
-        {
-          "id": "fan",
-          "name": "desk fan"
-        },
-        {
-          "id": "hair_dryer",
-          "name": "hair dryer"
-        },
-        {
-          "id": "leather_bellow",
-          "name": "leather bellow"
-        }
-      ],
-      "total": 8
-    },
-    "PISTOL::1": {
-      "examples": [],
-      "total": 0
-    },
-    "SAW_M::2": {
-      "examples": [
-        {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
-        },
-        {
-          "id": "large_repairkit",
-          "name": "gunsmith repair kit"
-        },
-        {
-          "id": "hacksaw",
-          "name": "hacksaw"
+          "id": "sieve_steel",
+          "name": "sieve"
         }
       ],
       "total": 5
-    },
-    "LIFT::8": {
-      "examples": [
-        {
-          "id": "crane_medium",
-          "name": "boom crane"
-        },
-        {
-          "id": "crane_medium_internal",
-          "name": "internal boom crane"
-        }
-      ],
-      "total": 2
-    },
-    "WRENCH_FINE::1": {
-      "examples": [
-        {
-          "id": "wrench",
-          "name": "adjustable wrench"
-        },
-        {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
-        },
-        {
-          "id": "large_repairkit",
-          "name": "gunsmith repair kit"
-        }
-      ],
-      "total": 8
-    },
-    "SAW_W::2": {
-      "examples": [
-        {
-          "id": "bow_saw",
-          "name": "bow saw"
-        },
-        {
-          "id": "saw_bronze",
-          "name": "bronze wood saw"
-        },
-        {
-          "id": "misc_repairkit",
-          "name": "miscellaneous repair kit"
-        }
-      ],
-      "total": 5
-    },
-    "HOSE::1": {
-      "examples": [
-        {
-          "id": "hose_garden",
-          "name": "garden hose"
-        },
-        {
-          "id": "makeshift_hose",
-          "name": "leather hose"
-        },
-        {
-          "id": "hose",
-          "name": "rubber hose"
-        }
-      ],
-      "total": 3
-    },
-    "SCREW_FINE::1": {
-      "examples": [
-        {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
-        },
-        {
-          "id": "large_repairkit",
-          "name": "gunsmith repair kit"
-        },
-        {
-          "id": "robofac_gun_kit",
-          "name": "Hub 01 HWP maintenance kit"
-        }
-      ],
-      "total": 6
-    },
-    "SAW_M_FINE::1": {
-      "examples": [
-        {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
-        },
-        {
-          "id": "large_repairkit",
-          "name": "gunsmith repair kit"
-        },
-        {
-          "id": "hacksaw",
-          "name": "hacksaw"
-        }
-      ],
-      "total": 5
-    },
-    "HAMMER::2": {
-      "examples": [
-        {
-          "id": "exodii_prybar",
-          "name": "breacher"
-        },
-        {
-          "id": "halligan",
-          "name": "Halligan bar"
-        },
-        {
-          "id": "iceaxe",
-          "name": "ice axe"
-        }
-      ],
-      "total": 11
-    },
-    "PRY::2": {
-      "examples": [
-        {
-          "id": "crowbar_warhammer",
-          "name": "bec de crowbar"
-        },
-        {
-          "id": "claw_bar",
-          "name": "claw bar"
-        },
-        {
-          "id": "crash_axe",
-          "name": "crash axe"
-        }
-      ],
-      "total": 10
-    },
-    "CHEM::2": {
-      "examples": [
-        {
-          "id": "chemistry_set_basic",
-          "name": "basic chemistry set"
-        },
-        {
-          "id": "chemistry_set",
-          "name": "chemistry set"
-        }
-      ],
-      "total": 2
     },
     "WELD::1": {
       "examples": [
@@ -10229,73 +10246,22 @@
       ],
       "total": 4
     },
-    "JACK::1": {
+    "WINNOW::1": {
       "examples": [
         {
-          "id": "nose_plate",
-          "name": "nose plate"
+          "id": "fan",
+          "name": "desk fan"
         },
         {
-          "id": "jack_makeshift",
-          "name": "makeshift jack"
+          "id": "hair_dryer",
+          "name": "hair dryer"
         },
         {
-          "id": "jack_small",
-          "name": "scissor jack"
+          "id": "leather_bellow",
+          "name": "leather bellow"
         }
       ],
       "total": 8
-    },
-    "JACK::4": {
-      "examples": [
-        {
-          "id": "jack_small",
-          "name": "scissor jack"
-        },
-        {
-          "id": "forklift_fork",
-          "name": "forklift arms"
-        },
-        {
-          "id": "crane_small",
-          "name": "telescopic crane"
-        }
-      ],
-      "total": 6
-    },
-    "JACK::16": {
-      "examples": [
-        {
-          "id": "jack",
-          "name": "bottle jack"
-        },
-        {
-          "id": "crane_medium",
-          "name": "boom crane"
-        },
-        {
-          "id": "crane_medium_internal",
-          "name": "internal boom crane"
-        }
-      ],
-      "total": 3
-    },
-    "BUTCHER::16": {
-      "examples": [
-        {
-          "id": "crash_axe",
-          "name": "crash axe"
-        },
-        {
-          "id": "knife_rm42",
-          "name": "F-S fighting knife"
-        },
-        {
-          "id": "ch_kukri",
-          "name": "hardened steel kukri"
-        }
-      ],
-      "total": 25
     },
     "WRENCH::2": {
       "examples": [
@@ -10314,18 +10280,22 @@
       ],
       "total": 9
     },
-    "LIFT::40": {
+    "WRENCH_FINE::1": {
       "examples": [
         {
-          "id": "crane_medium",
-          "name": "boom crane"
+          "id": "wrench",
+          "name": "adjustable wrench"
         },
         {
-          "id": "crane_medium_internal",
-          "name": "internal boom crane"
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        },
+        {
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
         }
       ],
-      "total": 2
+      "total": 8
     }
   }
 }
