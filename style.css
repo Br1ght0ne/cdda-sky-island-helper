@@ -203,10 +203,17 @@ h1 .accent { color: var(--accent); }
 .card.planned { border-color: var(--accent2); box-shadow: 0 0 0 1px var(--accent2) inset; }
 .card.locked { opacity: .72; }
 
-.card-top { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; cursor: pointer; }
-.card-done { margin-top: 2px; }
+.card-top { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; }
+.card-done { margin-top: 2px; display: flex; flex-direction: row; align-items: center; gap: 6px; }
 .card-done input { width: 18px; height: 18px; accent-color: var(--good); cursor: pointer; }
 .card-done input:disabled { cursor: not-allowed; opacity: .5; }
+.card-chevron {
+  width: 7px; height: 7px; flex: none;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg); /* points right, closed */
+  transition: transform .15s ease;
+}
+.card.open .card-chevron { transform: rotate(45deg); } /* points down, open */
 .lock-note { color: var(--muted); font-size: 12px; margin-top: 4px; }
 .card-main { flex: 1; min-width: 0; }
 .card-title { font-weight: 600; font-size: 15px; }

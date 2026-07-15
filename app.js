@@ -288,10 +288,10 @@
 
     // Top-left control: a "Mark complete" checkbox for one-shot mission
     // upgrades, or a "Craft" button (tally + reset) for repeatable key-item crafts.
-    let doneWrap, doneCb = null, craftBtn = null;
+    const doneWrap = document.createElement("div");
+    doneWrap.className = "card-done";
+    let doneCb = null, craftBtn = null;
     if (u.repeatable) {
-      doneWrap = document.createElement("div");
-      doneWrap.className = "card-done";
       const ready = prog.total > 0 && prog.met === prog.total;
       craftBtn = document.createElement("button");
       craftBtn.type = "button";
@@ -308,9 +308,8 @@
       });
       doneWrap.appendChild(craftBtn);
     } else {
-      doneWrap = document.createElement("label");
-      doneWrap.className = "card-done";
-      doneWrap.title = blockers.length
+      const cbLabel = document.createElement("label");
+      cbLabel.title = blockers.length
         ? 'Complete ' + blockers.map(b => '"' + b.name + '"').join(" and ") + " first"
         : "Mark upgrade completed";
       doneCb = document.createElement("input");
@@ -328,8 +327,19 @@
         else delete state.done[u.id];
         render();
       });
-      doneWrap.appendChild(doneCb);
+      cbLabel.appendChild(doneCb);
+      doneWrap.appendChild(cbLabel);
     }
+    // Chevron beside the checkbox/button, purely a visual open/closed
+    // indicator — a sibling of the label (not inside it) so clicking it
+    // doesn't trigger the label's native "activate the checkbox" behavior;
+    // the click bubbles to card-top's listener below instead. Drawn as a
+    // CSS border-corner arrow (not a text glyph) so it centers by geometry
+    // instead of font ascent/descent metrics.
+    const chevron = document.createElement("span");
+    chevron.className = "card-chevron";
+    chevron.setAttribute("aria-hidden", "true");
+    doneWrap.appendChild(chevron);
 
     const main = document.createElement("div");
     main.className = "card-main";
