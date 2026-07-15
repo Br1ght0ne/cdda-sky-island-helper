@@ -285,8 +285,8 @@ h1 .accent { color: var(--accent); }
 
 /* shopping list */
 /* Capped to the viewport so a long plan doesn't run off-screen; the header
-   (title + Clear/Remove finished) stays put while .plan-scroll scrolls on
-   its own — same pattern the mobile bottom sheet already uses. */
+   (title + Clear) and the ready-to-craft footer stay put while .plan-scroll
+   scrolls on its own — same pattern the mobile bottom sheet already uses. */
 aside .sticky {
   position: sticky; top: 16px; max-height: calc(100vh - 32px);
   display: flex; flex-direction: column; overflow: hidden;
@@ -296,13 +296,15 @@ aside .sticky {
 .panel-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex: none; }
 .panel-head h2 { flex: 1; }
 .panel-actions { display: flex; gap: 6px; }
-.plan-count-tag {
-  display: inline-block; margin-left: 8px; font-weight: 600; font-size: 12px;
-  color: var(--accent2); background: rgba(var(--accent2-rgb),.12);
-  border: 1px solid rgba(var(--accent2-rgb),.35); border-radius: 20px; padding: 1px 9px;
-  vertical-align: middle; white-space: nowrap;
-}
 .plan-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.plan-footer { flex: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.plan-footer-summary {
+  font-weight: 600; font-size: 12px; color: var(--accent2); margin-bottom: 6px;
+}
+.plan-ready-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; }
+.plan-ready-row .craft-btn { flex: none; }
+.plan-ready-check { width: 18px; height: 18px; accent-color: var(--good); cursor: pointer; flex: none; }
+.plan-ready-name { flex: 1; overflow-wrap: anywhere; }
 .hint { color: var(--muted); font-size: 13px; }
 .shop-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--hairline); font-size: 14px; }
 .shop-check { margin-top: 2px; accent-color: var(--good); width: 16px; height: 16px; cursor: pointer; flex: none; }

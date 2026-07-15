@@ -17,7 +17,6 @@
     hideDone: document.getElementById("hide-done"),
     onlyPlan: document.getElementById("only-plan"),
     clearPlan: document.getElementById("clear-plan"),
-    removeFinished: document.getElementById("remove-finished"),
     planActions: document.getElementById("plan-actions"),
     planPanel: document.getElementById("plan-panel"),
     planHandle: document.getElementById("plan-handle"),
@@ -28,7 +27,9 @@
     foot: document.getElementById("foot"),
     toolbarActions: document.getElementById("toolbar-actions"),
     mainActions: document.getElementById("main-actions"),
-    planCountTag: document.getElementById("plan-count-tag"),
+    planFooter: document.getElementById("plan-footer"),
+    planFooterSummary: document.getElementById("plan-footer-summary"),
+    planReadyList: document.getElementById("plan-ready-list"),
     importSaveFile: document.getElementById("import-save-file"),
   };
 
@@ -126,13 +127,6 @@
     groups.forEach(g => { if (groupMet(u, g)) met++; });
     return { met, total: groups.length };
   }
-  // "Finished" = a one-shot mission upgrade marked done. Repeatable key-item
-  // crafts are never "finished" (you keep crafting more), so they never count
-  // here — this keeps "Remove finished" and the "hide done" filter away from them.
-  function isFinished(u) {
-    return !u.repeatable && !!state.done[u.id];
-  }
-
   // ---- rendering -----------------------------------------------------------
   function render() {
     const q = els.search.value.trim().toLowerCase();
@@ -246,7 +240,10 @@
       doneCb.checked = done;
       doneCb.addEventListener("click", e => e.stopPropagation());
       doneCb.addEventListener("change", () => {
-        if (doneCb.checked) state.done[u.id] = true; else delete state.done[u.id];
+        // Marking a one-shot upgrade complete drops it from the plan right
+        // away — there's no separate "remove finished" step.
+        if (doneCb.checked) { state.done[u.id] = true; delete state.plan[u.id]; }
+        else delete state.done[u.id];
         render();
       });
       doneWrap.appendChild(doneCb);
@@ -295,7 +292,11 @@
     planBtn.textContent = planned ? "✓ Planned" : "＋ Plan";
     planBtn.addEventListener("click", e => {
       e.stopPropagation();
-      if (planned) delete state.plan[u.id]; else state.plan[u.id] = true;
+      // Planning and done are mutually exclusive: re-planning a completed
+      // upgrade means "I want to do this again," so clear its done status
+      // (mirrors marking done auto-dropping it from the plan).
+      if (planned) delete state.plan[u.id];
+      else { state.plan[u.id] = true; delete state.done[u.id]; }
       render();
     });
     side.appendChild(badge); side.appendChild(planBtn);
@@ -496,15 +497,54 @@
     return row;
   }
 
+  // A row in the Plan footer's ready-to-craft list: lets the user complete
+  // (or, for repeatables, tally a craft of) a fully-gathered upgrade without
+  // leaving the sidebar. Mirrors the card's own doneCb/craftBtn behaviour.
+  function planReadyRow(u) {
+    const row = document.createElement("div");
+    row.className = "plan-ready-row";
+    if (u.repeatable) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "craft-btn ready";
+      btn.textContent = "Craft";
+      btn.title = "Tally one craft and reset ingredients";
+      btn.addEventListener("click", () => {
+        state.crafted[u.id] = (state.crafted[u.id] || 0) + 1;
+        resetComponents(u);
+        render();
+      });
+      row.appendChild(btn);
+    } else {
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.className = "plan-ready-check";
+      cb.title = "Mark upgrade completed";
+      cb.addEventListener("change", () => {
+        if (cb.checked) { state.done[u.id] = true; delete state.plan[u.id]; }
+        render();
+      });
+      row.appendChild(cb);
+    }
+    const name = document.createElement("span");
+    name.className = "plan-ready-name";
+    name.textContent = u.name;
+    row.appendChild(name);
+    return row;
+  }
+
   // ---- shopping list -------------------------------------------------------
   function renderShopping() {
     const planned = UP.filter(u => state.plan[u.id]);
     els.planHint.style.display = planned.length ? "none" : "block";
     els.planActions.style.display = planned.length ? "flex" : "none";
-    els.planCountTag.hidden = !planned.length;
-    els.planCountTag.textContent = String(planned.length);
     els.shopping.innerHTML = "";
-    if (!planned.length) { els.planSummary.textContent = "nothing planned yet"; return; }
+    els.planFooter.hidden = !planned.length;
+    if (!planned.length) {
+      els.planSummary.textContent = "nothing planned yet";
+      els.planReadyList.innerHTML = "";
+      return;
+    }
 
     // Aggregate component groups across planned upgrades. Key by the set of
     // alternative ids so "3 nails" from two upgrades merges into one line.
@@ -516,9 +556,12 @@
     planned.forEach(u => {
       u.components.forEach((alts, i) => {
         // warp shards get their own read-only summary line (a currency total).
+        // Unlike other components this counts partial progress, not just
+        // whole-group met/unmet, so "1 of 2 gathered" shows 1 still needed.
         if (alts.length === 1 && alts[0].id === "warptoken") {
-          shards += alts[0].count;
-          if (compMet(u, i, alts)) shardsHave += alts[0].count;
+          const a = alts[0];
+          shards += a.count;
+          shardsHave += isHave(u, "comp", i) ? a.count : Math.min(getQty(u, i, a.id), a.count);
           return;
         }
         const sig = alts.map(a => a.id).join("|");
@@ -594,6 +637,16 @@
     els.shopping.appendChild(tot);
 
     els.planSummary.textContent = planned.length + " planned · " + itemsNeeded + " to gather";
+
+    // Footer: upgrades whose every requirement (components, qualities, tools)
+    // is already met, ready to complete/craft straight from the sidebar.
+    const ready = planned.filter(u => {
+      const prog = progress(u);
+      return prog.total > 0 && prog.met === prog.total;
+    });
+    els.planFooterSummary.textContent = ready.length + "/" + planned.length + " ready";
+    els.planReadyList.innerHTML = "";
+    ready.forEach(u => els.planReadyList.appendChild(planReadyRow(u)));
   }
 
   function renderStats() {
@@ -857,14 +910,6 @@
   els.clearPlan.addEventListener("click", () => {
     if (Object.keys(state.plan).length && confirm("Clear all planned upgrades?")) {
       state.plan = {}; render();
-    }
-  });
-  els.removeFinished.addEventListener("click", () => {
-    const finished = UP.filter(u => state.plan[u.id] && isFinished(u));
-    if (!finished.length) { alert("No crafted upgrades in your plan yet."); return; }
-    if (confirm("Remove " + finished.length + " crafted upgrade(s) from your plan?")) {
-      finished.forEach(u => delete state.plan[u.id]);
-      render();
     }
   });
   // ---- mobile Plan bottom sheet -------------------------------------------

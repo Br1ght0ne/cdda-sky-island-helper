@@ -124,11 +124,13 @@ planButtons[1] && planButtons[1].dispatch("click");
 planButtons[2] && planButtons[2].dispatch("click");
 assert(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan && Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length >= 1, "planning persists to localStorage");
 
-// Plan count tag next to the "Plan" panel header
-const planCountTag = registry["plan-count-tag"];
+// Plan footer: shows once something is planned, with an "X/Y ready" summary
+// (nothing gathered yet, so 0 are ready).
+const planFooter = registry["plan-footer"];
+const planFooterSummary = registry["plan-footer-summary"];
 const plannedCount = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length;
-assert(planCountTag.hidden === false && planCountTag.textContent === String(plannedCount),
-  "plan count tag shows the number of planned upgrades");
+assert(planFooter.hidden === false && planFooterSummary.textContent === "0/" + plannedCount + " ready",
+  "plan footer shows the ready/planned count once something is planned");
 
 // Toolbar order: checkboxes, then Expand/Collapse, then the main action
 // buttons (pushed right), with Reset last of those.
@@ -158,14 +160,30 @@ expandAll.dispatch("click"); // restore full render for the remaining checks
 const shopping = registry["shopping"];
 assert(shopping.children.length > 0 || shopping._html !== "", "shopping list populated after planning");
 
-// Check a "have" checkbox inside first card
+// Check a "have" checkbox inside first card. (The very first checkbox in the
+// list is actually rank-up #1's own "Mark complete" checkbox — its doneWrap
+// is appended before its body's requirement rows — so this also exercises
+// the "done" path.)
 const checkboxes = [];
 (function walk(n){ if(n.tagName==="input" && n.type==="checkbox") checkboxes.push(n); (n.children||[]).forEach(walk); })(list);
 assert(checkboxes.length > 0, "requirement checkboxes rendered (" + checkboxes.length + ")");
 const reqCb = checkboxes.find(c => c._listeners.change);
+const planBeforeReq = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length;
 reqCb.checked = true; reqCb.dispatch("change");
 const st = JSON.parse(storeBacking["skyisland.tracker.v1"]);
 assert(st.have && Object.keys(st.have).length >= 1 || st.done && Object.keys(st.done).length >= 1, "checking an item persists");
+assert(Object.keys(st.plan).length === planBeforeReq - 1,
+  "marking a one-shot upgrade complete drops it from the plan immediately (no Remove finished step)");
+
+// Bug fix regression: planned/done are mutually exclusive both ways — just
+// as marking done auto-unplans, re-planning a done-but-unplanned upgrade
+// must clear its done status (stale button reference is fine: it still
+// mutates the real `state` object, which is all these listeners touch).
+assert(Object.keys(st.done).length >= 1, "sanity: rank-up #1 is currently done");
+planButtons[0].dispatch("click");
+const afterReplan = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+assert(Object.keys(afterReplan.done).length === 0, "re-planning a done upgrade clears its done status");
+assert(Object.keys(afterReplan.plan).length === planBeforeReq, "and adds it back to the plan");
 
 // Per-alternative +/- steppers track quantities in state.qty
 const stepPlus = [];
@@ -237,15 +255,6 @@ planHandle.dispatch("click");
 assert(/\bopen\b/.test(planPanel.className), "tapping the handle opens the plan sheet");
 planHandle.dispatch("click");
 assert(!/\bopen\b/.test(planPanel.className), "tapping again closes the plan sheet");
-
-// Remove finished from plan: rank-up #1 was planned and marked done earlier,
-// so it should be dropped from the plan (checked before import replaces state).
-const planBeforeRm = Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length;
-const rmFin = registry["remove-finished"]; // now lives in the Plan panel, not the toolbar
-assert(!!rmFin && rmFin._listeners.click, "Remove finished button wired in plan panel");
-rmFin.dispatch("click");
-assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length < planBeforeRm,
-  "remove finished drops completed upgrades from the plan");
 
 // Export copies JSON to clipboard
 const expBtn = headerActions.children.find(c => c._text === "Export");
@@ -344,6 +353,62 @@ setTimeout(() => {
   treeCard = findCardByName(tree.name);
   const hasTag = (function walk(n){ if(typeof n.className==="string" && n.className==="crafted-tag" && /Crafted: 1/.test(n._text)) return true; for(const c of n.children||[]){if(walk(c)) return true;} return false; })(treeCard);
   assert(hasTag, "Crafted:1 tag appears near the name after a craft");
+
+  // ---- Plan footer: complete/craft ready upgrades right from the sidebar ---
+  const planReadyList = registry["plan-ready-list"];
+
+  // A ready + planned repeatable craft shows up with its own Craft button;
+  // pressing it tallies the same as the card's, and stays planned (you keep
+  // crafting more of a repeatable, so it's never auto-removed).
+  promptReturn = JSON.stringify({ done: {}, plan: { [tree.id]: true }, have: haveAll, qty: {}, tools: {}, open: {}, crafted: {} });
+  impBtn2.dispatch("click");
+  searchEl.dispatch("input");
+  const footerCraftBtn = (planReadyList.children || []).map(row => (row.children || []).find(c => c.tagName === "button")).find(Boolean);
+  assert(!!footerCraftBtn, "ready repeatable craft appears in the plan footer with a Craft button");
+  footerCraftBtn.dispatch("click");
+  const afterFooterCraft = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  assert((afterFooterCraft.crafted[tree.id] || 0) === 1, "crafting from the plan footer tallies the same as the card");
+  assert(!!afterFooterCraft.plan[tree.id], "a repeatable craft stays planned after crafting from the footer");
+
+  // A ready + planned one-shot upgrade shows a checkbox instead; checking it
+  // marks it done AND immediately drops it from the plan — there's no
+  // separate "Remove finished" step anymore.
+  const oneShot = window.SKYISLAND_DATA.upgrades.find(u => !u.repeatable && u.components.length > 0);
+  assert(!!oneShot, "found a non-repeatable upgrade with components to test the footer checkbox");
+  const oneShotHave = {};
+  oneShot.components.forEach((_alts, gi) => { oneShotHave[oneShot.id + "::comp::" + gi] = true; });
+  oneShot.tools.forEach((_t, i) => { oneShotHave[oneShot.id + "::tool::" + i] = true; });
+  const oneShotQualHave = {};
+  oneShot.qualities.forEach(q => { oneShotQualHave[q.id + "::" + q.level] = true; });
+  promptReturn = JSON.stringify({ done: {}, plan: { [oneShot.id]: true }, have: oneShotHave, qty: {}, tools: oneShotQualHave, open: {}, crafted: {} });
+  impBtn2.dispatch("click");
+  searchEl.dispatch("input");
+  const footerCheck = (planReadyList.children || []).map(row => (row.children || []).find(c => c.tagName === "input")).find(Boolean);
+  assert(!!footerCheck, "ready one-shot upgrade appears in the plan footer with a checkbox");
+  footerCheck.checked = true; footerCheck.dispatch("change");
+  const afterFooterDone = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  assert(afterFooterDone.done[oneShot.id] === true, "checking the footer checkbox marks the upgrade done");
+  assert(!afterFooterDone.plan[oneShot.id], "and immediately drops it from the plan");
+
+  // Warp shard summary line counts partial progress, not just whole-group
+  // met/unmet — gathering 1 of 2 should leave 1 still needed, not 2.
+  const shardUp = window.SKYISLAND_DATA.upgrades.find(u =>
+    u.components.some(alts => alts.length === 1 && alts[0].id === "warptoken" && alts[0].count >= 2));
+  assert(!!shardUp, "found an upgrade with a multi-shard requirement to test partial progress");
+  const shardGi = shardUp.components.findIndex(alts => alts.length === 1 && alts[0].id === "warptoken" && alts[0].count >= 2);
+  const shardQtyKey = shardUp.id + "::comp::" + shardGi + "::warptoken";
+  promptReturn = JSON.stringify({ done: {}, plan: { [shardUp.id]: true }, have: {}, qty: { [shardQtyKey]: 1 }, tools: {}, open: {}, crafted: {} });
+  impBtn2.dispatch("click");
+  searchEl.dispatch("input");
+  const shardLineText = (function findShardLine(n) {
+    if (typeof n.className === "string" && n.className === "shard-line") return n._html;
+    for (const c of n.children || []) { const r = findShardLine(c); if (r) return r; }
+    return null;
+  })(shopping);
+  assert(!!shardLineText, "shard summary line renders once a shard-only upgrade is planned");
+  const shardCount = shardUp.components[shardGi][0].count;
+  assert(shardLineText.indexOf(">" + (shardCount - 1) + "×<") >= 0,
+    "gathering 1 shard leaves (count-1) still needed, not the full count (" + shardLineText + ")");
 
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;
