@@ -9,8 +9,13 @@
 <body>
   <header>
     <div class="wrap header-inner">
-      <h1>Sky Island <span class="accent">Helper</span></h1>
-      <p class="sub">Track what items you need for upgrades, constructions &amp; raid unlocks in the CDDA <em>Sky Island</em> mod.</p>
+      <div class="header-text">
+        <h1>Sky Island <span class="accent">Helper</span></h1>
+        <p class="sub">Track what items you need for upgrades, constructions &amp; raid unlocks in the CDDA <em>Sky Island</em> mod.</p>
+      </div>
+      <div class="header-actions" id="header-actions">
+        <input type="file" id="import-save-file" accept=".gsav" hidden>
+      </div>
     </div>
   </header>
 
@@ -20,9 +25,10 @@
         <input type="search" id="search" placeholder="Search upgrades or items…" autocomplete="off">
       </div>
       <div class="toolbar toolbar-actions" id="toolbar-actions">
-        <label class="chk"><input type="checkbox" id="hide-done"> Hide completed</label>
-        <label class="chk"><input type="checkbox" id="only-plan"> Only in plan</label>
-        <input type="file" id="import-save-file" accept=".gsav" hidden>
+        <div class="toolbar-group">
+          <label class="chk"><input type="checkbox" id="hide-done"><span>Hide done</span></label>
+          <label class="chk"><input type="checkbox" id="only-plan"><span>Only in plan</span></label>
+        </div>
       </div>
       <div id="stats" class="stats"></div>
       <div id="list"></div>

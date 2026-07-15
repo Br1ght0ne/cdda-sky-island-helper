@@ -73,7 +73,8 @@ require(path.join(ROOT, "app.js"));
 function assert(c, m) { if (!c) { console.error("FAIL:", m); process.exitCode = 1; } else console.log("ok  -", m); }
 
 const list = registry["list"];
-const actions = registry["toolbar-actions"]; // Expand/Collapse/Export/Import/Reset live here now
+const actions = registry["toolbar-actions"]; // Expand/Collapse live here
+const headerActions = registry["header-actions"]; // Export/Import/Import Save/Reset live here
 assert(list.children.length > 0, "list rendered group/category/card nodes");
 
 // find first upgrade card's plan button and click it (Island Rank Up 1)
@@ -95,8 +96,8 @@ planButtons[2] && planButtons[2].dispatch("click");
 assert(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan && Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length >= 1, "planning persists to localStorage");
 
 // Expand all / Collapse all — now also affects collapsible sections
-const expandAll = actions.children.find(c => c._text === "Expand all");
-const collapseAll = actions.children.find(c => c._text === "Collapse all");
+const expandAll = findByText(actions, "Expand all");
+const collapseAll = findByText(actions, "Collapse all");
 assert(!!expandAll && !!collapseAll, "Expand all / Collapse all buttons present");
 const countCards = () => { let n=0; (function w(x){ if(typeof x.className==="string" && (x.className==="card"||x.className.indexOf("card ")===0)) n++; (x.children||[]).forEach(w); })(list); return n; };
 const countHeads = () => { let n=0; (function w(x){ if(typeof x.className==="string" && x.className.indexOf("group-head")===0) n++; (x.children||[]).forEach(w); })(list); return n; };
@@ -199,20 +200,20 @@ assert(Object.keys(JSON.parse(storeBacking["skyisland.tracker.v1"]).plan).length
   "remove finished drops completed upgrades from the plan");
 
 // Export copies JSON to clipboard
-const expBtn = actions.children.find(c => c._text === "Export");
+const expBtn = headerActions.children.find(c => c._text === "Export");
 assert(!!expBtn, "Export button added to toolbar");
 expBtn.dispatch("click");
 setTimeout(() => {
   assert(clipboard.length > 0 && JSON.parse(clipboard), "export wrote valid JSON to clipboard");
   // Import
   promptReturn = JSON.stringify({ plan: { "SKYISLAND_UPGRADE_landing1": true }, done: {}, have: {}, open: {} });
-  const impBtn = actions.children.find(c => c._text === "Import");
+  const impBtn = headerActions.children.find(c => c._text === "Import");
   impBtn.dispatch("click");
   const after = JSON.parse(storeBacking["skyisland.tracker.v1"]);
   assert(after.plan["SKYISLAND_UPGRADE_landing1"] === true, "import replaced state from JSON");
 
   // Import Save reads a master.gsav, matching mission type_id -> upgrade id
-  const impSaveBtn = actions.children.find(c => c._text === "Import Save");
+  const impSaveBtn = headerActions.children.find(c => c._text === "Import Save");
   assert(!!impSaveBtn, "Import Save button added to toolbar");
   const gsav = "# version 39\n" + JSON.stringify({
     active_missions: [
@@ -232,7 +233,7 @@ setTimeout(() => {
 
   // Reset wipes everything
   global.confirm = () => true;
-  const resetBtn = actions.children.find(c => c._text === "Reset");
+  const resetBtn = headerActions.children.find(c => c._text === "Reset");
   assert(!!resetBtn, "Reset button present");
   resetBtn.dispatch("click");
   const cleared = JSON.parse(storeBacking["skyisland.tracker.v1"]);
@@ -249,7 +250,7 @@ setTimeout(() => {
   // points (Import replaces `state` via Object.assign(blankState(), parsed) then
   // renders+saves) — writing straight to the mock localStorage backing store
   // would NOT reach the in-memory `state` object app.js actually reads from.
-  const impBtn2 = actions.children.find(c => c._text === "Import");
+  const impBtn2 = headerActions.children.find(c => c._text === "Import");
   promptReturn = JSON.stringify({ done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: { [tree.id]: true }, crafted: {} });
   impBtn2.dispatch("click");
   searchEl.value = ""; searchEl.dispatch("input");

@@ -26,6 +26,7 @@
     stats: document.getElementById("stats"),
     foot: document.getElementById("foot"),
     toolbarActions: document.getElementById("toolbar-actions"),
+    headerActions: document.getElementById("header-actions"),
     importSaveFile: document.getElementById("import-save-file"),
   };
 
@@ -710,8 +711,12 @@
     const collapse = document.createElement("button");
     collapse.type = "button"; collapse.className = "btn ghost"; collapse.textContent = "Collapse all";
     collapse.addEventListener("click", () => setAllOpen(false));
-    els.toolbarActions.appendChild(expand);
-    els.toolbarActions.appendChild(collapse);
+    const viewGroup = document.createElement("div");
+    viewGroup.className = "toolbar-group";
+    viewGroup.appendChild(expand);
+    viewGroup.appendChild(collapse);
+    els.toolbarActions.appendChild(viewGroup);
+    els.toolbarActions.appendChild(els.stats); // counters get their own row below Expand/Collapse all
 
     const exp = document.createElement("button");
     exp.type = "button"; exp.className = "btn"; exp.textContent = "Export";
@@ -740,10 +745,10 @@
         render();
       }
     });
-    els.toolbarActions.appendChild(exp);
-    els.toolbarActions.appendChild(imp);
-    els.toolbarActions.appendChild(impSave);
-    els.toolbarActions.appendChild(reset);
+    els.headerActions.appendChild(exp);
+    els.headerActions.appendChild(imp);
+    els.headerActions.appendChild(impSave);
+    els.headerActions.appendChild(reset);
   }
 
   // ---- hover tooltips, CRPG-style ------------------------------------------
