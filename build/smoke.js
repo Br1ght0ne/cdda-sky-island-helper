@@ -21,8 +21,15 @@ function mkEl(tag) {
     closest() { return null; },
     getBoundingClientRect() { return { left: 0, top: 0, right: 0, bottom: 0 }; },
     select() {},
+    click() { this.dispatch("click"); },
   };
 }
+
+// Fake File objects carry their content in `_text`; readAsText hands it back
+// synchronously via onload, matching how app.js consumes it.
+global.FileReader = function () {
+  this.readAsText = file => { this.result = file._text; if (this.onload) this.onload(); };
+};
 
 const registry = {};
 function getEl(id) { return registry[id] || (registry[id] = mkEl("div")); }
@@ -203,6 +210,25 @@ setTimeout(() => {
   impBtn.dispatch("click");
   const after = JSON.parse(storeBacking["skyisland.tracker.v1"]);
   assert(after.plan["SKYISLAND_UPGRADE_landing1"] === true, "import replaced state from JSON");
+
+  // Import Save reads a master.gsav, matching mission type_id -> upgrade id
+  const impSaveBtn = actions.children.find(c => c._text === "Import Save");
+  assert(!!impSaveBtn, "Import Save button added to toolbar");
+  const gsav = "# version 39\n" + JSON.stringify({
+    active_missions: [
+      { type_id: "SKYISLAND_UPGRADE_landing1", status: "success" },
+      { type_id: "SKYISLAND_UPGRADE_exit1", status: "in_progress" },
+      { type_id: "BOGUS_MISSION_NOT_IN_DATA", status: "success" },
+    ],
+  });
+  const fileInput = registry["import-save-file"];
+  fileInput.files = [{ _text: gsav }];
+  fileInput.dispatch("change");
+  const afterSaveImport = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  assert(afterSaveImport.done["SKYISLAND_UPGRADE_landing1"] === true,
+    "Import Save marks a mission with status success as done");
+  assert(!afterSaveImport.done["SKYISLAND_UPGRADE_exit1"],
+    "Import Save leaves in_progress missions untouched");
 
   // Reset wipes everything
   global.confirm = () => true;

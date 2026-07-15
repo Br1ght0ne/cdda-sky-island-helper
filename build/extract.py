@@ -38,6 +38,8 @@ BASE = os.path.join(CDDA, "data/json")
 UPGRADE_FILES = [
     ("missions/island_upgrades/rankup.json",      "Progression",         "Island Rank Up"),
     ("missions/island_upgrades/misc.json",        "Island Upgrades",     "Miscellaneous"),
+    ("missions/security_container.json",          "Island Upgrades",     "Security"),
+    ("missions/warped_harness.json",               "Island Upgrades",    "Warped Harness"),
     ("missions/island_upgrades/center_rooms.json","Island Construction", "Central Rooms"),
     ("missions/island_upgrades/greenhouse.json",  "Island Construction", "Greenhouse"),
     ("missions/island_upgrades/west_rooms.json",  "Island Construction", "West Wing"),

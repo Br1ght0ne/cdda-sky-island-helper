@@ -8,7 +8,7 @@ tracker for the upgrades in the Cataclysm: DDA *Sky Island* mod.
 A dependency-free, single-page web app (vanilla HTML/CSS/JS, no build step, no
 framework) that helps a player track the items needed to unlock the mod's
 one-time upgrades (Island Rank Up, constructions, raid upgrades, start-location
-& challenge unlocks — 84 total).
+& challenge unlocks — 91 total).
 
 **Hard constraint: it must run by opening `index.html` straight from a `file://`
 path.** That rules out `fetch()` (blocked on `file://`) and any CDN/remote

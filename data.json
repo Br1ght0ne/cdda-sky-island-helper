@@ -1,7 +1,7 @@
 {
   "generated_from": "CleverRaven/cataclysm-dda data/mods/Sky_Island",
   "guide_base": "https://cdda-guide.nornagon.net",
-  "count": 107,
+  "count": 114,
   "upgrades": [
     {
       "id": "SKYISLAND_UPGRADE_rankup1",
@@ -676,6 +676,337 @@
         ]
       ],
       "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "SKYISLAND_UPGRADE_security1",
+      "repeatable": false,
+      "key_item": "secure_container_1",
+      "name": "Upgrade: Security Alpha",
+      "key_name": "Secure Container 1",
+      "group": "Island Upgrades",
+      "category": "Security",
+      "effect": "You can only ever equip one secure container.",
+      "description": "You have been granted the recipe to craft an Alpha Secure Container.  This little miracle defies the very laws of physics and insists upon its own permanence.  In short, it will give you an integrated pocket you can always access.  The contents of this pocket are completely secure and will not be lost, even if you die and are returned to the island.\n\nYou can only ever equip one secure container.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 5,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "SKYISLAND_UPGRADE_security2",
+      "repeatable": false,
+      "key_item": "secure_container_2",
+      "name": "Upgrade: Security Beta",
+      "key_name": "Secure Container 2",
+      "group": "Island Upgrades",
+      "category": "Security",
+      "effect": "With the supplied recipe, you will be able to expand the capacity of your secure container.",
+      "description": "With the supplied recipe, you will be able to expand the capacity of your secure container.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 5,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "SKYISLAND_UPGRADE_security3",
+      "repeatable": false,
+      "key_item": "secure_container_3",
+      "name": "Upgrade: Security Gamma",
+      "key_name": "Secure Container 3",
+      "group": "Island Upgrades",
+      "category": "Security",
+      "effect": "With the supplied recipe, you will be able to expand the capacity of your secure container.",
+      "description": "With the supplied recipe, you will be able to expand the capacity of your secure container.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 5,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "SKYISLAND_UPGRADE_security4",
+      "repeatable": false,
+      "key_item": "secure_container_4",
+      "name": "Upgrade: Security Epsilon",
+      "key_name": "Secure Container 4",
+      "group": "Island Upgrades",
+      "category": "Security",
+      "effect": "With the supplied recipe, you will be able to expand the capacity of your secure container.",
+      "description": "With the supplied recipe, you will be able to expand the capacity of your secure container.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 5,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "SKYISLAND_UPGRADE_security5",
+      "repeatable": false,
+      "key_item": "secure_container_5",
+      "name": "Upgrade: Security Kappa",
+      "key_name": "Secure Container 5",
+      "group": "Island Upgrades",
+      "category": "Security",
+      "effect": "With the supplied recipe, you will be able to expand the capacity of your secure container to its maximum size.",
+      "description": "With the supplied recipe, you will be able to expand the capacity of your secure container to its maximum size.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 5,
+            "name": "warp shards",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "SKYISLAND_UPGRADE_WARPED_HARNESS_TIER_2",
+      "repeatable": false,
+      "key_item": "upgradekey_warped_harness1",
+      "name": "Craft: Warped Hauler's Harness Mk II",
+      "key_name": "Ideal of Exercise",
+      "group": "Island Upgrades",
+      "category": "Warped Harness",
+      "effect": "EFFECT: Unlock ability to craft an upgraded warped hauler's harness mk II.",
+      "description": "Completing this mission unlocks a new item crafting recipe.\n\nCraft the Ideal of Exercise from experimental materials and miscellaneous parts.  The Heart of the Island has already placed the recipe inside your mind.\n\nEFFECT: Unlock ability to craft an upgraded warped hauler's harness mk II.",
+      "components": [
+        [
+          {
+            "id": "frame",
+            "count": 10,
+            "name": "steel frame",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "cargo_rack",
+            "count": 4,
+            "name": "cargo carrier",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "v6_combustion",
+            "count": 1,
+            "name": "2.8 L V6 engine",
+            "list": false
+          },
+          {
+            "id": "v6_diesel",
+            "count": 1,
+            "name": "2.8 L V6 diesel engine",
+            "list": false
+          },
+          {
+            "id": "v8_combustion",
+            "count": 1,
+            "name": "4.5 L V8 engine",
+            "list": false
+          },
+          {
+            "id": "v8_diesel",
+            "count": 1,
+            "name": "4.5 L V8 diesel engine",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "wheel_wide_or",
+            "count": 4,
+            "name": "off-road wide wheel",
+            "list": false
+          },
+          {
+            "id": "wheel",
+            "count": 4,
+            "name": "wheel",
+            "list": false
+          },
+          {
+            "id": "wheel_wide",
+            "count": 4,
+            "name": "wide wheel",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "wheel_mount_medium",
+            "count": 4,
+            "name": "medium wheel hub assembly",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "alternator_car",
+            "count": 1,
+            "name": "car alternator",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "metal_tank",
+            "count": 1,
+            "name": "metal tank (60 L)",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "battery_car",
+            "count": 1,
+            "name": "car battery",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [
+        {
+          "id": "LIFT",
+          "level": 8,
+          "name": "lifting"
+        },
+        {
+          "id": "JACK",
+          "level": 4,
+          "name": "jacking"
+        }
+      ],
+      "tools": []
+    },
+    {
+      "id": "SKYISLAND_UPGRADE_WARPED_HARNESS_TIER_3",
+      "repeatable": false,
+      "key_item": "upgradekey_warped_harness2",
+      "name": "Craft: Warped Hauler's Harness Mk III",
+      "key_name": "Testament of Hoisting",
+      "group": "Island Upgrades",
+      "category": "Warped Harness",
+      "effect": "EFFECT: Unlock ability to craft an upgraded warped hauler's harness mk III.",
+      "description": "Completing this mission unlocks a new item crafting recipe.\n\nCraft the Testament of Hoisting from experimental materials and miscellaneous parts.  The Heart of the Island has already placed the recipe inside your mind.\n\nEFFECT: Unlock ability to craft an upgraded warped hauler's harness mk III.",
+      "components": [
+        [
+          {
+            "id": "hdframe",
+            "count": 5,
+            "name": "heavy-duty frame",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "livestock_carrier",
+            "count": 2,
+            "name": "livestock carrier",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "v12_diesel",
+            "count": 2,
+            "name": "7 L V12 diesel engine",
+            "list": false
+          },
+          {
+            "id": "v12_combustion",
+            "count": 2,
+            "name": "7 L V12 engine",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "wheel_armor",
+            "count": 4,
+            "name": "armored wheel",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "wheel_mount_heavy",
+            "count": 4,
+            "name": "heavy wheel hub assembly",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "alternator_truck",
+            "count": 2,
+            "name": "truck alternator",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "metal_tank",
+            "count": 2,
+            "name": "metal tank (60 L)",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "battery_car",
+            "count": 4,
+            "name": "car battery",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [
+        {
+          "id": "LIFT",
+          "level": 40,
+          "name": "lifting"
+        },
+        {
+          "id": "JACK",
+          "level": 16,
+          "name": "jacking"
+        }
+      ],
       "tools": []
     },
     {
@@ -9493,48 +9824,73 @@
     }
   ],
   "quality_items": {
-    "BOIL::2": {
+    "STRAIN::1": {
       "examples": [
         {
-          "id": "pot_copper",
-          "name": "%s by electrolysis"
+          "id": "sieve_steel_makeshift",
+          "name": "makeshift sieve"
         },
         {
-          "id": "aluminum_pan",
-          "name": "aluminum frying pan"
+          "id": "colander_steel",
+          "name": "mesh colander"
         },
         {
-          "id": "keg",
-          "name": "aluminum keg"
+          "id": "sieve_steel",
+          "name": "sieve"
         }
       ],
-      "total": 61
+      "total": 5
     },
-    "SMOOTH::1": {
+    "GLARE::1": {
       "examples": [
         {
-          "id": "wood_smoother",
-          "name": "wooden smoother"
+          "id": "outsert_breach",
+          "name": "breach outsert lens"
         },
         {
-          "id": "metal_smoother",
-          "name": "metallic smoother"
+          "id": "welding_mask_crude",
+          "name": "crude welding mask"
+        },
+        {
+          "id": "eclipse_glasses",
+          "name": "eclipse glasses"
         }
       ],
-      "total": 2
+      "total": 8
     },
-    "FABRIC_CUT::2": {
+    "HAMMER_FINE::1": {
       "examples": [
         {
-          "id": "kevlar_shears",
-          "name": "Kevlar shears"
+          "id": "hammer_peen",
+          "name": "ball-peen hammer"
+        },
+        {
+          "id": "hammer_bronze",
+          "name": "bronze hammer"
+        },
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        }
+      ],
+      "total": 6
+    },
+    "SEW::3": {
+      "examples": [
+        {
+          "id": "needle_steel",
+          "name": "needle"
+        },
+        {
+          "id": "sewing_kit",
+          "name": "sewing kit"
         },
         {
           "id": "tailors_kit",
           "name": "tailor's kit"
         }
       ],
-      "total": 2
+      "total": 3
     },
     "DRILL::1": {
       "examples": [
@@ -9553,15 +9909,122 @@
       ],
       "total": 5
     },
-    "CHEM::2": {
+    "SMOOTH::1": {
       "examples": [
         {
-          "id": "chemistry_set_basic",
-          "name": "basic chemistry set"
+          "id": "wood_smoother",
+          "name": "wooden smoother"
         },
         {
-          "id": "chemistry_set",
-          "name": "chemistry set"
+          "id": "metal_smoother",
+          "name": "metallic smoother"
+        }
+      ],
+      "total": 2
+    },
+    "SCREW::1": {
+      "examples": [
+        {
+          "id": "camping_multitool",
+          "name": "camping multitool"
+        },
+        {
+          "id": "cordless_drill",
+          "name": "cordless drill"
+        },
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        }
+      ],
+      "total": 14
+    },
+    "DIG::1": {
+      "examples": [
+        {
+          "id": "exodii_prybar",
+          "name": "breacher"
+        },
+        {
+          "id": "bronze_hoe",
+          "name": "bronze hoe"
+        },
+        {
+          "id": "digging_stick",
+          "name": "digging stick"
+        }
+      ],
+      "total": 13
+    },
+    "CUT_FINE::2": {
+      "examples": [
+        {
+          "id": "misc_repairkit",
+          "name": "miscellaneous repair kit"
+        },
+        {
+          "id": "xacto",
+          "name": "X-Acto knife"
+        },
+        {
+          "id": "scalpel",
+          "name": "scalpel"
+        }
+      ],
+      "total": 4
+    },
+    "SHOTGUN::1": {
+      "examples": [],
+      "total": 0
+    },
+    "MOP::1": {
+      "examples": [
+        {
+          "id": "mop_folded",
+          "name": "collapsible mop"
+        },
+        {
+          "id": "mop",
+          "name": "mop"
+        }
+      ],
+      "total": 2
+    },
+    "BLOW_HOT_AIR::1": {
+      "examples": [
+        {
+          "id": "hair_dryer",
+          "name": "hair dryer"
+        }
+      ],
+      "total": 1
+    },
+    "BOIL::2": {
+      "examples": [
+        {
+          "id": "pot_copper",
+          "name": "%s by electrolysis"
+        },
+        {
+          "id": "aluminum_pan",
+          "name": "aluminum frying pan"
+        },
+        {
+          "id": "keg",
+          "name": "aluminum keg"
+        }
+      ],
+      "total": 61
+    },
+    "FABRIC_CUT::2": {
+      "examples": [
+        {
+          "id": "kevlar_shears",
+          "name": "Kevlar shears"
+        },
+        {
+          "id": "tailors_kit",
+          "name": "tailor's kit"
         }
       ],
       "total": 2
@@ -9583,19 +10046,121 @@
       ],
       "total": 8
     },
-    "STRAIN::1": {
+    "PISTOL::1": {
+      "examples": [],
+      "total": 0
+    },
+    "SAW_M::2": {
       "examples": [
         {
-          "id": "sieve_steel_makeshift",
-          "name": "makeshift sieve"
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
         },
         {
-          "id": "colander_steel",
-          "name": "mesh colander"
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
         },
         {
-          "id": "sieve_steel",
-          "name": "sieve"
+          "id": "hacksaw",
+          "name": "hacksaw"
+        }
+      ],
+      "total": 5
+    },
+    "LIFT::8": {
+      "examples": [
+        {
+          "id": "crane_medium",
+          "name": "boom crane"
+        },
+        {
+          "id": "crane_medium_internal",
+          "name": "internal boom crane"
+        }
+      ],
+      "total": 2
+    },
+    "WRENCH_FINE::1": {
+      "examples": [
+        {
+          "id": "wrench",
+          "name": "adjustable wrench"
+        },
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        },
+        {
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
+        }
+      ],
+      "total": 8
+    },
+    "SAW_W::2": {
+      "examples": [
+        {
+          "id": "bow_saw",
+          "name": "bow saw"
+        },
+        {
+          "id": "saw_bronze",
+          "name": "bronze wood saw"
+        },
+        {
+          "id": "misc_repairkit",
+          "name": "miscellaneous repair kit"
+        }
+      ],
+      "total": 5
+    },
+    "HOSE::1": {
+      "examples": [
+        {
+          "id": "hose_garden",
+          "name": "garden hose"
+        },
+        {
+          "id": "makeshift_hose",
+          "name": "leather hose"
+        },
+        {
+          "id": "hose",
+          "name": "rubber hose"
+        }
+      ],
+      "total": 3
+    },
+    "SCREW_FINE::1": {
+      "examples": [
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        },
+        {
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
+        },
+        {
+          "id": "robofac_gun_kit",
+          "name": "Hub 01 HWP maintenance kit"
+        }
+      ],
+      "total": 6
+    },
+    "SAW_M_FINE::1": {
+      "examples": [
+        {
+          "id": "small_repairkit",
+          "name": "firearm repair kit"
+        },
+        {
+          "id": "large_repairkit",
+          "name": "gunsmith repair kit"
+        },
+        {
+          "id": "hacksaw",
+          "name": "hacksaw"
         }
       ],
       "total": 5
@@ -9617,113 +10182,6 @@
       ],
       "total": 11
     },
-    "GLARE::1": {
-      "examples": [
-        {
-          "id": "outsert_breach",
-          "name": "breach outsert lens"
-        },
-        {
-          "id": "welding_mask_crude",
-          "name": "crude welding mask"
-        },
-        {
-          "id": "eclipse_glasses",
-          "name": "eclipse glasses"
-        }
-      ],
-      "total": 8
-    },
-    "HOSE::1": {
-      "examples": [
-        {
-          "id": "hose_garden",
-          "name": "garden hose"
-        },
-        {
-          "id": "makeshift_hose",
-          "name": "leather hose"
-        },
-        {
-          "id": "hose",
-          "name": "rubber hose"
-        }
-      ],
-      "total": 3
-    },
-    "SAW_M::2": {
-      "examples": [
-        {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
-        },
-        {
-          "id": "large_repairkit",
-          "name": "gunsmith repair kit"
-        },
-        {
-          "id": "hacksaw",
-          "name": "hacksaw"
-        }
-      ],
-      "total": 5
-    },
-    "BUTCHER::16": {
-      "examples": [
-        {
-          "id": "crash_axe",
-          "name": "crash axe"
-        },
-        {
-          "id": "knife_rm42",
-          "name": "F-S fighting knife"
-        },
-        {
-          "id": "ch_kukri",
-          "name": "hardened steel kukri"
-        }
-      ],
-      "total": 25
-    },
-    "MOP::1": {
-      "examples": [
-        {
-          "id": "mop_folded",
-          "name": "collapsible mop"
-        },
-        {
-          "id": "mop",
-          "name": "mop"
-        }
-      ],
-      "total": 2
-    },
-    "HAMMER_FINE::1": {
-      "examples": [
-        {
-          "id": "hammer_peen",
-          "name": "ball-peen hammer"
-        },
-        {
-          "id": "hammer_bronze",
-          "name": "bronze hammer"
-        },
-        {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
-        }
-      ],
-      "total": 6
-    },
-    "BLOW_HOT_AIR::1": {
-      "examples": [
-        {
-          "id": "hair_dryer",
-          "name": "hair dryer"
-        }
-      ],
-      "total": 1
-    },
     "PRY::2": {
       "examples": [
         {
@@ -9741,60 +10199,18 @@
       ],
       "total": 10
     },
-    "SAW_W::2": {
+    "CHEM::2": {
       "examples": [
         {
-          "id": "bow_saw",
-          "name": "bow saw"
+          "id": "chemistry_set_basic",
+          "name": "basic chemistry set"
         },
         {
-          "id": "saw_bronze",
-          "name": "bronze wood saw"
-        },
-        {
-          "id": "misc_repairkit",
-          "name": "miscellaneous repair kit"
+          "id": "chemistry_set",
+          "name": "chemistry set"
         }
       ],
-      "total": 5
-    },
-    "DIG::1": {
-      "examples": [
-        {
-          "id": "exodii_prybar",
-          "name": "breacher"
-        },
-        {
-          "id": "bronze_hoe",
-          "name": "bronze hoe"
-        },
-        {
-          "id": "digging_stick",
-          "name": "digging stick"
-        }
-      ],
-      "total": 13
-    },
-    "WRENCH_FINE::1": {
-      "examples": [
-        {
-          "id": "wrench",
-          "name": "adjustable wrench"
-        },
-        {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
-        },
-        {
-          "id": "large_repairkit",
-          "name": "gunsmith repair kit"
-        }
-      ],
-      "total": 8
-    },
-    "PISTOL::1": {
-      "examples": [],
-      "total": 0
+      "total": 2
     },
     "WELD::1": {
       "examples": [
@@ -9813,60 +10229,73 @@
       ],
       "total": 4
     },
-    "SHOTGUN::1": {
-      "examples": [],
-      "total": 0
-    },
-    "SCREW::1": {
+    "JACK::1": {
       "examples": [
         {
-          "id": "camping_multitool",
-          "name": "camping multitool"
+          "id": "nose_plate",
+          "name": "nose plate"
         },
         {
-          "id": "cordless_drill",
-          "name": "cordless drill"
+          "id": "jack_makeshift",
+          "name": "makeshift jack"
         },
         {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
+          "id": "jack_small",
+          "name": "scissor jack"
         }
       ],
-      "total": 14
+      "total": 8
     },
-    "SEW::3": {
+    "JACK::4": {
       "examples": [
         {
-          "id": "needle_steel",
-          "name": "needle"
+          "id": "jack_small",
+          "name": "scissor jack"
         },
         {
-          "id": "sewing_kit",
-          "name": "sewing kit"
+          "id": "forklift_fork",
+          "name": "forklift arms"
         },
         {
-          "id": "tailors_kit",
-          "name": "tailor's kit"
+          "id": "crane_small",
+          "name": "telescopic crane"
+        }
+      ],
+      "total": 6
+    },
+    "JACK::16": {
+      "examples": [
+        {
+          "id": "jack",
+          "name": "bottle jack"
+        },
+        {
+          "id": "crane_medium",
+          "name": "boom crane"
+        },
+        {
+          "id": "crane_medium_internal",
+          "name": "internal boom crane"
         }
       ],
       "total": 3
     },
-    "SAW_M_FINE::1": {
+    "BUTCHER::16": {
       "examples": [
         {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
+          "id": "crash_axe",
+          "name": "crash axe"
         },
         {
-          "id": "large_repairkit",
-          "name": "gunsmith repair kit"
+          "id": "knife_rm42",
+          "name": "F-S fighting knife"
         },
         {
-          "id": "hacksaw",
-          "name": "hacksaw"
+          "id": "ch_kukri",
+          "name": "hardened steel kukri"
         }
       ],
-      "total": 5
+      "total": 25
     },
     "WRENCH::2": {
       "examples": [
@@ -9885,56 +10314,18 @@
       ],
       "total": 9
     },
-    "CUT_FINE::2": {
+    "LIFT::40": {
       "examples": [
         {
-          "id": "misc_repairkit",
-          "name": "miscellaneous repair kit"
+          "id": "crane_medium",
+          "name": "boom crane"
         },
         {
-          "id": "xacto",
-          "name": "X-Acto knife"
-        },
-        {
-          "id": "scalpel",
-          "name": "scalpel"
+          "id": "crane_medium_internal",
+          "name": "internal boom crane"
         }
       ],
-      "total": 4
-    },
-    "SCREW_FINE::1": {
-      "examples": [
-        {
-          "id": "small_repairkit",
-          "name": "firearm repair kit"
-        },
-        {
-          "id": "large_repairkit",
-          "name": "gunsmith repair kit"
-        },
-        {
-          "id": "robofac_gun_kit",
-          "name": "Hub 01 HWP maintenance kit"
-        }
-      ],
-      "total": 6
-    },
-    "JACK::1": {
-      "examples": [
-        {
-          "id": "nose_plate",
-          "name": "nose plate"
-        },
-        {
-          "id": "jack_makeshift",
-          "name": "makeshift jack"
-        },
-        {
-          "id": "jack_small",
-          "name": "scissor jack"
-        }
-      ],
-      "total": 8
+      "total": 2
     }
   }
 }

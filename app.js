@@ -26,6 +26,7 @@
     stats: document.getElementById("stats"),
     foot: document.getElementById("foot"),
     toolbarActions: document.getElementById("toolbar-actions"),
+    importSaveFile: document.getElementById("import-save-file"),
   };
 
   // ---- state ---------------------------------------------------------------
@@ -618,6 +619,61 @@
       alert("That doesn't look like valid exported JSON.");
     }
   }
+  // Parses a Cataclysm: DDA `master.gsav` (world save-directory file, not the
+  // per-character `.sav`) to find upgrades already completed in-game, keyed by
+  // matching each mission's `type_id` against an upgrade `id` (they're the
+  // same string — every upgrade IS a mission_definition, joined by extract.py
+  // on the key item id). Only adds `done`; never unmarks or touches plan/qty.
+  function importSaveFromGsav(text) {
+    const jsonStart = text.indexOf("{");
+    if (jsonStart < 0) throw new Error("no JSON object found");
+    const data = JSON.parse(text.slice(jsonStart));
+    if (!Array.isArray(data.active_missions)) {
+      throw new Error("missing active_missions — not a master.gsav file");
+    }
+    const completedIds = new Set(
+      data.active_missions
+        .filter(m => m && m.status === "success" && typeof m.type_id === "string")
+        .map(m => m.type_id)
+    );
+    const matched = [...completedIds].filter(id => byId[id]);
+    const unrecognized = completedIds.size - matched.length;
+    const newlyDone = matched.filter(id => !state.done[id]);
+    return { matched, unrecognized, newlyDone };
+  }
+  function importSave(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      let result;
+      try {
+        result = importSaveFromGsav(String(reader.result));
+      } catch (e) {
+        alert("Couldn't read that as a Cataclysm master.gsav file.\n\n"
+          + "Pick master.gsav from your save's world folder, e.g.\n"
+          + "~/Library/Application Support/Cataclysm/save/<world name>/master.gsav");
+        return;
+      }
+      const { matched, unrecognized, newlyDone } = result;
+      if (!matched.length) {
+        alert("No completed Sky Island upgrades found in that save.");
+        return;
+      }
+      if (!newlyDone.length) {
+        alert(matched.length + " completed upgrade(s) found in the save, but all are already marked done here.");
+        return;
+      }
+      const names = newlyDone.map(id => byId[id].name).sort();
+      const extra = unrecognized ? "\n\n(" + unrecognized + " other completed mission(s) in the save aren't tracked by this app.)" : "";
+      if (!confirm("Mark " + newlyDone.length + " upgrade(s) as done from this save?\n\n"
+        + names.join("\n") + extra)) return;
+      newlyDone.forEach(id => { state.done[id] = true; });
+      save();
+      render();
+      alert("Marked " + newlyDone.length + " upgrade(s) as done.");
+    };
+    reader.onerror = () => alert("Couldn't read that file.");
+    reader.readAsText(file);
+  }
   function copyToClipboard(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       return navigator.clipboard.writeText(text).then(() => true).catch(() => fallbackCopy(text));
@@ -665,6 +721,15 @@
     imp.type = "button"; imp.className = "btn"; imp.textContent = "Import";
     imp.title = "Paste previously exported JSON progress";
     imp.addEventListener("click", importState);
+    const impSave = document.createElement("button");
+    impSave.type = "button"; impSave.className = "btn"; impSave.textContent = "Import Save";
+    impSave.title = "Read completed upgrades from your Cataclysm master.gsav save file";
+    impSave.addEventListener("click", () => els.importSaveFile.click());
+    els.importSaveFile.addEventListener("change", () => {
+      const file = els.importSaveFile.files[0];
+      els.importSaveFile.value = "";
+      if (file) importSave(file);
+    });
     const reset = document.createElement("button");
     reset.type = "button"; reset.className = "btn danger"; reset.textContent = "Reset";
     reset.title = "Clear all progress (completed, planned, and checked items)";
@@ -677,6 +742,7 @@
     });
     els.toolbarActions.appendChild(exp);
     els.toolbarActions.appendChild(imp);
+    els.toolbarActions.appendChild(impSave);
     els.toolbarActions.appendChild(reset);
   }
 

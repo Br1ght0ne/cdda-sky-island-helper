@@ -9,7 +9,7 @@ Just open `index.html` in a browser. No server, no build step, no internet.
 
 ## Features
 
-- **All 84 upgrades** grouped by Progression / Island Upgrades / Island
+- **All 91 upgrades** grouped by Progression / Island Upgrades / Island
   Construction / Raid Upgrades / Raid Unlocks.
 - **Collapsible cards** — a vertical list you can scan at a glance, with
   **Expand all / Collapse all**.
@@ -52,6 +52,8 @@ Just open `index.html` in a browser. No server, no build step, no internet.
   when opened from a `file://` path.
 - **Export / Import** your whole progress as JSON via the clipboard, to back it
   up or move it between machines/browsers.
+- **Import Save** reads a Cataclysm world's `master.gsav` file and marks
+  upgrades you've already completed in-game as done.
 
 ## Files
 
