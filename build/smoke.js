@@ -39,13 +39,25 @@ function getEl(id) { return registry[id] || (registry[id] = mkEl("div")); }
   .forEach(id => { registry[id] = mkEl(id === "search" ? "input" : "div"); registry[id].value = ""; registry[id].checked = false; });
 const toolbar = mkEl("div");
 
+// Static theme-toggle buttons from index.html (not built by app.js, so the
+// shim fabricates them the same way it fakes ".toolbar" via querySelector).
+const themeButtons = ["auto", "light", "dark"].map(choice => {
+  const b = mkEl("button");
+  b.dataset.themeChoice = choice;
+  return b;
+});
+const themeToggle = mkEl("div");
+themeToggle.children = themeButtons;
+registry["theme-toggle"] = themeToggle;
+
 global.document = {
   getElementById: getEl,
   querySelector: sel => sel === ".toolbar" ? toolbar : null,
+  querySelectorAll: sel => sel === "#theme-toggle .theme-btn" ? themeButtons : [],
   createElement: mkEl,
   createTextNode: t => ({ nodeType: 3, textContent: t, _text: t }),
   body: mkEl("body"),
-  documentElement: { clientWidth: 1000 },
+  documentElement: { clientWidth: 1000, dataset: {} },
   addEventListener: () => {},
   execCommand: () => true,
 };
@@ -53,6 +65,7 @@ const storeBacking = {};
 global.localStorage = {
   getItem: k => (k in storeBacking ? storeBacking[k] : null),
   setItem: (k, v) => { storeBacking[k] = String(v); },
+  removeItem: k => { delete storeBacking[k]; },
 };
 let clipboard = "";
 // Node 21+ ships a read-only `navigator` global; override it forcibly.
@@ -74,7 +87,7 @@ function assert(c, m) { if (!c) { console.error("FAIL:", m); process.exitCode = 
 
 const list = registry["list"];
 const actions = registry["toolbar-actions"]; // Expand/Collapse live here
-const headerActions = registry["header-actions"]; // Export/Import/Import Save/Reset live here
+const headerActions = registry["header-buttons"]; // Export/Import/Import Save/Reset live here
 assert(list.children.length > 0, "list rendered group/category/card nodes");
 
 // find first upgrade card's plan button and click it (Island Rank Up 1)
@@ -296,6 +309,20 @@ setTimeout(() => {
   treeCard = findCardByName(tree.name);
   const hasTag = (function walk(n){ if(typeof n.className==="string" && n.className==="crafted-tag" && /Crafted: 1/.test(n._text)) return true; for(const c of n.children||[]){if(walk(c)) return true;} return false; })(treeCard);
   assert(hasTag, "Crafted:1 tag appears near the name after a craft");
+
+  // ---- theme toggle ---------------------------------------------------
+  const [autoBtn, lightBtn, darkBtn] = themeButtons;
+  assert(autoBtn.getAttribute("aria-pressed") === "true", "theme toggle starts on Auto");
+  lightBtn.dispatch("click");
+  assert(global.document.documentElement.dataset.theme === "light", "clicking Light sets data-theme=light");
+  assert(storeBacking["skyisland.theme"] === "light", "Light choice persists to localStorage");
+  assert(lightBtn.getAttribute("aria-pressed") === "true" && autoBtn.getAttribute("aria-pressed") === "false",
+    "aria-pressed follows the active theme button");
+  darkBtn.dispatch("click");
+  assert(global.document.documentElement.dataset.theme === "dark", "clicking Dark sets data-theme=dark");
+  autoBtn.dispatch("click");
+  assert(!("theme" in global.document.documentElement.dataset), "clicking Auto clears data-theme");
+  assert(!("skyisland.theme" in storeBacking), "Auto choice clears the persisted theme");
 
   console.log(process.exitCode ? "\nSMOKE TEST FAILED" : "\nAll smoke checks passed");
 }, 10);

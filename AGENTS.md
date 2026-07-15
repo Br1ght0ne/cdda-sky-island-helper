@@ -84,6 +84,15 @@ node --check app.js
 
 Export/Import copies this object as JSON via the clipboard; Reset = `blankState()`.
 
+**Theme preference** lives in its own key, `skyisland.theme` (`"light"` / `"dark"`,
+absent = Auto) — deliberately separate from tracker state above so it's a UI
+preference, not exported/imported/reset with the tracked progress. A tiny inline
+`<script>` at the top of `index.html`'s `<head>` (before the stylesheet) reads it
+and sets `documentElement.dataset.theme` before first paint, to avoid a flash of
+the wrong theme. `style.css` gives `:root[data-theme]` higher specificity than
+the `@media (prefers-color-scheme)` block, so an explicit choice always wins;
+with no attribute set, the OS preference alone decides ("Auto").
+
 ## Key behaviours & decisions (don't regress these)
 
 - **Terminology is centralized on "Plan"** — the sidebar/panel is the "Plan", not

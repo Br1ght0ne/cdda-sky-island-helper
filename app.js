@@ -26,7 +26,7 @@
     stats: document.getElementById("stats"),
     foot: document.getElementById("foot"),
     toolbarActions: document.getElementById("toolbar-actions"),
-    headerActions: document.getElementById("header-actions"),
+    headerButtons: document.getElementById("header-buttons"),
     importSaveFile: document.getElementById("import-save-file"),
   };
 
@@ -748,10 +748,10 @@
         render();
       }
     });
-    els.headerActions.appendChild(exp);
-    els.headerActions.appendChild(imp);
-    els.headerActions.appendChild(impSave);
-    els.headerActions.appendChild(reset);
+    els.headerButtons.appendChild(exp);
+    els.headerButtons.appendChild(imp);
+    els.headerButtons.appendChild(impSave);
+    els.headerButtons.appendChild(reset);
   }
 
   // ---- hover tooltips, CRPG-style ------------------------------------------
@@ -880,8 +880,36 @@
     // "Only in plan" while filtering feels natural to peek — left to the user.
   }
 
+  // ---- theme toggle (Auto / Light / Dark) ---------------------------------
+  // "Auto" means no explicit choice: no `data-theme` attribute, so
+  // `@media (prefers-color-scheme)` in style.css alone decides. An explicit
+  // choice sets `data-theme` (which always wins, see style.css) and persists
+  // it; a tiny inline script in index.html applies it before first paint so
+  // there's no flash of the wrong theme on load.
+  const THEME_KEY = "skyisland.theme";
+  function setupThemeToggle() {
+    const buttons = [...document.querySelectorAll("#theme-toggle .theme-btn")];
+    function current() {
+      const saved = localStorage.getItem(THEME_KEY);
+      return saved === "light" || saved === "dark" ? saved : "auto";
+    }
+    function apply(choice) {
+      if (choice === "light" || choice === "dark") {
+        document.documentElement.dataset.theme = choice;
+        localStorage.setItem(THEME_KEY, choice);
+      } else {
+        delete document.documentElement.dataset.theme;
+        localStorage.removeItem(THEME_KEY);
+      }
+      buttons.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.themeChoice === choice)));
+    }
+    buttons.forEach(b => b.addEventListener("click", () => apply(b.dataset.themeChoice)));
+    apply(current());
+  }
+
   addToolbarButtons();
   setupTooltips();
   setupPlanSheet();
+  setupThemeToggle();
   render();
 })();

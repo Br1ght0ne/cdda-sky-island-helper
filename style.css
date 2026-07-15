@@ -1,7 +1,12 @@
 /* Dark theme: green-on-black terminal, in the spirit of cdda-guide.nornagon.net
    (near-black background, green as the primary hue) but pushed toward a true
-   phosphor-terminal look with green body text, not white. */
-:root {
+   phosphor-terminal look with green body text, not white.
+   `[data-theme]` (set by the header toggle, persisted in localStorage) always
+   wins over the OS preference below — an attribute selector outranks a plain
+   `:root` even inside a media query, regardless of source order. With no
+   `data-theme` attribute at all, the toggle is in "Auto" and only the media
+   query decides. */
+:root, :root[data-theme="dark"] {
   --bg: #0a0a0a;
   --bg2: #131313;
   --panel: #171717;
@@ -62,6 +67,34 @@
     --shadow: rgba(0,0,0,.18);
   }
 }
+:root[data-theme="light"] {
+  --bg: #f6f6f5;
+  --bg2: #eeeeee;
+  --panel: #ffffff;
+  --panel2: #f2f2f2;
+  --border: #dcdcdc;
+  --text: #18201a;
+  --muted: #5b6b62;
+  --accent: #15803d;
+  --accent-rgb: 21,128,61;
+  --accent2: #16a34a;
+  --accent2-rgb: 22,163,74;
+  --good: #047857;
+  --good-rgb: 4,120,87;
+  --good-bg: #dcfce7;
+  --on-good: #f2fff8;
+  --shard: #92400e;
+  --shard-rgb: 146,64,14;
+  --danger: #b91c1c;
+  --danger-border: #f3b4b4;
+  --danger-hover-border: #ef4444;
+  --danger-hover-bg: #fee2e2;
+  --hairline: rgba(0,0,0,.06);
+  --header-grad-1: #f0f0f0;
+  --header-grad-2: #ffffff;
+  --tooltip-bg: #ffffff;
+  --shadow: rgba(0,0,0,.18);
+}
 * { box-sizing: border-box; }
 /* Kill the ~300ms touch tap delay on interactive elements (double-tap-zoom hold). */
 button, a, input, label, .plan-handle, .plan-backdrop, .card-top, .group-head { touch-action: manipulation; }
@@ -90,7 +123,15 @@ h1 .accent { color: var(--accent); }
 /* Lines up with .layout's 1fr / 420px columns, so the action buttons sit
    directly above the Plan sidebar. */
 .header-inner { display: grid; grid-template-columns: 1fr 420px; gap: 24px; align-items: start; }
-.header-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; padding-top: 6px; }
+.header-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding-top: 6px; }
+.header-buttons { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+
+.theme-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--panel2); }
+.theme-btn { border: none; background: transparent; color: var(--muted); padding: 7px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.theme-btn + .theme-btn { border-left: 1px solid var(--border); }
+.theme-btn svg { width: 15px; height: 15px; }
+.theme-btn:hover { color: var(--text); }
+.theme-btn[aria-pressed="true"] { background: var(--accent2); color: #fff; }
 
 .layout { display: grid; grid-template-columns: 1fr 420px; gap: 24px; margin-top: 22px; align-items: start; }
 
@@ -245,7 +286,8 @@ aside .sticky { position: sticky; top: 16px; }
   .wrap { padding: 0 14px; }
   .layout { grid-template-columns: 1fr; }
   .header-inner { grid-template-columns: 1fr; }
-  .header-actions { justify-content: flex-start; padding-top: 12px; }
+  .header-actions { align-items: flex-start; padding-top: 12px; }
+  .header-buttons { justify-content: flex-start; }
   /* Force the 3 groups (checkboxes, Expand/Collapse, counters) onto their own row each,
      instead of letting a single flex-wrap row break them apart unpredictably. */
   .toolbar-actions { flex-direction: column; align-items: flex-start; }
