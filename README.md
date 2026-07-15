@@ -44,9 +44,9 @@ are regenerated together — never edit them by hand.
 ## Deploying (GitHub Pages)
 
 The site is served straight from the repo root — no build step. Pushing to
-`main` runs `.github/workflows/deploy.yml`, which bundles the four site files
-(`index.html`, `style.css`, `app.js`, `data.js`) and publishes them to
-GitHub Pages.
+`main` runs `.github/workflows/deploy.yml`, which bundles the site files
+(`index.html`, `style.css`, `app.js`, `data.js`, `favicon.svg`) and publishes
+them to GitHub Pages.
 
 One-time setup: in the repo's **Settings → Pages**, set **Source** to
 **GitHub Actions**. After the first successful run the site is live at

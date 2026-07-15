@@ -29,7 +29,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir _site
-          cp index.html style.css app.js data.js .nojekyll _site/
+          cp index.html style.css app.js data.js favicon.svg .nojekyll _site/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
