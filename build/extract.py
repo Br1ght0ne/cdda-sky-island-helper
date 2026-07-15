@@ -22,6 +22,7 @@ Anything unresolved falls back to a prettified id.
 import json
 import os
 import re
+import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -163,6 +164,16 @@ def _register(o, idx):
             for pair in quals:
                 if isinstance(pair, list) and len(pair) >= 2 and isinstance(pair[0], str):
                     d[pair[0]] = max(d.get(pair[0], 0), pair[1])
+
+
+def source_commit():
+    try:
+        return subprocess.run(
+            ["git", "-C", CDDA, "rev-parse", "HEAD"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return None
 
 
 def prettify(item_id):
@@ -410,6 +421,7 @@ def main():
 
     payload = {
         "generated_from": "CleverRaven/cataclysm-dda data/mods/Sky_Island",
+        "source_commit": source_commit(),
         "guide_base": "https://cdda-guide.nornagon.net",
         "count": len(upgrades),
         "upgrades": upgrades,
