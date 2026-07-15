@@ -760,7 +760,7 @@
   // interactive (grabbable/scrollable) and its border turns gold, so you can
   // move the cursor onto it. It then only closes once you leave both the item
   // and the tooltip.
-  const FREEZE_MS = 1400;
+  const FREEZE_MS = 500;
   const BRIDGE_MS = 260; // grace period to travel from item to a frozen tooltip
   function setupTooltips() {
     const tip = document.createElement("div");
