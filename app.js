@@ -483,7 +483,10 @@
         egs.appendChild(guideLink("item", e.id, e.name));
       });
       const more = info.total - info.examples.length;
-      if (more > 0) egs.appendChild(textNode(" and " + more + " more"));
+      if (more > 0) {
+        egs.appendChild(textNode(" and "));
+        egs.appendChild(guideLink("tool_quality", q.id, more + " more"));
+      }
       text.appendChild(egs);
     }
     row.appendChild(cb); row.appendChild(text);
