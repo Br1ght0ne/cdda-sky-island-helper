@@ -44,13 +44,15 @@
 
   <div class="wrap layout">
     <main>
-      <div class="toolbar">
-        <input type="search" id="search" placeholder="Search upgrades or items…" autocomplete="off">
-      </div>
-      <div class="toolbar toolbar-actions" id="toolbar-actions">
-        <div class="toolbar-group">
-          <label class="chk"><input type="checkbox" id="hide-done"><span>Hide done</span></label>
-          <label class="chk"><input type="checkbox" id="only-plan"><span>Only in plan</span></label>
+      <div class="controls-sticky">
+        <div class="toolbar">
+          <input type="search" id="search" placeholder="Search upgrades or items…" autocomplete="off">
+        </div>
+        <div class="toolbar toolbar-actions" id="toolbar-actions">
+          <div class="toolbar-group">
+            <label class="chk"><input type="checkbox" id="hide-done"><span>Hide done</span></label>
+            <label class="chk"><input type="checkbox" id="only-plan"><span>Only in plan</span></label>
+          </div>
         </div>
       </div>
       <div id="stats" class="stats"></div>
@@ -67,14 +69,14 @@
             <span class="plan-caret" aria-hidden="true">⌃</span>
           </span>
         </button>
-        <div class="plan-scroll" id="plan-scroll">
-          <div class="panel-head">
-            <h2>Plan</h2>
-            <div class="panel-actions" id="plan-actions">
-              <button id="remove-finished" class="btn ghost tiny" type="button" title="Remove crafted (completed) upgrades from your plan">Remove finished</button>
-              <button id="clear-plan" class="btn ghost tiny" type="button">Clear</button>
-            </div>
+        <div class="panel-head">
+          <h2>Plan</h2>
+          <div class="panel-actions" id="plan-actions">
+            <button id="remove-finished" class="btn ghost tiny" type="button" title="Remove crafted (completed) upgrades from your plan">Remove finished</button>
+            <button id="clear-plan" class="btn ghost tiny" type="button">Clear</button>
           </div>
+        </div>
+        <div class="plan-scroll" id="plan-scroll">
           <p class="hint" id="plan-hint">Click <strong>＋ Plan</strong> on any upgrade to add its materials here.</p>
           <div id="shopping"></div>
         </div>
