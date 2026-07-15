@@ -1,122 +1,298 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Primary Meta Tags -->
-  <title>Sky Island Helper — Upgrade &amp; Item Tracker</title>
-  <meta name="title" content="Sky Island Helper — Upgrade &amp; Item Tracker" />
-  <meta name="description" content="Track the items you need to unlock upgrades in the Cataclysm: DDA Sky Island mod — Island Rank Ups, constructions, raid upgrades, and start-location unlocks." />
+    <!-- Primary Meta Tags -->
+    <title>Sky Island Helper — Upgrade &amp; Item Tracker</title>
+    <meta
+      name="title"
+      content="Sky Island Helper — Upgrade &amp; Item Tracker"
+    />
+    <meta
+      name="description"
+      content="Track the items you need to unlock upgrades in the Cataclysm: DDA Sky Island mod — Island Rank Ups, constructions, raid upgrades, and start-location unlocks."
+    />
 
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://br1ght0ne.github.io/cdda-sky-island-helper/" />
-  <meta property="og:title" content="Sky Island Helper — Upgrade &amp; Item Tracker" />
-  <meta property="og:description" content="Track the items you need to unlock upgrades in the Cataclysm: DDA Sky Island mod — Island Rank Ups, constructions, raid upgrades, and start-location unlocks." />
-  <meta property="og:image" content="https://br1ght0ne.github.io/cdda-sky-island-helper/og-image.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://br1ght0ne.github.io/cdda-sky-island-helper/"
+    />
+    <meta
+      property="og:title"
+      content="Sky Island Helper — Upgrade &amp; Item Tracker"
+    />
+    <meta
+      property="og:description"
+      content="Track the items you need to unlock upgrades in the Cataclysm: DDA Sky Island mod — Island Rank Ups, constructions, raid upgrades, and start-location unlocks."
+    />
+    <meta
+      property="og:image"
+      content="https://br1ght0ne.github.io/cdda-sky-island-helper/og-image.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:url" content="https://br1ght0ne.github.io/cdda-sky-island-helper/" />
-  <meta name="twitter:title" content="Sky Island Helper — Upgrade &amp; Item Tracker" />
-  <meta name="twitter:description" content="Track the items you need to unlock upgrades in the Cataclysm: DDA Sky Island mod — Island Rank Ups, constructions, raid upgrades, and start-location unlocks." />
-  <meta name="twitter:image" content="https://br1ght0ne.github.io/cdda-sky-island-helper/og-image.png" />
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:url"
+      content="https://br1ght0ne.github.io/cdda-sky-island-helper/"
+    />
+    <meta
+      name="twitter:title"
+      content="Sky Island Helper — Upgrade &amp; Item Tracker"
+    />
+    <meta
+      name="twitter:description"
+      content="Track the items you need to unlock upgrades in the Cataclysm: DDA Sky Island mod — Island Rank Ups, constructions, raid upgrades, and start-location unlocks."
+    />
+    <meta
+      name="twitter:image"
+      content="https://br1ght0ne.github.io/cdda-sky-island-helper/og-image.png"
+    />
 
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <script>
-    // Runs before the stylesheet paints anything, so an explicit Light/Dark
-    // choice applies immediately instead of flashing the Auto (OS) theme first.
-    (function () {
-      try {
-        var t = localStorage.getItem("skyisland.theme");
-        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
-      } catch (e) {}
-    })();
-  </script>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header>
-    <div class="wrap header-inner">
-      <div class="header-text">
-        <h1><span class="accent">CDDA</span> Sky Island <span class="accent">Helper</span></h1>
-      </div>
-      <div class="header-actions" id="header-actions">
-        <div class="theme-toggle" id="theme-toggle" role="group" aria-label="Theme">
-          <button type="button" class="theme-btn" data-theme-choice="auto" title="Match system theme" aria-pressed="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          </button>
-          <button type="button" class="theme-btn" data-theme-choice="light" title="Light theme" aria-pressed="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-          </button>
-          <button type="button" class="theme-btn" data-theme-choice="dark" title="Dark theme" aria-pressed="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-          </button>
+    <link
+      id="site-favicon-svg"
+      rel="icon"
+      type="image/svg+xml"
+      href="favicon-dark.svg"
+    />
+    <link
+      id="site-favicon-png"
+      rel="alternate icon"
+      type="image/png"
+      href="favicon-dark.png"
+    />
+    <script>
+      // Runs before the stylesheet paints anything, so an explicit Light/Dark
+      // choice applies immediately instead of flashing the Auto (OS) theme first.
+      // Also picks the matching favicon from the same theme choice.
+      (function () {
+        function resolvedTheme(choice) {
+          if (choice === "light" || choice === "dark") return choice;
+          var prefersDark =
+            typeof window.matchMedia === "function" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+          return prefersDark ? "dark" : "light";
+        }
+        window.SKYISLAND_setFavicon = function (choice) {
+          var theme = resolvedTheme(choice);
+          var svgFav = document.querySelector("#site-favicon-svg");
+          var pngFav = document.querySelector("#site-favicon-png");
+          if (svgFav)
+            svgFav.href =
+              theme === "dark" ? "favicon-dark.svg" : "favicon-light.svg";
+          if (pngFav)
+            pngFav.href =
+              theme === "dark" ? "favicon-dark.png" : "favicon-light.png";
+        };
+        try {
+          var t = localStorage.getItem("skyisland.theme");
+          if (t === "light" || t === "dark")
+            document.documentElement.dataset.theme = t;
+          window.SKYISLAND_setFavicon(t);
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="wrap header-inner">
+        <div class="header-text">
+          <h1>
+            <span class="accent">CDDA</span> Sky Island
+            <span class="accent">Helper</span>
+          </h1>
         </div>
-        <input type="file" id="import-save-file" accept=".gsav" hidden>
-      </div>
-    </div>
-  </header>
-
-  <div class="wrap layout">
-    <main>
-      <div class="controls-sticky">
-        <div class="toolbar">
-          <div class="search-wrap">
-            <input type="search" id="search" placeholder="Search upgrades or items…" autocomplete="off">
-            <button type="button" id="search-clear" class="search-clear" title="Clear search" aria-label="Clear search" hidden>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        <div class="header-actions" id="header-actions">
+          <div
+            class="theme-toggle"
+            id="theme-toggle"
+            role="group"
+            aria-label="Theme"
+          >
+            <button
+              type="button"
+              class="theme-btn"
+              data-theme-choice="auto"
+              title="Match system theme"
+              aria-pressed="false"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="2" y="4" width="20" height="13" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="theme-btn"
+              data-theme-choice="light"
+              title="Light theme"
+              aria-pressed="false"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="4" />
+                <path
+                  d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="theme-btn"
+              data-theme-choice="dark"
+              title="Dark theme"
+              aria-pressed="false"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
             </button>
           </div>
-        </div>
-        <div class="toolbar toolbar-actions" id="toolbar-actions">
-          <div class="toolbar-group">
-            <label class="chk"><input type="checkbox" id="hide-done"><span>Hide done</span></label>
-            <label class="chk"><input type="checkbox" id="only-plan"><span>Only in plan</span></label>
-          </div>
-          <div class="toolbar-group" id="main-actions"></div>
+          <input type="file" id="import-save-file" accept=".gsav" hidden />
         </div>
       </div>
-      <div id="stats" class="stats"></div>
-      <div id="list"></div>
-    </main>
+    </header>
 
-    <aside>
-      <div class="panel sticky" id="plan-panel">
-        <button class="plan-handle" id="plan-handle" type="button" aria-expanded="false" aria-controls="plan-scroll">
-          <span class="plan-grip" aria-hidden="true"></span>
-          <span class="plan-handle-row">
-            <span class="plan-handle-title">Plan</span>
-            <span class="plan-summary" id="plan-summary"></span>
-            <span class="plan-caret" aria-hidden="true">⌃</span>
-          </span>
-        </button>
-        <div class="panel-head">
-          <h2>Plan</h2>
-          <span class="plan-ready-badge" id="plan-footer-summary"></span>
-          <div class="panel-actions" id="plan-actions">
-            <button id="clear-plan" class="btn ghost tiny" type="button">Clear</button>
+    <div class="wrap layout">
+      <main>
+        <div class="controls-sticky">
+          <div class="toolbar">
+            <div class="search-wrap">
+              <input
+                type="search"
+                id="search"
+                placeholder="Search upgrades or items…"
+                autocomplete="off"
+              />
+              <button
+                type="button"
+                id="search-clear"
+                class="search-clear"
+                title="Clear search"
+                aria-label="Clear search"
+                hidden
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="toolbar toolbar-actions" id="toolbar-actions">
+            <div class="toolbar-group">
+              <label class="chk"
+                ><input type="checkbox" id="hide-done" /><span
+                  >Hide done</span
+                ></label
+              >
+              <label class="chk"
+                ><input type="checkbox" id="only-plan" /><span
+                  >Only in plan</span
+                ></label
+              >
+            </div>
+            <div class="toolbar-group" id="main-actions"></div>
           </div>
         </div>
-        <div class="plan-scroll" id="plan-scroll">
-          <p class="hint" id="plan-hint">Click <strong>＋ Plan</strong> on any upgrade to add its materials here.</p>
-          <div id="plan-ready-list"></div>
-          <div id="shopping"></div>
+        <div id="stats" class="stats"></div>
+        <div id="list"></div>
+      </main>
+
+      <aside>
+        <div class="panel sticky" id="plan-panel">
+          <button
+            class="plan-handle"
+            id="plan-handle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="plan-scroll"
+          >
+            <span class="plan-grip" aria-hidden="true"></span>
+            <span class="plan-handle-row">
+              <span class="plan-handle-title">Plan</span>
+              <span class="plan-summary" id="plan-summary"></span>
+              <span class="plan-caret" aria-hidden="true">⌃</span>
+            </span>
+          </button>
+          <div class="panel-head">
+            <h2>Plan</h2>
+            <span class="plan-ready-badge" id="plan-footer-summary"></span>
+            <div class="panel-actions" id="plan-actions">
+              <button id="clear-plan" class="btn ghost tiny" type="button">
+                Clear
+              </button>
+            </div>
+          </div>
+          <div class="plan-scroll" id="plan-scroll">
+            <p class="hint" id="plan-hint">
+              Click <strong>＋ Plan</strong> on any upgrade to add its materials
+              here.
+            </p>
+            <div id="plan-ready-list"></div>
+            <div id="shopping"></div>
+          </div>
         </div>
-      </div>
-    </aside>
-  </div>
+      </aside>
+    </div>
 
-  <footer class="wrap">
-    <span id="foot"></span> · Data generated from <a href="https://github.com/CleverRaven/Cataclysm-DDA" target="_blank" rel="noopener noreferrer"><code>CleverRaven/cataclysm-dda</code></a> · progress saved in your browser · <a href="https://github.com/Br1ght0ne/cdda-sky-island-helper" target="_blank" rel="noopener noreferrer">GitHub</a>
-  </footer>
+    <footer class="wrap">
+      <span id="foot"></span> · Data generated from
+      <a
+        href="https://github.com/CleverRaven/Cataclysm-DDA"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><code>CleverRaven/cataclysm-dda</code></a
+      >
+      · progress saved in your browser ·
+      <a
+        href="https://github.com/Br1ght0ne/cdda-sky-island-helper"
+        target="_blank"
+        rel="noopener noreferrer"
+        >GitHub</a
+      >
+    </footer>
 
-  <div id="toast" role="status" aria-live="polite"></div>
+    <div id="toast" role="status" aria-live="polite"></div>
 
-  <script src="data.js"></script>
-  <script src="app.js"></script>
-</body>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
 </html>
