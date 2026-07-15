@@ -21,6 +21,7 @@ function mkEl(tag) {
     closest() { return null; },
     getBoundingClientRect() { return { left: 0, top: 0, right: 0, bottom: 0 }; },
     select() {},
+    focus() {},
     click() { this.dispatch("click"); },
   };
 }
@@ -35,8 +36,8 @@ const registry = {};
 function getEl(id) { return registry[id] || (registry[id] = mkEl("div")); }
 
 // Pre-create the elements index.html references by id.
-["list","search","hide-done","only-plan","clear-plan","shopping","plan-hint","stats","foot"]
-  .forEach(id => { registry[id] = mkEl(id === "search" ? "input" : "div"); registry[id].value = ""; registry[id].checked = false; });
+["list","search","search-clear","hide-done","only-plan","clear-plan","shopping","plan-hint","stats","foot"]
+  .forEach(id => { registry[id] = mkEl(id === "search" ? "input" : id === "search-clear" ? "button" : "div"); registry[id].value = ""; registry[id].checked = false; });
 const toolbar = mkEl("div");
 
 // Static theme-toggle buttons from index.html (not built by app.js, so the
@@ -190,9 +191,13 @@ assert(tipped.some(n => Array.isArray(n._tipItems) && n._tipItems[0] && n._tipIt
 
 // Search matches tool qualities (e.g. "boiling" = the BOIL quality)
 const searchEl = registry["search"];
+const searchClearEl = registry["search-clear"];
 searchEl.value = "boiling"; searchEl.dispatch("input");
 assert(countCards() > 0, "search matches tool qualities");
-searchEl.value = ""; searchEl.dispatch("input"); // reset filter
+assert(searchClearEl.hidden === false, "clear button shows once search has text");
+searchClearEl.dispatch("click");
+assert(searchEl.value === "", "clicking clear button empties the search input");
+assert(searchClearEl.hidden === true, "clear button hides once search is empty");
 
 // Mobile Plan bottom sheet: handle toggles the panel open/closed
 const planHandle = registry["plan-handle"];

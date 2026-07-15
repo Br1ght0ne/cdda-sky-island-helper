@@ -13,6 +13,7 @@
   const els = {
     list: document.getElementById("list"),
     search: document.getElementById("search"),
+    searchClear: document.getElementById("search-clear"),
     hideDone: document.getElementById("hide-done"),
     onlyPlan: document.getElementById("only-plan"),
     clearPlan: document.getElementById("clear-plan"),
@@ -136,6 +137,7 @@
     const q = els.search.value.trim().toLowerCase();
     const hideDone = els.hideDone.checked;
     const onlyPlan = els.onlyPlan.checked;
+    els.searchClear.hidden = !q;
 
     const groups = {}; // group -> category -> [upgrades]
     let shown = 0;
@@ -847,6 +849,11 @@
   }
 
   els.search.addEventListener("input", render);
+  els.searchClear.addEventListener("click", () => {
+    els.search.value = "";
+    els.search.focus();
+    render();
+  });
   els.hideDone.addEventListener("change", render);
   els.onlyPlan.addEventListener("change", render);
   els.clearPlan.addEventListener("click", () => {
