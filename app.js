@@ -254,7 +254,7 @@
     const title = document.createElement("div");
     title.className = "card-title";
     title.textContent = u.name;
-    if (u.key_name) {
+    if (u.key_name && u.key_name !== u.name) {
       const key = document.createElement("span");
       key.className = "card-key";
       key.textContent = "Craft: " + u.key_name;
