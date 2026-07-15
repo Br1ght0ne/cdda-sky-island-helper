@@ -1,8 +1,8 @@
 /* Sky Island Helper — vanilla JS, no build step, runs straight from file://.
    State lives in localStorage (works from a local .html file) and can be
    exported / imported as JSON via the clipboard. */
-(function () {
-  "use strict";
+(() => {
+  
 
   const DATA = (window.SKYISLAND_DATA || { upgrades: [] });
   const UP = DATA.upgrades;
@@ -105,7 +105,6 @@
     foot: document.getElementById("foot"),
     toolbarActions: document.getElementById("toolbar-actions"),
     mainActions: document.getElementById("main-actions"),
-    planFooter: document.getElementById("plan-footer"),
     planFooterSummary: document.getElementById("plan-footer-summary"),
     planReadyList: document.getElementById("plan-ready-list"),
     importSaveFile: document.getElementById("import-save-file"),
@@ -661,9 +660,9 @@
     els.planHint.style.display = planned.length ? "none" : "block";
     els.planActions.style.display = planned.length ? "flex" : "none";
     els.shopping.innerHTML = "";
-    els.planFooter.hidden = !planned.length;
     if (!planned.length) {
       els.planSummary.textContent = "nothing planned yet";
+      els.planFooterSummary.textContent = "";
       els.planReadyList.innerHTML = "";
       return;
     }
@@ -790,7 +789,10 @@
     });
     els.planFooterSummary.textContent = ready.length + "/" + planned.length + " ready";
     els.planReadyList.innerHTML = "";
-    ready.forEach(u => els.planReadyList.appendChild(planReadyRow(u)));
+    if (ready.length) {
+      els.planReadyList.appendChild(sectionLabel("Ready to craft"));
+      ready.forEach(u => els.planReadyList.appendChild(planReadyRow(u)));
+    }
   }
 
   function renderStats() {
