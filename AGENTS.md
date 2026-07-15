@@ -20,7 +20,7 @@ not a JSON file loaded at runtime.
 | File | Role |
 |---|---|
 | `index.html` | markup / layout |
-| `style.css` | all styling (dark, warp-purple theme) |
+| `style.css` | all styling (green-on-black terminal theme, with a light-mode complement) |
 | `app.js` | all behaviour — one big IIFE, no framework |
 | `data.json` | **canonical** generated data (pretty, diffable) |
 | `data.js` | generated wrapper: `window.SKYISLAND_DATA = <same payload>` (minified). Loaded by the app. |
@@ -108,8 +108,8 @@ Export/Import copies this object as JSON via the clipboard; Reset = `blankState(
     CDN/server, breaking the `file://` + offline constraint.
 - **Tooltips**: only `LIST` item-groups have them. They appear on hover; after
   ~1.4s of hovering (or an immediate click on the group, which is not a link)
-  they **freeze** — border turns from muted to vivid **purple** (no other accent
-  colors), become interactive/scrollable, and each option inside is a link to the
+  they **freeze** — border turns from muted to vivid **accent green** (no other
+  accent colors), become interactive/scrollable, and each option inside is a link to the
   CDDA Guide. `FREEZE_MS` / `BRIDGE_MS` constants in `app.js`.
 - **Links**: items → `cdda-guide.nornagon.net/item/<id>`, qualities →
   `/tool_quality/<id>` (base is `DATA.guide_base`). Clicking item text/links must
