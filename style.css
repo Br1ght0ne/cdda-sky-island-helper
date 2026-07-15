@@ -321,8 +321,8 @@ aside .sticky {
 .shop-name { flex: 1; }
 .shop-from { color: var(--muted); font-size: 11px; }
 .shop-total { margin-top: 12px; font-size: 12px; color: var(--muted); }
-.shard-line { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 14px; }
-.shard-line .count { color: var(--shard); }
+.shop-item.shard { border-bottom-color: rgba(var(--shard-rgb), .4); }
+.shop-item.shard .shop-name { font-weight: 600; }
 
 /* ---- mobile: single column + Plan as a pull-up bottom sheet ---- */
 .plan-backdrop { display: none; }

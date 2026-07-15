@@ -673,7 +673,6 @@
     // Each line tracks its contributing (upgrade, group) pairs so ticking it
     // updates the very same state the cards read/write.
     const agg = {}; // sig -> { alts, from:Set, groups:[{u,gi,alts}] }
-    let shards = 0, shardsHave = 0;
     // Tool qualities are already a GLOBAL registry (state.tools, keyed
     // id::level) so "3 upgrades need Hammering lvl 2" naturally dedupes to
     // one line — we just need to gather which planned upgrades ask for it.
@@ -681,15 +680,6 @@
 
     planned.forEach(u => {
       u.components.forEach((alts, i) => {
-        // warp shards get their own read-only summary line (a currency total).
-        // Unlike other components this counts partial progress, not just
-        // whole-group met/unmet, so "1 of 2 gathered" shows 1 still needed.
-        if (alts.length === 1 && alts[0].id === "warptoken") {
-          const a = alts[0];
-          shards += a.count;
-          shardsHave += isHave(u, "comp", i) ? a.count : Math.min(getQty(u, i, a.id), a.count);
-          return;
-        }
         const sig = alts.map(a => a.id).join("|");
         const rec = agg[sig] || (agg[sig] = { alts, from: new Set(), groups: [] });
         rec.groups.push({ u, gi: i, alts });
@@ -702,10 +692,17 @@
       });
     });
 
+    // Warp shards are a currency accrued across every planned upgrade at once,
+    // so pin its aggregated line first (ahead of the alphabetical sort) with
+    // its own accent instead of burying it among ordinary materials.
+    const isShardRec = rec => rec.alts.length === 1 && rec.alts[0].id === "warptoken";
+
     const rows = Object.values(agg).map(rec => {
       const unmet = rec.groups.filter(g => !compMet(g.u, g.gi, g.alts));
       return { rec, unmet, allMet: unmet.length === 0 };
     }).sort((a, b) => {
+      const aShard = isShardRec(a.rec), bShard = isShardRec(b.rec);
+      if (aShard !== bShard) return aShard ? -1 : 1;
       if (a.allMet !== b.allMet) return a.allMet ? 1 : -1; // needed first, met last
       return a.rec.alts[0].name.localeCompare(b.rec.alts[0].name);
     });
@@ -719,7 +716,7 @@
       src.forEach(g => g.alts.forEach(a => { counts[a.id] = (counts[a.id] || 0) + a.count; }));
 
       const row = document.createElement("div");
-      row.className = "shop-item" + (allMet ? " have" : "");
+      row.className = "shop-item" + (allMet ? " have" : "") + (isShardRec(rec) ? " shard" : "");
 
       const cb = document.createElement("input");
       cb.type = "checkbox";
@@ -742,21 +739,21 @@
       const from = document.createElement("div");
       from.className = "shop-from";
       from.textContent = [...rec.from].join(", ");
+      // Shards accrue across every planned upgrade as one running total, so
+      // surface gathered/needed alongside the usual "planned by" list — the
+      // per-group met/unmet count above doesn't show partial progress.
+      if (isShardRec(rec)) {
+        const total = rec.groups.reduce((n, g) => n + g.alts[0].count, 0);
+        const have = rec.groups.reduce((n, g) =>
+          n + (isHave(g.u, "comp", g.gi) ? g.alts[0].count : Math.min(getQty(g.u, g.gi, g.alts[0].id), g.alts[0].count)), 0);
+        from.textContent += " — " + have + "/" + total + " gathered";
+      }
       const col = document.createElement("div");
       col.style.flex = "1";
       col.appendChild(name); col.appendChild(from);
       row.appendChild(cb); row.appendChild(col);
       els.shopping.appendChild(row);
     });
-
-    if (shards > 0) {
-      const line = document.createElement("div");
-      line.className = "shard-line";
-      const remaining = shards - shardsHave;
-      line.innerHTML = '<span class="count">' + remaining + "×</span> warp shards still needed" +
-        (shardsHave ? ' <span class="shop-from">(' + shards + " total)</span>" : "");
-      els.shopping.appendChild(line);
-    }
 
     const qualRows = Object.values(qualAgg).map(rec => ({ rec, met: qualOwned(rec.qual) }))
       .sort((a, b) => {

@@ -390,8 +390,15 @@ setTimeout(() => {
   assert(afterFooterDone.done[oneShot.id] === true, "checking the footer checkbox marks the upgrade done");
   assert(!afterFooterDone.plan[oneShot.id], "and immediately drops it from the plan");
 
-  // Warp shard summary line counts partial progress, not just whole-group
-  // met/unmet — gathering 1 of 2 should leave 1 still needed, not 2.
+  // Warp shards are folded into the plan's normal material rows (checkbox +
+  // pinned first), but the "from" line still surfaces the running
+  // gathered/total tally since that's the one thing the binary met/unmet
+  // count above can't show.
+  function textOf(n) {
+    if (n.nodeType === 3) return n._text || "";
+    if (n.children && n.children.length) return n.children.map(textOf).join("");
+    return n._text || n.textContent || "";
+  }
   const shardUp = window.SKYISLAND_DATA.upgrades.find(u =>
     u.components.some(alts => alts.length === 1 && alts[0].id === "warptoken" && alts[0].count >= 2));
   assert(!!shardUp, "found an upgrade with a multi-shard requirement to test partial progress");
@@ -400,15 +407,23 @@ setTimeout(() => {
   promptReturn = JSON.stringify({ done: {}, plan: { [shardUp.id]: true }, have: {}, qty: { [shardQtyKey]: 1 }, tools: {}, open: {}, crafted: {} });
   impBtn2.dispatch("click");
   searchEl.dispatch("input");
-  const shardLineText = (function findShardLine(n) {
-    if (typeof n.className === "string" && n.className === "shard-line") return n._html;
-    for (const c of n.children || []) { const r = findShardLine(c); if (r) return r; }
+  const shardRow = (function findShardRow(n) {
+    if (typeof n.className === "string" && n.className.split(" ").includes("shard")) return n;
+    for (const c of n.children || []) { const r = findShardRow(c); if (r) return r; }
     return null;
   })(shopping);
-  assert(!!shardLineText, "shard summary line renders once a shard-only upgrade is planned");
+  assert(!!shardRow, "shard row renders once a shard-only upgrade is planned");
+  const shardRowCb = (shardRow.children || []).find(c => c.tagName === "input");
+  assert(!!shardRowCb, "shard row has a checkbox like other plan materials");
   const shardCount = shardUp.components[shardGi][0].count;
-  assert(shardLineText.indexOf(">" + (shardCount - 1) + "×<") >= 0,
-    "gathering 1 shard leaves (count-1) still needed, not the full count (" + shardLineText + ")");
+  const shardRowText = textOf(shardRow);
+  assert(shardRowText.indexOf("1/" + shardCount + " gathered") >= 0,
+    "gathering 1 of " + shardCount + " shards shows partial progress (" + shardRowText + ")");
+  assert(shopping.children.indexOf(shardRow) === 0, "shard row is pinned first in the plan panel");
+  shardRowCb.checked = true; shardRowCb.dispatch("change");
+  const afterShardCheck = JSON.parse(storeBacking["skyisland.tracker.v1"]);
+  assert(afterShardCheck.have[shardUp.id + "::comp::" + shardGi] === true,
+    "checking the shard row marks the group met just like other plan materials");
 
   // ---- ordered upgrade chains: Rank Up 1 must finish before Rank Up 2 -----
   function doneCbOf(card) {
