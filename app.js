@@ -552,23 +552,15 @@
     return row;
   }
 
-  // A tool-quality row bound to the GLOBAL registry: ticking it here reflects in
-  // every other upgrade that needs the same quality (they're kept on the island).
-  function qualityRow(u, q) {
-    const owned = qualOwned(q);
-    const row = document.createElement("div");
-    row.className = "req qual" + (owned ? " have" : "");
-    const cb = document.createElement("input");
-    cb.type = "checkbox";
-    cb.checked = owned;
-    cb.title = "You own a tool with this quality — shared across all upgrades";
-    cb.addEventListener("change", () => setQualOwned(q, cb.checked));
-    const text = document.createElement("span");
-    text.className = "req-text";
-    text.appendChild(guideLink("tool_quality", q.id, q.name));
-    text.appendChild(textNode(" "));
-    text.appendChild(tagNode("lvl " + q.level));
-    const info = (DATA.quality_items || {})[q.id + "::" + q.level];
+  // Name + level tag + optional "e.g. <examples>" for a tool quality. Shared
+  // by the card's qualityRow and the Plan panel's deduplicated planQualityRow
+  // (which omits examples — too verbose alongside every planned upgrade's name).
+  function qualityLabel(q, withExamples) {
+    const wrap = document.createElement("span");
+    wrap.appendChild(guideLink("tool_quality", q.id, q.name));
+    wrap.appendChild(textNode(" "));
+    wrap.appendChild(tagNode("lvl " + q.level));
+    const info = withExamples && (DATA.quality_items || {})[toolKey(q)];
     if (info && info.examples.length) {
       const egs = document.createElement("span");
       egs.className = "quality-egs";
@@ -582,9 +574,53 @@
         egs.appendChild(textNode(" and "));
         egs.appendChild(guideLink("tool_quality", q.id, more + " more"));
       }
-      text.appendChild(egs);
+      wrap.appendChild(egs);
     }
+    return wrap;
+  }
+
+  // A tool-quality row bound to the GLOBAL registry: ticking it here reflects in
+  // every other upgrade that needs the same quality (they're kept on the island).
+  function qualityRow(u, q) {
+    const owned = qualOwned(q);
+    const row = document.createElement("div");
+    row.className = "req qual" + (owned ? " have" : "");
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = owned;
+    cb.title = "You own a tool with this quality — shared across all upgrades";
+    cb.addEventListener("change", () => setQualOwned(q, cb.checked));
+    const text = document.createElement("span");
+    text.className = "req-text";
+    text.appendChild(qualityLabel(q, true));
     row.appendChild(cb); row.appendChild(text);
+    return row;
+  }
+
+  // A deduplicated tool-quality line in the Plan panel: one row per unique
+  // quality::level across every planned upgrade, bound to the same GLOBAL
+  // registry the cards read/write — ticking it here reflects everywhere.
+  function planQualityRow(rec, met) {
+    const row = document.createElement("div");
+    row.className = "shop-item" + (met ? " have" : "");
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.className = "shop-check";
+    cb.checked = met;
+    cb.title = "You own a tool with this quality — shared across all upgrades";
+    cb.addEventListener("change", () => setQualOwned(rec.qual, cb.checked));
+
+    const name = document.createElement("div");
+    name.className = "shop-name";
+    name.appendChild(qualityLabel(rec.qual, false));
+    const from = document.createElement("div");
+    from.className = "shop-from";
+    from.textContent = [...rec.from].join(", ");
+    const col = document.createElement("div");
+    col.style.flex = "1";
+    col.appendChild(name); col.appendChild(from);
+    row.appendChild(cb); row.appendChild(col);
     return row;
   }
 
@@ -643,6 +679,10 @@
     // updates the very same state the cards read/write.
     const agg = {}; // sig -> { alts, from:Set, groups:[{u,gi,alts}] }
     let shards = 0, shardsHave = 0;
+    // Tool qualities are already a GLOBAL registry (state.tools, keyed
+    // id::level) so "3 upgrades need Hammering lvl 2" naturally dedupes to
+    // one line — we just need to gather which planned upgrades ask for it.
+    const qualAgg = {}; // "id::level" -> { qual, from:Set }
 
     planned.forEach(u => {
       u.components.forEach((alts, i) => {
@@ -658,6 +698,11 @@
         const sig = alts.map(a => a.id).join("|");
         const rec = agg[sig] || (agg[sig] = { alts, from: new Set(), groups: [] });
         rec.groups.push({ u, gi: i, alts });
+        rec.from.add(u.name);
+      });
+      u.qualities.forEach(q => {
+        const key = toolKey(q);
+        const rec = qualAgg[key] || (qualAgg[key] = { qual: q, from: new Set() });
         rec.from.add(u.name);
       });
     });
@@ -722,12 +767,30 @@
       els.shopping.appendChild(line);
     }
 
+    const qualRows = Object.values(qualAgg).map(rec => ({ rec, met: qualOwned(rec.qual) }))
+      .sort((a, b) => {
+        if (a.met !== b.met) return a.met ? 1 : -1; // needed first, owned last
+        return a.rec.qual.name.localeCompare(b.rec.qual.name) || a.rec.qual.level - b.rec.qual.level;
+      });
+
+    let qualitiesNeeded = 0;
+    if (qualRows.length) {
+      els.shopping.appendChild(sectionLabel("Tool qualities (shared)"));
+      qualRows.forEach(({ rec, met }) => {
+        if (!met) qualitiesNeeded++;
+        els.shopping.appendChild(planQualityRow(rec, met));
+      });
+    }
+
     const tot = document.createElement("div");
     tot.className = "shop-total";
-    tot.textContent = itemsNeeded + " material line(s) still to gather across " + planned.length + " planned upgrade(s).";
+    tot.textContent = itemsNeeded + " material line(s)" +
+      (qualRows.length ? " and " + qualitiesNeeded + " tool " + (qualitiesNeeded === 1 ? "quality" : "qualities") : "") +
+      " still to gather.";
     els.shopping.appendChild(tot);
 
-    els.planSummary.textContent = planned.length + " planned · " + itemsNeeded + " to gather";
+    els.planSummary.textContent = planned.length + " planned · " + itemsNeeded +
+      (qualRows.length ? " + " + qualitiesNeeded + " qual" : "") + " to gather";
 
     // Footer: upgrades whose every requirement (components, qualities, tools)
     // is already met, ready to complete/craft straight from the sidebar. A
