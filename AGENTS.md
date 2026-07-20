@@ -71,10 +71,14 @@ node --check app.js
 
 ## State model (localStorage key `skyisland.tracker.v1`)
 
-`{ done, plan, have, qty, tools, open, groupsCollapsed }` — see `blankState()`.
+`{ done, plan, have, qty, tools, open, groupsCollapsed, crafted }` — see
+`blankState()`.
 
-- `done[upgradeId]` — marked crafted/complete.
+- `done[upgradeId]` — a one-shot upgrade marked complete.
 - `plan[upgradeId]` — in the plan (feeds the Plan panel).
+- `crafted[upgradeId]` — integer tally of how many times a **repeatable**
+  craft's "Craft" button has been pressed (shown as a "Crafted: N" tag on the
+  card; click the tag to reset it to 0). One-shot upgrades never touch this.
 - `have[key]` — a component group manually ticked ("I have one of these"),
   keyed `${upgradeId}::comp::${groupIdx}`.
 - `qty[key]` — per-alternative gathered count, keyed
@@ -124,8 +128,13 @@ with no attribute set, the OS preference alone decides ("Auto").
 - **Links**: items → `cdda-guide.nornagon.net/item/<id>`, qualities →
   `/tool_quality/<id>` (base is `DATA.guide_base`). Clicking item text/links must
   never toggle a checkbox or the card.
-- **"Remove finished"** unplans **only crafted (`done`) upgrades**, not merely
-  ready ones. Lives in the Plan panel header with "Clear".
+- **"Ready to craft" list** in the Plan panel: any planned upgrade whose every
+  requirement (components, qualities, tools) is met **and** that is not
+  chain-locked appears there, completable straight from the sidebar. Marking a
+  planned upgrade done auto-drops it from the plan, so there is no separate
+  "remove finished" step — the old button was dropped when this section
+  arrived. For repeatable crafts the same row tallies a craft and resets
+  ingredients.
 - **Sections (groups) are collapsible**; "Collapse all" collapses sections too
   (leaving only section names); search bypasses collapse so matches show. Search
   matches names, effects, component names, **and tool qualities/tools**.
@@ -133,8 +142,9 @@ with no attribute set, the OS preference alone decides ("Auto").
 ## Layout / responsive
 
 - Top controls are two rows: search on row 1; filters + Expand/Collapse-all +
-  Export/Import/Reset on row 2. Plan-management buttons (Clear, Remove finished)
-  live in the Plan panel header instead.
+  Export/Import/Reset on row 2. The only plan-management button ("Clear") lives
+  in the Plan panel header; the "Ready to craft" list below it replaces the old
+  "Remove finished" button.
 - Desktop: Plan is a sticky right sidebar (grid `1fr 420px`).
 - `≤900px`: single column; the Plan becomes a **fixed bottom sheet** — a handle
   with a live summary; tap it or the backdrop to slide up/down (`open` class,
