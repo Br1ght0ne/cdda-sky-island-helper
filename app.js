@@ -985,7 +985,24 @@
 			els.stats.append(b);
 			els.stats.append(document.createTextNode(" crafted"));
 		}
-		els.foot.textContent = total + " upgrades tracked";
+		els.foot.replaceChildren();
+		els.foot.append(document.createTextNode(total + " upgrades tracked"));
+		// Link the short SHA of the cataclysm-dda commit the data was built from
+		// (DATA.source_commit, the full hash emitted by build/extract.py) so a
+		// visitor can verify exactly which mod version the tracker covers.
+		const commit = DATA.source_commit;
+		if (commit) {
+			els.foot.append(document.createTextNode(" \u00b7 "));
+			const a = document.createElement("a");
+			a.href =
+				"https://github.com/CleverRaven/Cataclysm-DDA/commit/" +
+				encodeURIComponent(commit);
+			a.target = "_blank";
+			a.rel = "noopener noreferrer";
+			a.textContent = commit.slice(0, 7);
+			a.title = "Data generated from this cataclysm-dda commit";
+			els.foot.append(a);
+		}
 	}
 
 	// ---- notification helpers ------------------------------------------------
