@@ -209,3 +209,7 @@ devtools (e.g. at 375px) when you touch layout. When adding a DOM API in
 - In Node scripts (`build/smoke.js`) use **`process.stdout.write()`** for
   informational output — `console.log/debug/warn` is reserved for actual
   errors or is banned outright by the linter rule `no-console-except-error-js`.
+
+### Version control
+
+- Use Jujutsu (`jj`) instead of `git` for version control manipulation where possible
