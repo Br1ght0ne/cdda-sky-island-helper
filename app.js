@@ -572,11 +572,12 @@
 			doneWrap.append(craftBtn);
 		} else {
 			const cbLabel = document.createElement("label");
+			const completionLabel = done ? "Mark incomplete" : "Mark upgrade completed";
 			cbLabel.title = blockers.length
 				? "Complete " +
 					blockers.map((b) => '"' + b.name + '"').join(" and ") +
 					" first"
-				: (done ? "Mark incomplete" : "Mark upgrade completed");
+				: completionLabel;
 			doneCb = document.createElement("input");
 			doneCb.type = "checkbox";
 			doneCb.setAttribute("aria-label", (done ? "Mark incomplete: " : "Mark completed: ") + u.name);
@@ -784,7 +785,7 @@
 	}
 	// Real items link to the item browser; LIST/requirement pseudo-ids
 	// (e.g. "cordage", "any_badge") aren't item pages, so render them as a
-	// hoverable span whose tooltip expands the requirement.
+	// details button whose tooltip expands the requirement.
 	function itemLink(id, text, isList, tip, expand) {
 		if (!isList) return guideLink("item", id, text, tip);
 		const s = document.createElement("button");
@@ -1362,7 +1363,7 @@
 	// per-character `.sav`) to find upgrades already completed in-game, keyed by
 	// matching each mission's `type_id` against an upgrade `id` (they're the
 	// same string — every upgrade IS a mission_definition, joined by extract.py
-	// on the key item id). Only adds `done`; never unmarks or touches plan/qty.
+	// on the key item id). Adds `done`, removes completed plan/raid entries, and preserves quantities.
 	function importSaveFromGsav(text) {
 		const jsonStart = text.indexOf("{");
 		if (jsonStart < 0) throw new Error("no JSON object found");
@@ -1549,7 +1550,7 @@
 	// ---- hover tooltips, CRPG-style ------------------------------------------
 	// A tooltip shows immediately on hover but is transient (can't be touched).
 	// Keep hovering the same item for FREEZE_MS and it "freezes": it becomes
-	// interactive (grabbable/scrollable) and its border turns gold, so you can
+	// interactive (grabbable/scrollable) and its border turns accent green, so you can
 	// move the cursor onto it. It then only closes once you leave both the item
 	// and the tooltip.
 	const FREEZE_MS = 500;

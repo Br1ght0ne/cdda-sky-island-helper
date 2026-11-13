@@ -20,12 +20,26 @@ Just open `index.html` in a browser. No server, no build step, no internet.
   count individual alternatives toward it.
 - Tool qualities are tracked globally: own a tool once, and it's satisfied
   everywhere it's needed, with example items shown for each.
-- A linked Plan panel aggregates missing materials across everything you've
-  queued up, and stays in sync with the per-upgrade cards.
+- A linked Plan panel shows remaining materials after partial gathering, with
+  independent alternative choices kept separate, and stays in sync with cards.
+- Select **Next raid** on planned upgrades to focus the Plan on this trip's goals.
+  This focus is saved and included in progress exports; completed upgrades leave
+  both the Plan and Next raid. Repeatable crafts stay selected for another craft.
+- Filter by category, **Available now** (no tracked prerequisite blockers), or
+  **Missing one requirement**. Availability does not model every in-game condition.
+- Read upgrade benefits on collapsed cards, follow prerequisite links, or add a
+  goal and all its missing prerequisites to the Plan in one action.
+- Recover the last 20 progress changes with **Progress → Undo**, including crafts,
+  imports, resets, and clearing the Plan. Undo history lasts for this page session;
+  it does not change theme, filters, or expanded sections.
+- First-run guidance offers save import or a first upgrade. **Settings → Getting
+  started** reopens it. Progress contains import/export/reset; Settings contains
+  the optional Xedra toggle.
 - Every item and tool quality links out to the [CDDA Guide](https://cdda-guide.nornagon.net),
   with expandable tooltips for grouped/alternative requirements.
 - Import your save file to auto-mark completed upgrades, or export/import your
   tracked progress as JSON.
+- Keyboard-operable cards, sections and item details; larger mobile touch targets.
 - Responsive layout with a mobile-friendly Plan sheet; works fully offline,
   even from a `file://` path, with progress saved in your browser.
 
@@ -65,7 +79,7 @@ gitignored `mise.local.toml`). If the mod updates, regenerate them:
 
 ```bash
 python3 build/extract.py     # reads $CDDA_PATH/data/mods/Sky_Island, writes data.json + data.js
-node build/smoke.js          # optional: verify app.js still works end-to-end
+mise exec bun -- bun build/smoke.js          # optional: verify app.js still works end-to-end
 ```
 
 The extractor:
@@ -84,3 +98,17 @@ Point `CDDA_PATH` at your own Cataclysm-DDA checkout (e.g. in `mise.local.toml`
 or `export CDDA_PATH=…`); the script errors out if it isn't set.
 For sparse checkouts, include `data/json`, `data/mods/Sky_Island`, and
 `data/mods/Xedra_Evolved` so optional upgrade ingredients resolve correctly.
+
+## Checking changes
+
+With Bun installed through mise:
+
+```bash
+mise exec bun -- bun build/smoke.js
+mise exec bun -- bun -e 'new Bun.Transpiler({loader:"js"}).transformSync(await Bun.file("app.js").text())'
+```
+
+The DOM shim covers tracking behavior and keyboard/focus state, not browser
+layout. For UI changes, also open `index.html` directly in a browser and inspect
+desktop and 375px layouts, including the open Plan sheet. Completed one-time
+upgrades must be explicitly marked incomplete before they can be planned again.

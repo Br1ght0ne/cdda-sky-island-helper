@@ -53,8 +53,8 @@ Regenerate + verify:
 
 ```bash
 python3 build/extract.py
-node build/smoke.js
-node --check app.js
+mise exec bun -- bun build/smoke.js
+mise exec bun -- bun -e 'new Bun.Transpiler({loader:"js"}).transformSync(await Bun.file("app.js").text())'
 ```
 
 ### Payload shape (`window.SKYISLAND_DATA`)
@@ -71,11 +71,19 @@ node --check app.js
 
 ## State model (localStorage key `skyisland.tracker.v1`)
 
-`{ done, plan, have, qty, tools, open, groupsCollapsed, crafted, xedraEnabled }` — see
+`{ done, plan, raid, have, qty, tools, open, groupsCollapsed, crafted, xedraEnabled }` — see
 `blankState()`.
 
 - `done[upgradeId]` — a one-shot upgrade marked complete.
 - `plan[upgradeId]` — in the plan (feeds the Plan panel).
+- `raid[upgradeId]` — selected for Next raid, a subset of planned incomplete
+  upgrades. Included in exports/imports/reset; old saves default to `{}`.
+  Completing/removing a goal clears its raid entry. Repeatable crafting retains
+  plan and raid membership. Disabled Xedra entries are retained but hidden.
+- Undo stores 20 progress snapshots in memory. `checkpoint()` precedes a user
+  mutation and `finishChange()` records it at render only if progress changed.
+  Open sections/cards and UI preferences are excluded. Imports normalize maps
+  and remove unknown/completed plan IDs and orphaned raid IDs.
 - `crafted[upgradeId]` — integer tally of how many times a **repeatable**
   craft's "Craft" button has been pressed (shown as a "Crafted: N" tag on the
   card; click the tag to reset it to 0). One-shot upgrades never touch this.
@@ -93,6 +101,9 @@ node --check app.js
   does not change it.
 
 Export/Import copies this object as JSON via the clipboard; Reset = `blankState()`.
+These controls and Undo live in the Progress disclosure. Xedra and Getting
+started live in Settings. Onboarding dismissal uses `skyisland.welcome-dismissed`,
+a separate UI preference excluded from tracker exports/imports/reset.
 
 **Theme preference** lives in its own key, `skyisland.theme` (`"light"` / `"dark"`,
 absent = Auto) — deliberately separate from tracker state above so it's a UI
@@ -125,11 +136,25 @@ with no attribute set, the OS preference alone decides ("Auto").
   - **Do NOT add a state/binding library (htmx, Alpine, etc.).** htmx was
     explicitly rejected: it's for server-driven HTML over HTTP and needs a
     CDN/server, breaking the `file://` + offline constraint.
+- **Plan quantities**: single-alternative rows sum remaining per-upgrade
+  allocations; OR groups stay separate so independent choices are not merged.
+  Same-ID alternatives can have different counts; never sum those counts together.
+  Next raid scopes materials, tools and readiness to selected goals; qualities
+  remain global. All planned retains gathered rows; Next raid hides them.
+- **Navigation**: category/availability/search filters combine. Available now
+  excludes done and tracked blockers; Missing one requirement also requires exactly
+  one unmet group/tool/quality. Prerequisite navigation clears hiding filters and
+  expands/focuses the target. Batch prerequisite planning is recursive and undoable.
+- **Completion**: completed upgrades cannot be silently reopened by planning.
+  Mark incomplete first. `isReady()` is shared by cards, Plan and summary counts;
+  blocked upgrades with gathered ingredients must not display Ready to craft.
 - **Tooltips**: only `LIST` item-groups have them. They appear on hover; after
-  ~1.4s of hovering (or an immediate click on the group, which is not a link)
+  500ms of hovering (or an immediate click on the group, which is not a link)
   they **freeze** — border turns from muted to vivid **accent green** (no other
   accent colors), become interactive/scrollable, and each option inside is a link to the
   CDDA Guide. `FREEZE_MS` / `BRIDGE_MS` constants in `app.js`.
+  LIST triggers are native buttons. Clicking pins details, focuses Close, and
+  Escape restores trigger focus; pinned details stay open until dismissed.
 - **Links**: items → `cdda-guide.nornagon.net/item/<id>`, qualities →
   `/tool_quality/<id>` (base is `DATA.guide_base`). Clicking item text/links must
   never toggle a checkbox or the card.
@@ -146,14 +171,16 @@ with no attribute set, the OS preference alone decides ("Auto").
 
 ## Layout / responsive
 
-- Top controls are two rows: search on row 1; filters + Expand/Collapse-all +
-  Export/Import/Reset on row 2. The only plan-management button ("Clear") lives
+- Top controls are two rows: search on row 1; filters (including category/availability) + Expand/Collapse-all +
+  Progress/Settings disclosures on row 2. The only plan-management button ("Clear") lives
   in the Plan panel header; the "Ready to craft" list below it replaces the old
   "Remove finished" button.
 - Desktop: Plan is a sticky right sidebar (grid `1fr 420px`).
 - `≤900px`: single column; the Plan becomes a **fixed bottom sheet** — a handle
   with a live summary; tap it or the backdrop to slide up/down (`open` class,
-  ephemeral, not persisted).
+  ephemeral, not persisted). The All planned/Next raid view is also ephemeral.
+  Closed sheet content is inert; opening makes the background inert, traps focus,
+  and Escape closes it. Desktop breakpoint changes release modal restrictions.
 - Must not horizontally scroll down to **375px** (iPhone SE). Guardrails:
   `overflow-wrap: anywhere` on text; viewport-capped tooltip; a `≤480px` block;
   `overflow-x:hidden` on mobile as a safety net.
@@ -165,18 +192,20 @@ with no attribute set, the OS preference alone decides ("Auto").
 
 ## Testing
 
-There is **no browser in the dev sandbox** (no Chrome/puppeteer/playwright/jsdom).
+The dev sandbox has no bundled browser automation dependencies
+(Chrome/puppeteer/playwright/jsdom). A host-native browser may be available through
+computer-use tools; verify tool availability rather than assuming it.
 `build/smoke.js` is a hand-rolled DOM shim that loads `data.js` + `app.js` and
 drives the UI (planning, checkboxes, steppers, quality sync, collapse, tooltips,
 sheet toggle, export/import/reset). Run it after any `app.js`/`data` change:
 
 ```bash
-node --check app.js && node build/smoke.js
+mise exec bun -- bun build/smoke.js
+mise exec bun -- bun -e 'new Bun.Transpiler({loader:"js"}).transformSync(await Bun.file("app.js").text())'
 ```
 
-Caveat: the shim verifies **logic**, not visual layout. CSS/responsive changes
-can't be visually confirmed here — call that out and ask the user to eyeball
-devtools (e.g. at 375px) when you touch layout. When adding a DOM API in
+Caveat: the shim verifies **logic**, not visual layout. Inspect CSS/responsive changes in an available browser (including 375px).
+If none is available, call out that limitation and ask the user to check devtools. When adding a DOM API in
 `app.js` that the shim lacks, extend the shim (`mkEl`, `global.document`).
 
 ## Idiomatic patterns (enforced by the linter — don't regress)
@@ -190,8 +219,8 @@ devtools (e.g. at 375px) when you touch layout. When adding a DOM API in
 - **`document.querySelector("#id")`** instead of `document.getElementById("id")`.
 - When adding a new DOM method to `app.js`, add the corresponding stub to
   `mkEl` / `global.document` in `build/smoke.js` at the same time.
-  Currently implemented: `append`, `replaceChildren`, `classList`
-  (add/remove/toggle/contains), `remove`.
+  The shim also models parentage, selectors, focus, document listeners and media
+  changes. Keep new API stubs aligned with the behaviors the application uses.
 
 ### User notifications
 
