@@ -136,11 +136,21 @@
 		planAll: document.querySelector("#plan-view-all"),
 		planRaid: document.querySelector("#plan-view-raid"),
 		planGoals: document.querySelector("#plan-goals"),
+		availability: document.querySelector("#availability"),
+		category: document.querySelector("#category-filter"),
+		welcome: document.querySelector("#welcome"),
+		welcomeStart: document.querySelector("#welcome-start"),
+		welcomeImport: document.querySelector("#welcome-import"),
+		welcomeDismiss: document.querySelector("#welcome-dismiss"),
+		help: document.querySelector("#show-help"),
+		results: document.querySelector("#result-count"),
 	};
 
 	// ---- state ---------------------------------------------------------------
 	let state = load();
 	let planView = "all";
+	let forceHelp = false;
+	let closePlanSheet = () => {};
 	const history = [];
 	let pendingChange = null;
 
@@ -326,22 +336,92 @@
 		});
 		return { met, total: groups.length };
 	}
+
+	function clearFilters() {
+		els.search.value = ""; els.hideDone.checked = false; els.onlyPlan.checked = false;
+		els.availability.value = ""; els.category.value = "";
+	}
+	function passesFilters(u) {
+		const q = els.search.value.trim().toLowerCase();
+		if (q && !matches(u, q)) return false;
+		if (els.hideDone.checked && state.done[u.id]) return false;
+		if (els.onlyPlan.checked && !state.plan[u.id]) return false;
+		if (els.category.value && u.category !== els.category.value) return false;
+		if (els.availability.value) {
+			if (state.done[u.id] || lockedBy(u).length) return false;
+			if (els.availability.value === "one") {
+				const p = progress(u); if (p.total - p.met !== 1) return false;
+			}
+		}
+		return true;
+	}
+	function revealUpgrade(id) {
+		const u = byId[id];
+		if (!u || !contentEnabled(u)) { notify("Enable optional content in Settings to view this upgrade."); return; }
+		const hidden = !passesFilters(u);
+		if (hidden) clearFilters();
+		state.open[id] = true; delete state.groupsCollapsed[u.group];
+		closePlanSheet(); render();
+		const target = document.querySelector('[data-upgrade="' + id + '"]');
+		if (target) { target.scrollIntoView({ block: "center" }); const button = target.querySelector(".card-disclosure"); if (button) button.focus({ preventScroll: true }); }
+		if (hidden) notify("Cleared filters to show " + u.name + ".");
+	}
+	function addPrerequisites(u) {
+		const visited = new Set(); const missing = []; let disabled = false;
+		function visit(id) {
+			if (visited.has(id)) return;
+			visited.add(id);
+			const next = byId[id]; if (!next || state.done[id]) return;
+			if (!contentEnabled(next)) { disabled = true; return; }
+			(requiresBefore[id] || []).forEach(visit);
+			missing.push(id);
+		}
+		visit(u.id); checkpoint("Added prerequisites to Plan");
+		missing.forEach(id => { state.plan[id] = true; }); render();
+		if (disabled) notify("Some prerequisites need optional content enabled in Settings.");
+	}
+	function renderWelcome() {
+		const meaningful = ["done", "plan", "have", "qty", "tools", "crafted"].some(key => Object.values(state[key]).some(Boolean));
+		let dismissed = false;
+		try { dismissed = localStorage.getItem("skyisland.welcome-dismissed") === "true"; } catch (e) {}
+		els.welcome.hidden = !forceHelp && (meaningful || dismissed);
+	}
+	function setupDiscovery() {
+		els.availability.addEventListener("change", render);
+		els.category.addEventListener("change", render);
+		els.welcomeStart.addEventListener("click", () => {
+			const u = UP.find(u => contentEnabled(u) && !u.repeatable && !state.done[u.id] && !lockedBy(u).length);
+			if (u) revealUpgrade(u.id);
+		});
+		els.welcomeImport.addEventListener("click", () => els.importSaveFile.click());
+		els.welcomeDismiss.addEventListener("click", () => {
+			forceHelp = false;
+			try { localStorage.setItem("skyisland.welcome-dismissed", "true"); } catch (e) {}
+			render(); els.search.focus();
+		});
+		els.help.addEventListener("click", () => { forceHelp = true; render(); els.welcome.scrollIntoView({ block: "center" }); els.welcomeStart.focus(); });
+	}
+
 	// ---- rendering -----------------------------------------------------------
 	function render() {
 		finishChange();
 		els.showXedra.checked = state.xedraEnabled === true;
 		const q = els.search.value.trim().toLowerCase();
-		const hideDone = els.hideDone.checked;
-		const onlyPlan = els.onlyPlan.checked;
+		const selectedCategory = els.category.value || "";
+		const categories = [...new Set(UP.filter(contentEnabled).map(u => u.category))];
+		els.category.replaceChildren();
+		["", ...categories].forEach(value => {
+			const option = document.createElement("option"); option.value = value;
+			option.textContent = value || "All categories"; els.category.append(option);
+		});
+		els.category.value = categories.includes(selectedCategory) ? selectedCategory : "";
 		els.searchClear.hidden = !q;
 
 		const groups = {}; // group -> category -> [upgrades]
 		let shown = 0;
 		UP.forEach((u) => {
 			if (!contentEnabled(u)) return;
-			if (hideDone && state.done[u.id]) return;
-			if (onlyPlan && !state.plan[u.id]) return;
-			if (q && !matches(u, q)) return;
+			if (!passesFilters(u)) return;
 			groups[u.group] = groups[u.group] || {};
 			(groups[u.group][u.category] = groups[u.group][u.category] || []).push(u);
 			shown++;
@@ -352,7 +432,10 @@
 			const empty = document.createElement("div");
 			empty.className = "empty";
 			empty.textContent = "No upgrades match your filters.";
-			els.list.append(empty);
+			const clear = document.createElement("button"); clear.type = "button";
+			clear.className = "btn"; clear.textContent = "Clear filters";
+			clear.addEventListener("click", () => { clearFilters(); render(); els.search.focus(); });
+			empty.append(clear); els.list.append(empty);
 		} else {
 			const searching = !!q;
 			for (const group of Object.keys(groups)) {
@@ -390,6 +473,8 @@
 				}
 			}
 		}
+		els.results.textContent = shown + " results";
+		renderWelcome();
 		renderStats();
 		renderShopping();
 		save();
@@ -414,6 +499,7 @@
 		const blockers = done ? [] : lockedBy(u);
 
 		const card = document.createElement("div");
+		card.setAttribute("data-upgrade", u.id);
 		card.className =
 			"card" +
 			(done ? " done" : "") +
@@ -455,9 +541,10 @@
 				? "Complete " +
 					blockers.map((b) => '"' + b.name + '"').join(" and ") +
 					" first"
-				: "Mark upgrade completed";
+				: (done ? "Mark incomplete" : "Mark upgrade completed");
 			doneCb = document.createElement("input");
 			doneCb.type = "checkbox";
+			doneCb.setAttribute("aria-label", (done ? "Mark incomplete: " : "Mark completed: ") + u.name);
 			doneCb.checked = done;
 			doneCb.disabled = blockers.length > 0;
 			doneCb.addEventListener("click", (e) => e.stopPropagation());
@@ -520,24 +607,35 @@
 			title.append(tag);
 		}
 		main.append(title);
+		if (u.effect) {
+			const effect = document.createElement("p"); effect.className = "card-effect";
+			effect.textContent = u.effect.replace(/^EFFECT:\s*/i, ""); main.append(effect);
+		}
 		if (blockers.length) {
 			const lock = document.createElement("div");
 			lock.className = "lock-note";
-			lock.textContent =
-				"🔒 Requires: " + blockers.map((b) => b.name).join(", ");
+			lock.append(textNode("Requires: "));
+			blockers.forEach((b, i) => {
+				if (i) lock.append(textNode(", "));
+				const jump = document.createElement("button"); jump.type = "button";
+				jump.className = "text-button"; jump.textContent = b.name;
+				jump.addEventListener("click", e => { e.stopPropagation(); revealUpgrade(b.id); }); lock.append(jump);
+			});
+			const add = document.createElement("button"); add.type = "button"; add.className = "btn tiny prerequisites";
+			add.textContent = "Add missing prerequisites to Plan";
+			add.addEventListener("click", e => { e.stopPropagation(); addPrerequisites(u); }); lock.append(add);
 			main.append(lock);
 		}
 
 		const side = document.createElement("div");
 		side.className = "card-side";
 		const badge = document.createElement("div");
-		const complete = prog.total > 0 && prog.met === prog.total;
-		badge.className = "progress-badge" + (complete ? " complete" : "");
-		if (prog.total === 0) {
-			badge.textContent = "—";
-		} else {
-			badge.textContent = complete ? "✓ ready" : prog.met + "/" + prog.total;
-		}
+		const ready = isReady(u);
+		badge.className = "progress-badge" + (ready ? " complete" : "");
+		if (done) badge.textContent = "Completed";
+		else if (ready) badge.textContent = "✓ Ready to craft";
+		else if (prog.total > 0 && prog.met === prog.total && blockers.length) badge.textContent = "Requirements met · prerequisite missing";
+		else badge.textContent = prog.met + "/" + prog.total + " requirements met";
 		const planBtn = document.createElement("button");
 		planBtn.type = "button";
 		planBtn.className = "plan-btn" + (planned ? " on" : "");
@@ -577,6 +675,7 @@
 		// body
 		const body = document.createElement("div");
 		body.className = "card-body";
+		if (u.effect) { const effect = document.createElement("p"); effect.className = "effect-full"; effect.textContent = u.effect.replace(/^EFFECT:\s*/i, ""); body.append(effect); }
 
 		if (u.components.length) {
 			body.append(sectionLabel("Materials"));
@@ -889,7 +988,8 @@
 		allPlanned.forEach(u => {
 			const row = document.createElement("div");
 			row.className = "plan-goal";
-			const name = document.createElement("span"); name.textContent = u.name;
+			const name = document.createElement("button"); name.type = "button"; name.className = "text-button plan-goal-name"; name.textContent = u.name;
+			name.addEventListener("click", () => revealUpgrade(u.id));
 			const focus = document.createElement("button"); focus.type = "button";
 			focus.className = "btn tiny"; focus.textContent = "Next raid";
 			focus.setAttribute("aria-pressed", String(!!state.raid[u.id]));
@@ -1097,10 +1197,14 @@
 			0,
 		);
 		els.stats.replaceChildren();
+		const oneTime = enabled.filter(u => !u.repeatable);
+		const completed = oneTime.filter(u => state.done[u.id]).length;
+		const planned = enabled.filter(u => state.plan[u.id] && !state.done[u.id]);
+		els.stats.append(textNode(completed + "/" + oneTime.length + " upgrades completed · " + planned.length + " planned · " + planned.filter(isReady).length + " ready"));
 		if (crafted > 0) {
 			const b = document.createElement("b");
 			b.textContent = String(crafted);
-			els.stats.append(b);
+			els.stats.append(textNode(" · "), b);
 			els.stats.append(document.createTextNode(" crafted"));
 		}
 		els.foot.replaceChildren();
@@ -1183,7 +1287,7 @@
 			state = normalizeState(parsed);
 			save();
 			render();
-			notify("Progress imported.");
+			notify("Progress imported.", true);
 		} catch (e) {
 			notify("That doesn't look like valid exported JSON.");
 		}
@@ -1265,7 +1369,7 @@
 			});
 			save();
 			render();
-			notify("Marked " + newlyDone.length + " upgrade(s) as done.");
+			notify("Marked " + newlyDone.length + " upgrade(s) as done.", true);
 		};
 		reader.onerror = () => notify("Couldn't read that file.");
 		reader.readAsText(file);
@@ -1327,7 +1431,7 @@
 		viewGroup.id = "view-actions";
 		viewGroup.append(expand);
 		viewGroup.append(collapse);
-		els.toolbarActions.insertBefore(viewGroup, els.mainActions);
+		els.toolbarActions.insertBefore(viewGroup, document.querySelector("#progress-menu"));
 
 		const exp = document.createElement("button");
 		exp.type = "button";
@@ -1587,5 +1691,6 @@
 	setupTooltips();
 	setupPlanSheet();
 	setupThemeToggle();
+	setupDiscovery();
 	render();
 })();

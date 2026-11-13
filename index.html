@@ -191,6 +191,7 @@
               <input
                 type="search"
                 id="search"
+                aria-label="Search upgrades, materials, and tools"
                 placeholder="Search upgrades or items…"
                 autocomplete="off"
               />
@@ -228,17 +229,42 @@
                   >Only in plan</span
                 ></label
               >
-              <label class="chk" title="Show optional Xedra Evolved upgrades"
-                ><input type="checkbox" id="show-xedra" /><span
-                  >Xedra Evolved</span
-                ></label
-              >
+              <label class="filter-label">Category
+                <select id="category-filter"><option value="">All categories</option></select>
+              </label>
+              <label class="filter-label">Availability
+                <select id="availability" aria-describedby="availability-help">
+                  <option value="">All upgrades</option>
+                  <option value="available">Available now</option>
+                  <option value="one">Missing one requirement</option>
+                </select>
+              </label>
             </div>
-            <div class="toolbar-group" id="main-actions"></div>
+            <details class="control-menu" id="progress-menu">
+              <summary>Progress</summary>
+              <div class="menu-content"><button id="undo-progress" class="btn" type="button" disabled>Undo</button><div id="main-actions"></div></div>
+            </details>
+            <details class="control-menu" id="settings-menu">
+              <summary>Settings</summary>
+              <div class="menu-content">
+                <label class="chk"><input type="checkbox" id="show-xedra" />Xedra Evolved</label>
+                <button id="show-help" class="btn" type="button">Getting started</button>
+              </div>
+            </details>
           </div>
         </div>
-        <button id="undo-progress" class="btn" type="button" disabled>Undo</button>
-        <div id="stats" class="stats"></div>
+        <p class="hint filter-help" id="availability-help">Availability uses tracked prerequisites; other in-game conditions may apply.</p>
+        <section id="welcome" class="welcome" aria-label="Getting started">
+          <h2>Plan your next trip home</h2>
+          <p>Choose an upgrade, gather its materials, and mark it complete. Your progress is saved in this browser.</p>
+          <div class="welcome-actions">
+            <button id="welcome-import" class="btn primary" type="button">Import your save</button>
+            <button id="welcome-start" class="btn" type="button">Choose your first upgrade</button>
+            <button id="welcome-dismiss" class="text-button" type="button">Dismiss</button>
+          </div>
+          <p class="hint">Choose master.gsav from your world's save folder. This imports completed upgrades, not gathered inventory or owned tools.</p>
+        </section>
+        <div class="summary-row"><div id="stats" class="stats"></div><span id="result-count" class="hint"></span></div>
         <div id="list"></div>
       </main>
 

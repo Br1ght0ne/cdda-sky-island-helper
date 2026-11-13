@@ -70,7 +70,9 @@ const toolbar = mkEl("div");
 // the real DOM.
 const toolbarActionsEl = mkEl("div");
 const mainActionsEl = mkEl("div");
-toolbarActionsEl.children = [mkEl("div"), mainActionsEl];
+const progressMenu = mkEl("details"); progressMenu.append(mainActionsEl);
+registry["progress-menu"] = progressMenu;
+toolbarActionsEl.children = [mkEl("div"), progressMenu];
 registry["toolbar-actions"] = toolbarActionsEl;
 registry["main-actions"] = mainActionsEl;
 
@@ -162,7 +164,7 @@ assert(planFooterSummary.textContent === "0/" + plannedCount + " ready",
 // Toolbar order: checkboxes, then Expand/Collapse, then the main action
 // buttons (pushed right), with Reset last of those.
 const viewGroupIdx = actions.children.findIndex(c => findByText(c, "Expand all"));
-const mainActionsIdx = actions.children.indexOf(registry["main-actions"]);
+const mainActionsIdx = actions.children.indexOf(registry["progress-menu"]);
 assert(viewGroupIdx !== -1 && viewGroupIdx < mainActionsIdx,
   "Expand/Collapse group sits to the left of the main action buttons");
 assert(registry["main-actions"].children.at(-1)._text === "Reset",
@@ -346,7 +348,7 @@ setTimeout(() => {
     const cards = [];
     (function walk(n){ if (typeof n.className === "string" && (n.className === "card" || n.className.startsWith("card "))) cards.push(n); (n.children || []).forEach(walk); })(list);
     return cards.find(c => (function walk2(n){
-      if (n._text && n._text.includes(name)) return true;
+      if (n.className === "card-title" && n._text === name) return true;
       for (const ch of n.children || []) if (walk2(ch)) return true;
       return false;
     })(c));
@@ -615,6 +617,38 @@ setTimeout(() => {
   assert(getState().raid?.[r1] && getState().plan[r1] && !getState().done[r1], "Undo completion restores plan and raid focus");
   importFixture({plan: null, qty: [], raid: null});
   assert(getState().plan && getState().raid && !Array.isArray(getState().qty), "malformed state maps normalize safely");
+
+  // Discovery and prerequisite navigation.
+  importFixture({});
+  assert(getEl("welcome").hidden === false, "welcome appears for an empty tracker");
+  const available = getEl("availability"), category = getEl("category-filter");
+  available.value = "available"; available.dispatch("change");
+  assert(!!findCardByName("Island Rank Up 1") && !findCardByName("Island Rank Up 2"), "Available now excludes tracked prerequisite blockers");
+  category.value = "Island Rank Up"; category.dispatch("change");
+  assert(countCards() === 1, "category and availability filters intersect");
+  const rankTools = Object.fromEntries(window.SKYISLAND_DATA.upgrades.find(u => u.id === r1).qualities.map(q => [q.id + "::" + q.level, true]));
+  importFixture({ tools: rankTools });
+  available.value = "one"; available.dispatch("change");
+  assert(countCards() === 1, "Missing one requirement selects an unblocked single-requirement upgrade");
+  available.value = ""; category.value = ""; available.dispatch("change");
+  importFixture({ plan: { [r2]: true }, have: { [r2 + "::comp::0"]: true }, tools: rankTools });
+  assert(getEl("welcome").hidden === true, "welcome hides when meaningful progress exists");
+  assert(!textOf(findCardByName("Island Rank Up 2")).includes("✓ ready"), "a locked card with gathered requirements never says ready");
+  const prereqBtn = findByText(findCardByName("Island Rank Up 2"), "Add missing prerequisites to Plan");
+  assert(!!prereqBtn, "blocked upgrades offer prerequisite planning");
+  if (prereqBtn) prereqBtn.dispatch("click");
+  assert(getState().plan[r1] && getState().plan[r2], "prerequisite planning includes target and missing ancestors");
+  getEl("undo-progress").dispatch("click");
+  assert(!getState().plan[r1] && getState().plan[r2], "prerequisite batch is one undo step");
+  const totalOneShot = window.SKYISLAND_DATA.upgrades.filter(u => !u.repeatable && !u.mod).length;
+  assert(textOf(registry.stats).includes("0/" + totalOneShot + " upgrades completed"), "completion summary excludes repeatable recipes");
+  searchEl.value = "Island Rank Up 2"; searchEl.dispatch("input");
+  const prereqLink = findByText(findCardByName("Island Rank Up 2"), "Island Rank Up 1");
+  if (prereqLink) prereqLink.dispatch("click");
+  assert(searchEl.value === "" && getState().open[r1], "prerequisite navigation clears hiding search and reveals target");
+  searchEl.value = ""; searchEl.dispatch("input");
+  const firstCard = findCardByName("Island Rank Up 1");
+  assert(textOf(firstCard).includes("Reach Rank 1"), "collapsed card includes its extracted benefit");
 
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;
