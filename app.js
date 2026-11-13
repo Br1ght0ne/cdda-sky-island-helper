@@ -132,10 +132,71 @@
 		planReadyList: document.querySelector("#plan-ready-list"),
 		importSaveFile: document.querySelector("#import-save-file"),
 		toast: document.querySelector("#toast"),
+		undo: document.querySelector("#undo-progress"),
+		planAll: document.querySelector("#plan-view-all"),
+		planRaid: document.querySelector("#plan-view-raid"),
+		planGoals: document.querySelector("#plan-goals"),
 	};
 
 	// ---- state ---------------------------------------------------------------
 	let state = load();
+	let planView = "all";
+	const history = [];
+	let pendingChange = null;
+
+	function progressSnapshot() {
+		const { open, groupsCollapsed, ...progress } = state;
+		return JSON.stringify(progress);
+	}
+	function checkpoint(label, quiet = false) {
+		pendingChange = { label, quiet, before: progressSnapshot() };
+	}
+	function finishChange() {
+		if (pendingChange && pendingChange.before !== progressSnapshot()) {
+			history.push(pendingChange);
+			if (history.length > 20) history.shift();
+			if (!pendingChange.quiet) notify(pendingChange.label + ".", true);
+		}
+		pendingChange = null;
+		els.undo.disabled = history.length === 0;
+		els.undo.textContent = history.length ? "Undo: " + history.at(-1).label : "Undo";
+	}
+	function undoProgress() {
+		const change = history.pop();
+		if (!change) return;
+		try {
+			state = { ...normalizeState(JSON.parse(change.before)), open: state.open, groupsCollapsed: state.groupsCollapsed };
+		} catch (e) { notify("Couldn't restore that change."); return; }
+		pendingChange = null;
+		render();
+		notify("Undid: " + change.label);
+	}
+	function normalizeState(raw) {
+		const result = blankState();
+		if (!raw || typeof raw !== "object" || Array.isArray(raw)) return result;
+		for (const key of Object.keys(result)) {
+			if (key === "xedraEnabled") result[key] = raw[key] === true;
+			else if (raw[key] && typeof raw[key] === "object" && !Array.isArray(raw[key])) {
+				result[key] = Object.fromEntries(Object.entries(raw[key]).filter(([id, value]) =>
+					id !== "__proto__" && id !== "constructor" &&
+					(typeof value === "boolean" || (Number.isFinite(value) && value >= 0))));
+			}
+		}
+		for (const id of Object.keys(result.plan)) if (!byId[id] || result.done[id]) delete result.plan[id];
+		for (const id of Object.keys(result.raid)) if (!result.plan[id] || !byId[id] || result.done[id]) delete result.raid[id];
+		return result;
+	}
+	function isReady(u) {
+		const p = progress(u);
+		return !state.done[u.id] && p.total > 0 && p.met === p.total && lockedBy(u).length === 0;
+	}
+	function toggleRaid(u) {
+		if (state.done[u.id]) return;
+		checkpoint("Changed next raid goals");
+		if (state.raid[u.id]) delete state.raid[u.id];
+		else { state.plan[u.id] = true; state.raid[u.id] = true; }
+		render();
+	}
 
 	function blankState() {
 		// `tools` is a GLOBAL registry of owned tool qualities (keyed `id::level`).
@@ -145,6 +206,7 @@
 			xedraEnabled: false,
 			done: {},
 			plan: {},
+			raid: {},
 			have: {},
 			qty: {},
 			tools: {},
@@ -157,7 +219,7 @@
 		try {
 			const raw = localStorage.getItem(STORE_KEY);
 			if (!raw) return blankState();
-			return Object.assign(blankState(), JSON.parse(raw));
+			return normalizeState(JSON.parse(raw));
 		} catch (e) {
 			return blankState();
 		}
@@ -187,6 +249,7 @@
 		return state.qty[qtyKey(u, gi, altId)] || 0;
 	}
 	function setQty(u, gi, alt, val) {
+		checkpoint("Changed gathered quantity", true);
 		const v = Math.max(0, Math.min(alt.count, val | 0));
 		const k = qtyKey(u, gi, alt.id);
 		if (v <= 0) delete state.qty[k];
@@ -212,6 +275,7 @@
 		else delete state.have[k];
 	}
 	function setCompGroup(u, gi, met) {
+		checkpoint("Changed gathered materials");
 		setCompGroupFlag(u, gi, met);
 		render();
 	}
@@ -233,6 +297,7 @@
 		return !!state.tools[toolKey(q)];
 	}
 	function setQualOwned(q, on) {
+		checkpoint("Changed owned tool quality");
 		if (on) state.tools[toolKey(q)] = true;
 		else delete state.tools[toolKey(q)];
 		render();
@@ -263,6 +328,7 @@
 	}
 	// ---- rendering -----------------------------------------------------------
 	function render() {
+		finishChange();
 		els.showXedra.checked = state.xedraEnabled === true;
 		const q = els.search.value.trim().toLowerCase();
 		const hideDone = els.hideDone.checked;
@@ -366,7 +432,7 @@
 		let doneCb = null,
 			craftBtn = null;
 		if (u.repeatable) {
-			const ready = prog.total > 0 && prog.met === prog.total;
+			const ready = isReady(u);
 			craftBtn = document.createElement("button");
 			craftBtn.type = "button";
 			craftBtn.className = "craft-btn" + (ready ? " ready" : "");
@@ -377,6 +443,7 @@
 				: "Gather all ingredients first";
 			craftBtn.addEventListener("click", (e) => {
 				e.stopPropagation();
+				checkpoint("Recorded craft");
 				state.crafted[u.id] = (state.crafted[u.id] || 0) + 1;
 				resetComponents(u);
 				render();
@@ -403,9 +470,11 @@
 				}
 				// Marking a one-shot upgrade complete drops it from the plan right
 				// away — there's no separate "remove finished" step.
+				checkpoint("Changed upgrade completion");
 				if (doneCb.checked) {
 					state.done[u.id] = true;
 					delete state.plan[u.id];
+					delete state.raid[u.id];
 				} else delete state.done[u.id];
 				render();
 			});
@@ -443,6 +512,7 @@
 			tag.addEventListener("click", (e) => {
 				e.stopPropagation();
 				if (confirm('Reset crafted count for "' + u.name + '" to 0?')) {
+					checkpoint("Reset craft count");
 					delete state.crafted[u.id];
 					render();
 				}
@@ -472,18 +542,25 @@
 		planBtn.type = "button";
 		planBtn.className = "plan-btn" + (planned ? " on" : "");
 		planBtn.textContent = planned ? "✓ Planned" : "＋ Plan";
+		planBtn.disabled = done;
+		if (done) planBtn.textContent = "Completed";
 		planBtn.addEventListener("click", (e) => {
 			e.stopPropagation();
-			// Planning and done are mutually exclusive: re-planning a completed
-			// upgrade means "I want to do this again," so clear its done status
-			// (mirrors marking done auto-dropping it from the plan).
-			if (planned) delete state.plan[u.id];
-			else {
-				state.plan[u.id] = true;
-				delete state.done[u.id];
-			}
+			if (state.done[u.id]) return;
+			checkpoint("Changed plan");
+			if (state.plan[u.id]) { delete state.plan[u.id]; delete state.raid[u.id]; }
+			else state.plan[u.id] = true;
 			render();
 		});
+		if (planned && !done) {
+			const raid = document.createElement("button");
+			raid.type = "button";
+			raid.className = "raid-btn btn tiny";
+			raid.textContent = "Next raid";
+			raid.setAttribute("aria-pressed", String(!!state.raid[u.id]));
+			raid.addEventListener("click", e => { e.stopPropagation(); toggleRaid(u); });
+			side.append(raid);
+		}
 		side.append(badge);
 		side.append(planBtn);
 
@@ -665,6 +742,7 @@
 		cb.checked = have;
 		cb.disabled = !!state.done[u.id]; // done ⇒ everything implicitly had
 		cb.addEventListener("change", () => {
+			checkpoint("Changed owned tool");
 			const k = haveKey(u, section, idx);
 			if (cb.checked) state.have[k] = true;
 			else delete state.have[k];
@@ -769,6 +847,7 @@
 			btn.textContent = "Craft";
 			btn.title = "Tally one craft and reset ingredients";
 			btn.addEventListener("click", () => {
+				checkpoint("Recorded craft");
 				state.crafted[u.id] = (state.crafted[u.id] || 0) + 1;
 				resetComponents(u);
 				render();
@@ -780,9 +859,11 @@
 			cb.className = "plan-ready-check";
 			cb.title = "Mark upgrade completed";
 			cb.addEventListener("change", () => {
+				checkpoint("Completed upgrade");
 				if (cb.checked) {
 					state.done[u.id] = true;
 					delete state.plan[u.id];
+					delete state.raid[u.id];
 				}
 				render();
 			});
@@ -797,9 +878,27 @@
 
 	// ---- shopping list -------------------------------------------------------
 	function renderShopping() {
-		const planned = UP.filter((u) => contentEnabled(u) && state.plan[u.id]);
+		const allPlanned = UP.filter((u) => contentEnabled(u) && state.plan[u.id] && !state.done[u.id]);
+		const focused = allPlanned.filter(u => state.raid[u.id]);
+		const planned = planView === "raid" ? focused : allPlanned;
+		els.planAll.textContent = "All planned (" + allPlanned.length + ")";
+		els.planRaid.textContent = "Next raid (" + focused.length + ")";
+		els.planAll.setAttribute("aria-pressed", String(planView === "all"));
+		els.planRaid.setAttribute("aria-pressed", String(planView === "raid"));
+		els.planGoals.replaceChildren();
+		allPlanned.forEach(u => {
+			const row = document.createElement("div");
+			row.className = "plan-goal";
+			const name = document.createElement("span"); name.textContent = u.name;
+			const focus = document.createElement("button"); focus.type = "button";
+			focus.className = "btn tiny"; focus.textContent = "Next raid";
+			focus.setAttribute("aria-pressed", String(!!state.raid[u.id]));
+			focus.addEventListener("click", () => toggleRaid(u));
+			row.append(name, focus); els.planGoals.append(row);
+		});
 		els.planHint.style.display = planned.length ? "none" : "block";
-		els.planActions.style.display = planned.length ? "flex" : "none";
+		els.planActions.style.display = allPlanned.length ? "flex" : "none";
+		els.planHint.textContent = planView === "raid" ? "Select Next raid beside a planned goal, or switch to All planned." : "Choose an upgrade and select + Plan to gather its materials here.";
 		els.shopping.replaceChildren();
 		if (!planned.length) {
 			els.planSummary.textContent = "nothing planned yet";
@@ -820,7 +919,7 @@
 
 		planned.forEach((u) => {
 			u.components.forEach((alts, i) => {
-				const sig = alts.map((a) => a.id).join("|");
+				const sig = alts.length === 1 ? alts[0].id : u.id + "::" + i;
 				const rec =
 					agg[sig] || (agg[sig] = { alts, from: new Set(), groups: [] });
 				rec.groups.push({ u, gi: i, alts });
@@ -856,12 +955,14 @@
 		let itemsNeeded = 0;
 		rows.forEach(({ rec, unmet, allMet }) => {
 			if (!allMet) itemsNeeded++;
+			if (allMet && planView === "raid") return;
 			// Sum counts across the groups that still need this material (or all, if done).
 			const src = allMet ? rec.groups : unmet;
 			const counts = {};
 			src.forEach((g) =>
 				g.alts.forEach((a) => {
-					counts[a.id] = (counts[a.id] || 0) + a.count;
+					const remaining = Math.max(0, a.count - getQty(g.u, g.gi, a.id));
+					counts[a.id] = (counts[a.id] || 0) + (allMet ? a.count : remaining);
 				}),
 			);
 
@@ -879,6 +980,7 @@
 			cb.title =
 				"Mark this material as gathered for every planned upgrade that needs it";
 			cb.addEventListener("change", () => {
+				checkpoint("Changed Plan materials");
 				rec.groups.forEach((g) => setCompGroupFlag(g.u, g.gi, cb.checked));
 				render();
 			});
@@ -898,6 +1000,7 @@
 				name.append(c);
 				name.append(itemLink(a.id, a.name, a.list, a.tip, a.expand));
 			});
+			name.append(textNode(allMet ? " · gathered" : " · still needed"));
 			const from = document.createElement("div");
 			from.className = "shop-from";
 			from.textContent = [...rec.from].join(", ");
@@ -940,10 +1043,19 @@
 			els.shopping.append(sectionLabel("Tool qualities (shared)"));
 			qualRows.forEach(({ rec, met }) => {
 				if (!met) qualitiesNeeded++;
-				els.shopping.append(planQualityRow(rec, met));
+				if (!met || planView === "all") els.shopping.append(planQualityRow(rec, met));
 			});
 		}
 
+		let toolsNeeded = 0;
+		planned.forEach(u => u.tools.forEach((tool, idx) => {
+			const met = isHave(u, "tool", idx);
+			if (!met) toolsNeeded++;
+			if (met && planView === "raid") return;
+			const row = reqRow(u, "tool", idx, [itemLink(tool.id, tool.name, false), textNode(" — " + u.name)]);
+			row.className += " plan-tool";
+			els.shopping.append(row);
+		}));
 		const tot = document.createElement("div");
 		tot.className = "shop-total";
 		const qualLabel = qualitiesNeeded === 1 ? "quality" : "qualities";
@@ -953,7 +1065,7 @@
 			(qualRows.length
 				? " and " + qualitiesNeeded + " tool " + qualLabel
 				: "") +
-			" still to gather.";
+			(toolsNeeded ? " and " + toolsNeeded + " tools" : "") + " still to gather.";
 		els.shopping.append(tot);
 
 		els.planSummary.textContent =
@@ -967,12 +1079,7 @@
 		// is already met, ready to complete/craft straight from the sidebar. A
 		// chain-locked upgrade (its predecessor tier isn't done yet) can't
 		// actually be completed yet, so it doesn't count as ready.
-		const ready = planned.filter((u) => {
-			const prog = progress(u);
-			return (
-				prog.total > 0 && prog.met === prog.total && lockedBy(u).length === 0
-			);
-		});
+		const ready = planned.filter(isReady);
 		els.planFooterSummary.textContent =
 			ready.length + "/" + planned.length + " ready";
 		els.planReadyList.replaceChildren();
@@ -1017,9 +1124,15 @@
 	}
 
 	// ---- notification helpers ------------------------------------------------
-	function notify(msg) {
+	function notify(msg, withUndo = false) {
 		const t = els.toast;
 		t.textContent = msg;
+		if (withUndo) {
+			const undo = document.createElement("button"); undo.type = "button";
+			undo.className = "btn tiny"; undo.textContent = "Undo";
+			undo.setAttribute("aria-label", "Undo: " + msg);
+			undo.addEventListener("click", undoProgress); t.append(undo);
+		}
 		t.classList.add("show");
 		clearTimeout(t._notifyTimer);
 		t._notifyTimer = setTimeout(() => t.classList.remove("show"), 3500);
@@ -1065,7 +1178,9 @@
 		if (!raw) return;
 		try {
 			const parsed = JSON.parse(raw.trim());
-			state = Object.assign(blankState(), parsed);
+			if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("invalid state");
+			checkpoint("Imported progress");
+			state = normalizeState(parsed);
 			save();
 			render();
 			notify("Progress imported.");
@@ -1142,8 +1257,11 @@
 				)
 			)
 				return;
+			checkpoint("Imported game save");
 			newlyDone.forEach((id) => {
 				state.done[id] = true;
+				delete state.plan[id];
+				delete state.raid[id];
 			});
 			save();
 			render();
@@ -1246,6 +1364,7 @@
 					"Reset ALL progress? This clears completed, planned, and checked items. Consider Export first.",
 				)
 			) {
+				checkpoint("Reset progress");
 				state = blankState();
 				save();
 				render();
@@ -1382,6 +1501,9 @@
 		});
 	}
 
+	els.undo.addEventListener("click", undoProgress);
+	els.planAll.addEventListener("click", () => { planView = "all"; render(); });
+	els.planRaid.addEventListener("click", () => { planView = "raid"; render(); });
 	els.search.addEventListener("input", render);
 	els.searchClear.addEventListener("click", () => {
 		els.search.value = "";
@@ -1391,6 +1513,7 @@
 	els.hideDone.addEventListener("change", render);
 	els.onlyPlan.addEventListener("change", render);
 	els.showXedra.addEventListener("change", () => {
+		checkpoint("Changed optional content");
 		state.xedraEnabled = els.showXedra.checked;
 		render();
 	});
@@ -1399,7 +1522,9 @@
 			Object.keys(state.plan).length &&
 			confirm("Clear all planned upgrades?")
 		) {
+			checkpoint("Cleared Plan");
 			state.plan = {};
+			state.raid = {};
 			render();
 		}
 	});

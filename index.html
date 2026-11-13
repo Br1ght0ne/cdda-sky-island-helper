@@ -237,6 +237,7 @@
             <div class="toolbar-group" id="main-actions"></div>
           </div>
         </div>
+        <button id="undo-progress" class="btn" type="button" disabled>Undo</button>
         <div id="stats" class="stats"></div>
         <div id="list"></div>
       </main>
@@ -257,6 +258,10 @@
               <span class="plan-caret" aria-hidden="true">⌃</span>
             </span>
           </button>
+          <div class="plan-views" role="group" aria-label="Plan view">
+            <button id="plan-view-all" class="btn" type="button">All planned</button>
+            <button id="plan-view-raid" class="btn" type="button">Next raid</button>
+          </div>
           <div class="panel-head">
             <h2>Plan</h2>
             <span class="plan-ready-badge" id="plan-footer-summary"></span>
@@ -271,6 +276,7 @@
               Click <strong>＋ Plan</strong> on any upgrade to add its materials
               here.
             </p>
+            <div id="plan-goals"></div>
             <div id="plan-ready-list"></div>
             <div id="shopping"></div>
           </div>

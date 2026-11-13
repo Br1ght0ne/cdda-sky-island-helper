@@ -209,8 +209,10 @@ assert(Object.keys(st.plan).length === planBeforeReq - 1,
 assert(Object.keys(st.done).length >= 1, "sanity: rank-up #1 is currently done");
 planButtons[0].dispatch("click");
 const afterReplan = getState();
-assert(Object.keys(afterReplan.done).length === 0, "re-planning a done upgrade clears its done status");
-assert(Object.keys(afterReplan.plan).length === planBeforeReq, "and adds it back to the plan");
+assert(Object.keys(afterReplan.done).length === 1, "planning cannot silently reopen a completed upgrade");
+assert(Object.keys(afterReplan.plan).length === planBeforeReq - 1, "completed upgrade remains out of plan");
+reqCb.checked = false; reqCb.dispatch("change");
+planButtons[0].dispatch("click");
 
 // Per-alternative +/- steppers track quantities in state.qty
 const stepPlus = [];
@@ -589,6 +591,30 @@ setTimeout(() => {
     impBtn2.dispatch("click");
     assert(xedraToggle.checked === false && !findCardByName(tier4.name), "old tracker imports default optional Xedra content to off");
   }
+
+  // Usability regressions: partial counts, subset actions and undo.
+  const importFixture = value => { promptReturn = JSON.stringify(value); impBtn2.dispatch("click"); };
+  const r1 = "SKYISLAND_UPGRADE_rankup1", r2 = "SKYISLAND_UPGRADE_rankup2";
+  const key1 = r1 + "::comp::0::warptoken";
+  importFixture({ plan: { [r1]: true, [r2]: true }, qty: { [key1]: 1 }, raid: { [r1]: true } });
+  assert(textOf(shopping).includes("5×"), "Plan subtracts partial quantities from remaining shards");
+  getEl("plan-view-raid").dispatch("click");
+  assert(textOf(shopping).includes("1×") && !textOf(shopping).includes("Island Rank Up 2"), "Next raid limits material totals and sources to focused goals");
+  const raidCheck = (shopping.children[0]?.children || []).find(n => n.className === "shop-check");
+  if (raidCheck) { raidCheck.checked = true; raidCheck.dispatch("change"); }
+  assert(getState().have[r1 + "::comp::0"] && !getState().have[r2 + "::comp::0"], "raid gathering affects only selected upgrades");
+  getEl("undo-progress").dispatch("click");
+  assert(!getState().have[r1 + "::comp::0"] && getState().qty[key1] === 1, "Undo restores quantity and flags before gathering");
+  getEl("plan-view-all").dispatch("click");
+  importFixture({ plan: { [r1]: true }, raid: { [r1]: true, bogus: true, [r2]: true } });
+  assert(Object.keys(getState().raid || {}).join() === r1, "import removes orphaned or unplanned raid selections");
+  const completeFocused = doneCbOf(findCardByName("Island Rank Up 1"));
+  completeFocused.checked = true; completeFocused.dispatch("change");
+  assert(!getState().raid?.[r1] && !getState().plan[r1], "completion removes raid focus and plan membership");
+  getEl("undo-progress").dispatch("click");
+  assert(getState().raid?.[r1] && getState().plan[r1] && !getState().done[r1], "Undo completion restores plan and raid focus");
+  importFixture({plan: null, qty: [], raid: null});
+  assert(getState().plan && getState().raid && !Array.isArray(getState().qty), "malformed state maps normalize safely");
 
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;
