@@ -151,6 +151,7 @@
 	let planView = "all";
 	let forceHelp = false;
 	let closePlanSheet = () => {};
+	let closeItemDetails = () => {};
 	const history = [];
 	let pendingChange = null;
 
@@ -165,7 +166,8 @@
 		if (pendingChange && pendingChange.before !== progressSnapshot()) {
 			history.push(pendingChange);
 			if (history.length > 20) history.shift();
-			if (!pendingChange.quiet) notify(pendingChange.label + ".", true);
+			if (pendingChange.quiet) dismissToast();
+			else notify(pendingChange.label + ".", true);
 		}
 		pendingChange = null;
 		els.undo.disabled = history.length === 0;
@@ -371,7 +373,16 @@
 		const u = byId[id];
 		if (!u || !contentEnabled(u)) { notify("Enable optional content in Settings to view this upgrade."); return; }
 		const hidden = !passesFilters(u);
-		if (hidden) clearFilters();
+		if (hidden) {
+			const query = els.search.value.trim().toLowerCase();
+			if (query && !matches(u, query)) els.search.value = "";
+			if (els.hideDone.checked && state.done[id]) els.hideDone.checked = false;
+			if (els.onlyPlan.checked && !state.plan[id]) els.onlyPlan.checked = false;
+			if (els.category.value && els.category.value !== u.category) els.category.value = "";
+			const p = progress(u);
+			const wrongMissingCount = els.availability.value === "one" && p.total - p.met !== 1;
+			if (state.done[id] || lockedBy(u).length || wrongMissingCount) els.availability.value = "";
+		}
 		state.open[id] = true; delete state.groupsCollapsed[u.group];
 		closePlanSheet(); render();
 		const target = document.querySelector('[data-upgrade="' + id + '"]');
@@ -423,6 +434,7 @@
 		const inPlan = active && els.planPanel.contains(active);
 		const scroll = document.querySelector("#plan-scroll");
 		const scrollTop = scroll.scrollTop;
+		closeItemDetails();
 		finishChange();
 		els.showXedra.checked = state.xedraEnabled === true;
 		const q = els.search.value.trim().toLowerCase();
@@ -509,7 +521,10 @@
 				const card = document.querySelector('[data-upgrade="' + cardId + '"]');
 				target = card && card.querySelector(".card-disclosure");
 			}
-			if (!target) target = inPlan ? els.planHandle : els.search;
+			if (!target) {
+				const planTarget = planView === "raid" ? els.planRaid : els.planAll;
+				target = inPlan ? planTarget : els.search;
+			}
 			target.focus({ preventScroll: true });
 		}
 		save();
@@ -1240,6 +1255,7 @@
 			" planned · " +
 			itemsNeeded +
 			(qualRows.length ? " + " + qualitiesNeeded + " qual" : "") +
+			(toolsNeeded ? " + " + toolsNeeded + " tools" : "") +
 			" to gather";
 
 		// Footer: upgrades whose every requirement (components, qualities, tools)
@@ -1295,18 +1311,36 @@
 	}
 
 	// ---- notification helpers ------------------------------------------------
+	function dismissToast() {
+		clearTimeout(els.toast._notifyTimer);
+		els.toast.classList.remove("show");
+		els.toast.hidden = true;
+		els.toast.replaceChildren();
+	}
+	function expireToast() {
+		if (els.toast.contains(document.activeElement)) {
+			els.toast._notifyTimer = setTimeout(expireToast, 3500);
+			return;
+		}
+		dismissToast();
+	}
 	function notify(msg, withUndo = false) {
 		const t = els.toast;
+		t.hidden = false;
 		t.textContent = msg;
-		if (withUndo) {
+		if (withUndo && history.length) {
 			const undo = document.createElement("button"); undo.type = "button";
 			undo.className = "btn tiny"; undo.textContent = "Undo";
 			undo.setAttribute("aria-label", "Undo: " + msg);
-			undo.addEventListener("click", undoProgress); t.append(undo);
+			const change = history.at(-1);
+			undo.addEventListener("click", () => {
+				if (history.at(-1) === change) undoProgress();
+			});
+			t.append(undo);
 		}
 		t.classList.add("show");
 		clearTimeout(t._notifyTimer);
-		t._notifyTimer = setTimeout(() => t.classList.remove("show"), 3500);
+		t._notifyTimer = setTimeout(expireToast, 3500);
 	}
 
 	// Shown when the clipboard API is unavailable — lets the user copy manually.
@@ -1352,9 +1386,10 @@
 			if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("invalid state");
 			checkpoint("Imported progress");
 			state = normalizeState(parsed);
+			const changed = pendingChange.before !== progressSnapshot();
 			save();
 			render();
-			notify("Progress imported.", true);
+			if (!changed) notify("Progress already matches this import.");
 		} catch (e) {
 			notify("That doesn't look like valid exported JSON.");
 		}
@@ -1590,27 +1625,36 @@
 			const trigger = current;
 			if (trigger) trigger.setAttribute("aria-expanded", "false");
 			pinned = false;
+			tip.removeAttribute("role");
 			clearFreeze();
 			clearHide();
 			tip.style.display = "none";
 			setFrozen(false);
 			current = null;
+			document.body.append(tip);
 			if (restore && trigger) trigger.focus();
 		}
 		function place(target) {
 			if (!target.getBoundingClientRect) return;
 			const r = target.getBoundingClientRect();
+			const inSheet = tip.parentElement === els.planPanel;
+			const panelRect = els.planPanel.getBoundingClientRect();
+			const originX = inSheet ? panelRect.left : -window.scrollX;
+			const originY = inSheet ? panelRect.top : -window.scrollY;
+			const width = inSheet ? panelRect.right - panelRect.left : document.documentElement.clientWidth;
 			tip.style.display = "block";
 			const tw = tip.offsetWidth,
 				th = tip.offsetHeight;
-			let left = r.left + window.scrollX;
+			let left = r.left - originX;
 			left = Math.min(
 				left,
-				window.scrollX + document.documentElement.clientWidth - tw - 10,
+				width - tw - 10,
 			);
-			left = Math.max(window.scrollX + 6, left);
-			let top = r.top + window.scrollY - th - 8; // above the item
-			if (top < window.scrollY + 4) top = r.bottom + window.scrollY + 8; // flip below
+			left = Math.max(6, left);
+			let top = r.top - originY - th - 8;
+			const minTop = inSheet ? 6 : window.scrollY + 4;
+			if (top < minTop) top = r.bottom - originY + 8;
+			if (inSheet) top = Math.max(6, Math.min(top, panelRect.bottom - panelRect.top - th - 6));
 			tip.style.left = left + "px";
 			tip.style.top = top + "px";
 		}
@@ -1640,6 +1684,9 @@
 		function show(target) {
 			if (current && current !== target) hide();
 			current = target;
+			const inSheet = els.planPanel.getAttribute("aria-modal") === "true" && els.planPanel.contains(target);
+			const parent = inSheet ? els.planPanel : document.body;
+			parent.append(tip);
 			clearFreeze();
 			clearHide();
 			setFrozen(false);
@@ -1679,10 +1726,17 @@
 			t.setAttribute("aria-expanded", "true");
 			tip.setAttribute("role", "dialog");
 			setFrozen(true);
-			tip.querySelector("button").focus();
+			(tip.querySelector("a") || tip.querySelector("button")).focus();
 		});
+		closeItemDetails = () => hide();
 		document.addEventListener("keydown", e => {
 			if (e.key === "Escape" && current) { e.preventDefault(); hide(true); }
+			if (e.key === "Tab" && pinned) {
+				const controls = [...tip.querySelectorAll("a,button")];
+				const first = controls[0], last = controls.at(-1);
+				if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+				else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+			}
 		});
 		// Once frozen, entering the tooltip cancels the pending hide; leaving closes.
 		tip.addEventListener("mouseenter", clearHide);
@@ -1739,6 +1793,7 @@
 		}
 		function setOpen(value) {
 			const wasOpen = open;
+			if (!value) closeItemDetails();
 			open = value && media.matches;
 			if (open && !wasOpen) returnFocus = document.activeElement;
 			sync();
@@ -1749,7 +1804,7 @@
 		els.planHandle.addEventListener("click", () => setOpen(!open));
 		backdrop.addEventListener("click", () => setOpen(false));
 		media.addEventListener("change", () => {
-			open = false; sync();
+			closeItemDetails(); open = false; sync();
 			if (els.planPanel.contains(document.activeElement)) {
 				const target = media.matches ? els.planHandle : els.planAll; target.focus();
 			}

@@ -1,6 +1,6 @@
 # Complete UI usability pass
 
-Status: proposed design for user review.
+Status: approved by user and implemented on codex/ui-usability-pass.
 
 ## Intent and scope
 

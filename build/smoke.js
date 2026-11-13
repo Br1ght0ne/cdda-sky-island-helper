@@ -1,6 +1,9 @@
 // @ts-nocheck
 // Minimal DOM shim to smoke-test app.js under node (no jsdom).
 const path = require("path");
+const originalTimeout = global.setTimeout;
+let toastExpiry;
+global.setTimeout = (fn, ms, ...args) => { if (ms === 3500) toastExpiry = fn; return originalTimeout(fn, ms, ...args); };
 const ROOT = path.dirname(__dirname);
 
 function descendants(root) { return (root.children || []).flatMap(n => [n, ...descendants(n)]); }
@@ -23,7 +26,7 @@ function mkEl(tag) {
     set innerHTML(v) { this._html = v; this.children = []; },
     get innerHTML() { return this._html; },
     appendChild(c) { this.children.push(c); return c; },
-    append(...args) { args.forEach(c => { this.children.push(c); if (typeof c === "object") c.parentElement = this; }); },
+    append(...args) { args.forEach(c => { if (c.parentElement) c.parentElement.removeChild(c); this.children.push(c); if (typeof c === "object") c.parentElement = this; }); },
     replaceChildren(...args) { this.children.forEach(c => { c.parentElement = null; }); this.children = []; this.append(...args); },
     insertBefore(c, ref) {
       const i = this.children.indexOf(ref);
@@ -722,6 +725,58 @@ setTimeout(() => {
   }
   for (let i = 0; i < 20; i++) getEl("undo-progress").dispatch("click");
   assert(getEl("undo-progress").disabled && !getState().raid[r1], "Undo retains only the last 20 progress changes");
+
+  // Review regressions: visible focus and truthful, reachable Undo actions.
+  importFixture({ plan: { [r1]: true }, raid: { [r1]: true }, open: { [r1]: true } });
+  mobileMedia.change(false); getEl("plan-view-raid").dispatch("click");
+  const disappearing = shopping.children.find(n => n.className?.includes("shard")).children[0];
+  disappearing.focus(); disappearing.checked = true; disappearing.dispatch("change");
+  assert(document.activeElement === getEl("plan-view-raid"), "desktop removed-row focus falls back to the visible Plan view");
+  getEl("plan-view-all").dispatch("click");
+  importFixture({ plan: { [r1]: true }, open: { [r1]: true } });
+  findByText(findCardByName("Island Rank Up 1"), "Next raid").dispatch("click");
+  const oldToastUndo = findByText(getEl("toast"), "Undo");
+  const quietPlus = findCardByName("Island Rank Up 1").querySelectorAll("button").find(n => n._text === "+");
+  quietPlus.dispatch("click");
+  assert(getEl("toast").hidden || getEl("toast").inert || !findByText(getEl("toast"), "Undo"), "quiet quantity changes retire the prior action's toast Undo");
+  if (oldToastUndo) oldToastUndo.dispatch("click");
+  assert(getState().qty[key1] === 1, "a stale toast Undo cannot undo a different later action");
+  const identicalState = getState(); importFixture(identicalState);
+  const noOpUndo = findByText(getEl("toast"), "Undo");
+  assert(!noOpUndo, "an unchanged import does not offer Undo for an unrelated older change");
+  findByText(findCardByName("Island Rank Up 1"), "Next raid").dispatch("click");
+  const expiringUndo = findByText(getEl("toast"), "Undo");
+  expiringUndo.focus(); if (toastExpiry) toastExpiry();
+  assert(!getEl("toast").hidden && getEl("toast").classList.contains("show"), "toast remains available while its Undo has keyboard focus");
+  searchEl.focus(); if (toastExpiry) toastExpiry();
+  assert(getEl("toast").hidden || getEl("toast").inert, "expired toast Undo is excluded from keyboard navigation");
+  const detailTrigger = list.querySelector("[data-tip]");
+  detailTrigger.focus(); document.dispatch("click", { target: detailTrigger });
+  const detailPanel = document.body.querySelector(".tooltip");
+  const detailClose = detailPanel.querySelector("button"); detailClose.focus();
+  document.dispatch("keydown", { key: "Tab", defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } });
+  assert(document.activeElement === detailPanel.querySelector("a"), "Tab from item details Close wraps to its alternatives");
+  document.dispatch("keydown", { key: "Escape", preventDefault() {} });
+
+  category.value = "Island Rank Up"; registry["hide-done"].checked = true;
+  searchEl.value = "Island Rank Up 2"; searchEl.dispatch("input");
+  findByText(findCardByName("Island Rank Up 2"), "Island Rank Up 1").dispatch("click");
+  assert(category.value === "Island Rank Up" && registry["hide-done"].checked && searchEl.value === "", "prerequisite navigation preserves compatible filters");
+  category.value = ""; registry["hide-done"].checked = false; category.dispatch("change");
+  const listUpgrade = window.SKYISLAND_DATA.upgrades.find(u => u.components.some(g => g.some(a => a.list)));
+  importFixture({ plan: { [listUpgrade.id]: true } });
+  mobileMedia.change(true); planHandle.focus(); planHandle.dispatch("click");
+  const sheetDetails = shopping.querySelector("[data-tip]");
+  sheetDetails.focus(); document.dispatch("click", { target: sheetDetails });
+  assert(planPanel.contains(detailPanel) && document.activeElement === detailPanel.querySelector("a"), "mobile item details remain inside the modal and focus the first alternative");
+  document.dispatch("keydown", { key: "Tab", shiftKey: true, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } });
+  assert(document.activeElement === detailPanel.querySelector("button"), "reverse Tab stays within pinned item details");
+  document.dispatch("keydown", { key: "Escape", defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } });
+  assert(planPanel.classList.contains("open") && document.activeElement === sheetDetails, "Escape closes nested item details without closing the Plan");
+  document.dispatch("keydown", { key: "Escape", preventDefault() {} });
+
+  importFixture({plan: { SKYISLAND_UPGRADE_bonusmissions5: true }});
+  assert(textOf(getEl("plan-summary")).includes("4 tools"), "Plan handle includes explicit tools in its missing requirements");
 
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;
