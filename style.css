@@ -533,3 +533,51 @@ select { max-width: 100%; min-width: 0; color: var(--text); background: var(--pa
 
 .toolbar-actions { justify-content: flex-start; }
 .filter-toggle[aria-pressed="true"] { border-color: var(--accent); }
+
+/* Give the phone toolbar deliberate rows instead of content-driven wrapping. */
+@media (max-width: 600px) {
+  .toolbar-actions {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+    align-items: stretch;
+    padding-block: 10px;
+    margin-bottom: 0;
+  }
+  .toolbar-actions > .toolbar-group:first-child {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .toolbar-actions .filter-toggle { width: 100%; }
+  .toolbar-actions .filter-label { display: block; position: relative; min-width: 0; }
+  .toolbar-actions .filter-caption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .toolbar-actions select { width: 100%; height: 44px; font-size: 13px; }
+  #view-actions {
+    grid-column: span 4;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  #undo-progress { grid-column: span 2; min-width: 0; }
+  .toolbar-actions > .control-menu { grid-column: span 3; min-width: 0; }
+  .toolbar-actions > .control-menu > summary {
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 11px 10px;
+    font-size: 13px;
+    line-height: 20px;
+    text-align: left;
+  }
+  .toolbar-actions .btn { padding-inline: 6px; font-size: 13px; }
+  .filter-help { margin-top: 10px; }
+}
