@@ -101,7 +101,7 @@ mise exec bun -- bun -e 'new Bun.Transpiler({loader:"js"}).transformSync(await B
   does not change it.
 
 Export/Import copies this object as JSON via the clipboard; Reset = `blankState()`.
-These controls and Undo live in the Progress disclosure. Xedra and Getting
+Import/export/reset live in the Data disclosure; Undo is a top-level toolbar button. Xedra and Getting
 started live in Settings. Onboarding dismissal uses `skyisland.welcome-dismissed`,
 a separate UI preference excluded from tracker exports/imports/reset.
 
@@ -142,7 +142,7 @@ with no attribute set, the OS preference alone decides ("Auto").
   Next raid scopes materials, tools and readiness to selected goals; qualities
   remain global. All planned retains gathered rows; Next raid hides them.
 - **Navigation**: category/availability/search filters combine. Available now
-  excludes done and tracked blockers; Missing one requirement also requires exactly
+  excludes done and tracked blockers; Missing one also requires exactly
   one unmet group/tool/quality. Prerequisite navigation clears hiding filters and
   expands/focuses the target. Batch prerequisite planning is recursive and undoable.
 - **Completion**: completed upgrades cannot be silently reopened by planning.
@@ -171,8 +171,8 @@ with no attribute set, the OS preference alone decides ("Auto").
 
 ## Layout / responsive
 
-- Top controls are two rows: search on row 1; filters (including category/availability) + Expand/Collapse-all +
-  Progress/Settings disclosures on row 2. The only plan-management button ("Clear") lives
+- Top controls are two rows: search on row 1; filter buttons (Hide done / Only in plan, with pressed accent borders) and category/availability + Expand/Collapse-all +
+  Data/Settings disclosures on row 2. The only plan-management button ("Clear") lives
   in the Plan panel header; the "Ready to craft" list below it replaces the old
   "Remove finished" button.
 - Desktop: Plan is a sticky right sidebar (grid `1fr 420px`).

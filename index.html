@@ -219,16 +219,8 @@
           </div>
           <div class="toolbar toolbar-actions" id="toolbar-actions">
             <div class="toolbar-group">
-              <label class="chk"
-                ><input type="checkbox" id="hide-done" /><span
-                  >Hide done</span
-                ></label
-              >
-              <label class="chk"
-                ><input type="checkbox" id="only-plan" /><span
-                  >Only in plan</span
-                ></label
-              >
+              <button id="hide-done" class="btn filter-toggle" type="button" aria-pressed="false">Hide done</button>
+              <button id="only-plan" class="btn filter-toggle" type="button" aria-pressed="false">Only in plan</button>
               <label class="filter-label">Category
                 <select id="category-filter"><option value="">All categories</option></select>
               </label>
@@ -236,13 +228,14 @@
                 <select id="availability" aria-describedby="availability-help">
                   <option value="">All upgrades</option>
                   <option value="available">Available now</option>
-                  <option value="one">Missing one requirement</option>
+                  <option value="one">Missing one</option>
                 </select>
               </label>
             </div>
+            <button id="undo-progress" class="btn" type="button" disabled>Undo</button>
             <details class="control-menu" id="progress-menu">
-              <summary>Progress</summary>
-              <div class="menu-content"><button id="undo-progress" class="btn" type="button" disabled>Undo</button><div id="main-actions"></div></div>
+              <summary>Data</summary>
+              <div class="menu-content"><div id="main-actions"></div></div>
             </details>
             <details class="control-menu" id="settings-menu">
               <summary>Settings</summary>

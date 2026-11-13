@@ -154,7 +154,7 @@ h1 .accent { color: var(--accent); }
 .toolbar-actions { border-top: 1px solid var(--border); padding-top: 12px; padding-bottom: 12px; gap: 6px 8px; }
 .toolbar-actions .btn { padding: 6px 9px; font-size: 12px; }
 .toolbar-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
-#view-actions { margin-left: auto; }
+#view-actions { margin-left: 0; }
 .search-wrap { position: relative; flex: 1 1 240px; min-width: 180px; display: flex; }
 #search {
   flex: 1 1 auto; width: 100%; min-width: 0;
@@ -443,7 +443,7 @@ select { max-width: 100%; min-width: 0; color: var(--text); background: var(--pa
 .toolbar-group { min-width: 0; }
 .control-menu { position: relative; color: var(--text); font-size: 13px; }
 .control-menu summary { padding: 6px 9px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; background: var(--panel2); }
-.menu-content { position: absolute; right: 0; top: calc(100% + 6px); min-width: 220px; width: max-content; max-width: calc(100vw - 28px); padding: 10px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 8px 24px var(--shadow); z-index: 30; }
+.menu-content { position: absolute; left: 0; top: calc(100% + 6px); min-width: 220px; width: max-content; max-width: calc(100vw - 28px); padding: 10px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 8px 24px var(--shadow); z-index: 30; }
 .menu-content, #main-actions { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
 .menu-content .btn { text-align: left; white-space: normal; }
 .summary-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin: 14px 0; }
@@ -516,7 +516,7 @@ select { max-width: 100%; min-width: 0; color: var(--text); background: var(--pa
   .wrap { padding: 0 12px; }
   .toolbar-actions { gap: 8px; }
   .toolbar-actions .btn { padding: 6px 8px; }
-  #view-actions { margin-right: auto; }
+  #view-actions { margin-right: 0; }
   .menu-content { min-width: min(220px, calc(100vw - 28px)); }
   .control-menu .menu-content { position: fixed; left: 12px; right: 12px; top: auto; width: auto; }
   .card-top { padding: 12px; gap: 8px; }
@@ -530,3 +530,6 @@ select { max-width: 100%; min-width: 0; color: var(--text); background: var(--pa
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; }
 }
+
+.toolbar-actions { justify-content: flex-start; }
+.filter-toggle[aria-pressed="true"] { border-color: var(--accent); }

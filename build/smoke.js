@@ -76,7 +76,7 @@ function getEl(id) { return registry[id] || (registry[id] = mkEl("div")); }
   .forEach(id => {
     let tag;
     if (id === "search") tag = "input";
-    else if (id === "search-clear") tag = "button";
+    else if (["search-clear", "hide-done", "only-plan"].includes(id)) tag = "button";
     else tag = "div";
     registry[id] = mkEl(tag);
     registry[id].value = "";
@@ -92,7 +92,7 @@ const toolbarActionsEl = mkEl("div");
 const mainActionsEl = mkEl("div");
 const progressMenu = mkEl("details"); progressMenu.append(mainActionsEl);
 registry["progress-menu"] = progressMenu;
-toolbarActionsEl.children = [mkEl("div"), progressMenu];
+toolbarActionsEl.children = [mkEl("div"), getEl("undo-progress"), progressMenu];
 registry["toolbar-actions"] = toolbarActionsEl;
 registry["main-actions"] = mainActionsEl;
 
@@ -758,11 +758,11 @@ setTimeout(() => {
   assert(document.activeElement === detailPanel.querySelector("a"), "Tab from item details Close wraps to its alternatives");
   document.dispatch("keydown", { key: "Escape", preventDefault() {} });
 
-  category.value = "Island Rank Up"; registry["hide-done"].checked = true;
+  category.value = "Island Rank Up"; registry["hide-done"].setAttribute("aria-pressed", "true");
   searchEl.value = "Island Rank Up 2"; searchEl.dispatch("input");
   findByText(findCardByName("Island Rank Up 2"), "Island Rank Up 1").dispatch("click");
-  assert(category.value === "Island Rank Up" && registry["hide-done"].checked && searchEl.value === "", "prerequisite navigation preserves compatible filters");
-  category.value = ""; registry["hide-done"].checked = false; category.dispatch("change");
+  assert(category.value === "Island Rank Up" && registry["hide-done"].getAttribute("aria-pressed") === "true" && searchEl.value === "", "prerequisite navigation preserves compatible filters");
+  category.value = ""; registry["hide-done"].setAttribute("aria-pressed", "false"); category.dispatch("change");
   const listUpgrade = window.SKYISLAND_DATA.upgrades.find(u => u.components.some(g => g.some(a => a.list)));
   importFixture({ plan: { [listUpgrade.id]: true } });
   mobileMedia.change(true); planHandle.focus(); planHandle.dispatch("click");
@@ -777,6 +777,17 @@ setTimeout(() => {
 
   importFixture({plan: { SKYISLAND_UPGRADE_bonusmissions5: true }});
   assert(textOf(getEl("plan-summary")).includes("4 tools"), "Plan handle includes explicit tools in its missing requirements");
+
+  importFixture({done: { [r1]: true }, plan: { [r2]: true }});
+  const hideButton = getEl("hide-done"), planButton = getEl("only-plan");
+  hideButton.dispatch("click");
+  assert(hideButton.getAttribute("aria-pressed") === "true" && !findCardByName("Island Rank Up 1"), "Hide done button stays pressed and filters completed cards");
+  hideButton.dispatch("click");
+  assert(hideButton.getAttribute("aria-pressed") === "false" && !!findCardByName("Island Rank Up 1"), "Hide done button toggles off and restores completed cards");
+  planButton.dispatch("click");
+  assert(planButton.getAttribute("aria-pressed") === "true" && countCards() === 1 && !!findCardByName("Island Rank Up 2"), "Only in plan button filters to planned cards");
+  planButton.dispatch("click");
+  assert(planButton.getAttribute("aria-pressed") === "false" && countCards() > 1, "Only in plan button toggles off");
 
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;

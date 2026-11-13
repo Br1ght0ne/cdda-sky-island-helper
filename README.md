@@ -26,14 +26,14 @@ Just open `index.html` in a browser. No server, no build step, no internet.
   This focus is saved and included in progress exports; completed upgrades leave
   both the Plan and Next raid. Repeatable crafts stay selected for another craft.
 - Filter by category, **Available now** (no tracked prerequisite blockers), or
-  **Missing one requirement**. Availability does not model every in-game condition.
+  **Missing one**. Availability does not model every in-game condition.
 - Read upgrade benefits on collapsed cards, follow prerequisite links, or add a
   goal and all its missing prerequisites to the Plan in one action.
-- Recover the last 20 progress changes with **Progress → Undo**, including crafts,
+- Recover the last 20 progress changes with **Undo**, including crafts,
   imports, resets, and clearing the Plan. Undo history lasts for this page session;
   it does not change theme, filters, or expanded sections.
 - First-run guidance offers save import or a first upgrade. **Settings → Getting
-  started** reopens it. Progress contains Export data, Import data, Import game save, and Reset; Settings contains
+  started** reopens it. Data contains Export data, Import data, Import game save, and Reset; Settings contains
   the optional Xedra toggle.
 - Every item and tool quality links out to the [CDDA Guide](https://cdda-guide.nornagon.net),
   with expandable tooltips for grouped/alternative requirements.

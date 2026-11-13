@@ -171,7 +171,10 @@
 		}
 		pendingChange = null;
 		els.undo.disabled = history.length === 0;
-		els.undo.textContent = history.length ? "Undo: " + history.at(-1).label : "Undo";
+		const undoLabel = history.length ? "Undo: " + history.at(-1).label : "Undo";
+		els.undo.textContent = "Undo";
+		els.undo.title = undoLabel;
+		els.undo.setAttribute("aria-label", undoLabel);
 	}
 	function undoProgress() {
 		const change = history.pop();
@@ -351,15 +354,21 @@
 			node.setAttribute("data-focus", base + "|" + count);
 		}
 	}
+	function filterOn(button) {
+		return button.getAttribute("aria-pressed") === "true";
+	}
+	function setFilter(button, on) {
+		button.setAttribute("aria-pressed", String(on));
+	}
 	function clearFilters() {
-		els.search.value = ""; els.hideDone.checked = false; els.onlyPlan.checked = false;
+		els.search.value = ""; setFilter(els.hideDone, false); setFilter(els.onlyPlan, false);
 		els.availability.value = ""; els.category.value = "";
 	}
 	function passesFilters(u) {
 		const q = els.search.value.trim().toLowerCase();
 		if (q && !matches(u, q)) return false;
-		if (els.hideDone.checked && state.done[u.id]) return false;
-		if (els.onlyPlan.checked && !state.plan[u.id]) return false;
+		if (filterOn(els.hideDone) && state.done[u.id]) return false;
+		if (filterOn(els.onlyPlan) && !state.plan[u.id]) return false;
 		if (els.category.value && u.category !== els.category.value) return false;
 		if (els.availability.value) {
 			if (state.done[u.id] || lockedBy(u).length) return false;
@@ -376,8 +385,8 @@
 		if (hidden) {
 			const query = els.search.value.trim().toLowerCase();
 			if (query && !matches(u, query)) els.search.value = "";
-			if (els.hideDone.checked && state.done[id]) els.hideDone.checked = false;
-			if (els.onlyPlan.checked && !state.plan[id]) els.onlyPlan.checked = false;
+			if (filterOn(els.hideDone) && state.done[id]) setFilter(els.hideDone, false);
+			if (filterOn(els.onlyPlan) && !state.plan[id]) setFilter(els.onlyPlan, false);
 			if (els.category.value && els.category.value !== u.category) els.category.value = "";
 			const p = progress(u);
 			const wrongMissingCount = els.availability.value === "one" && p.total - p.met !== 1;
@@ -1533,7 +1542,7 @@
 		viewGroup.id = "view-actions";
 		viewGroup.append(expand);
 		viewGroup.append(collapse);
-		els.toolbarActions.insertBefore(viewGroup, document.querySelector("#progress-menu"));
+		els.toolbarActions.insertBefore(viewGroup, els.undo);
 
 		const exp = document.createElement("button");
 		exp.type = "button";
@@ -1754,8 +1763,12 @@
 		els.search.focus();
 		render();
 	});
-	els.hideDone.addEventListener("change", render);
-	els.onlyPlan.addEventListener("change", render);
+	[els.hideDone, els.onlyPlan].forEach(button => {
+		button.addEventListener("click", () => {
+			setFilter(button, !filterOn(button));
+			render();
+		});
+	});
 	els.showXedra.addEventListener("change", () => {
 		checkpoint("Changed optional content");
 		state.xedraEnabled = els.showXedra.checked;
