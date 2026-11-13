@@ -22,3 +22,15 @@ Vim j/k aliases in Settings. Extend the existing offline IIFE; no dependencies.
 - Verify palette keyboard flow, no-results, hidden optional content, modal focus
   return, contextual planning and Undo, filtered navigation, Vim opt-in and typing
   guards with the DOM shim. Inspect desktop/375px layouts in the host browser.
+
+## Nested options and menu parity
+
+- Expose every Data button with a Data - prefix, invoking its existing handler
+  so clipboard, file picker, confirmation, reset and Undo semantics stay shared.
+- Expose the Settings Xedra and Vim toggles with a Settings - prefix and current
+  On/Off state. Both palette and Settings update the same setters.
+- Category and Availability open child palettes from their live select options,
+  with a title, Back button, current-selection indication and option search.
+- Enter applies an option and closes; Escape/Back returns to parent search and
+  active selection. Backspace from an empty child search also returns. Closing
+  explicitly or clicking the backdrop exits the whole dialog.

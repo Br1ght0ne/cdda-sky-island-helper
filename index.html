@@ -324,7 +324,7 @@
 
     <dialog id="command-palette" aria-labelledby="command-title">
       <div class="command-box">
-        <div class="command-head"><h2 id="command-title">Commands</h2><button id="close-commands" class="btn tiny" type="button">Close</button></div>
+        <div class="command-head"><button id="command-back" class="btn tiny" type="button" hidden aria-label="Back to previous command list">Back</button><h2 id="command-title">Commands</h2><button id="close-commands" class="btn tiny" type="button">Close</button></div>
         <label class="sr-only" for="command-search">Search commands and upgrades</label>
         <input id="command-search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="true" aria-controls="command-results" aria-describedby="command-instructions" autocomplete="off" placeholder="Find an upgrade or action…" />
         <div id="command-results" role="listbox" aria-label="Commands and upgrades"></div>

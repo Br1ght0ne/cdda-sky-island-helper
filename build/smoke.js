@@ -88,6 +88,9 @@ for (const id of ["plan-view-all", "plan-view-raid", "plan-handle", "open-comman
 getEl("command-search").tagName = "input";
 getEl("vim-navigation").tagName = "input";
 getEl("command-palette").tagName = "dialog";
+for (const [value, label] of [["", "All upgrades"], ["available", "Available now"], ["one", "Missing one"]]) {
+  const option = mkEl("option"); option.value = value; option.textContent = label; getEl("availability").append(option);
+}
 const toolbar = mkEl("div");
 
 // Static #toolbar-actions layout from index.html: a checkbox group placeholder
@@ -850,6 +853,37 @@ setTimeout(() => {
   paletteInput.value = "Show Next raid"; paletteInput.dispatch("input"); keyPress("Enter");
   assert(planPanel.classList.contains("open") && document.activeElement === getEl("plan-view-raid"), "palette Show Next raid focuses the selected view after opening the mobile sheet");
   keyPress("Escape"); mobileMedia.change(false);
+
+  const paletteQuery = query => { getEl("open-commands").dispatch("click"); paletteInput.value = query; paletteInput.dispatch("input"); };
+  importFixture({});
+  paletteQuery("Data -");
+  assert(["Data - Export data", "Data - Import data", "Data - Import game save", "Data - Reset"].every(label => textOf(paletteResults).includes(label)), "palette exposes every Data action"); keyPress("Escape");
+  paletteQuery("Settings - Display Xedra Evolved content"); keyPress("Enter");
+  assert(getState().xedraEnabled && xedraToggle.checked, "palette Xedra toggle updates tracker and Settings");
+  paletteQuery("Settings - Use Vim j/k navigation"); keyPress("Enter");
+  assert(getEl("vim-navigation").checked && storeBacking["skyisland.vim-keys"] === "true", "palette Vim toggle shares the Settings preference");
+  paletteQuery("Category"); keyPress("Enter");
+  assert(palette.open && textOf(paletteResults).includes("All categories") && textOf(paletteResults).includes("Xedra Evolved"), "Category opens a nested palette with enabled options");
+  paletteInput.value = "Island Rank Up"; paletteInput.dispatch("input"); keyPress("Enter");
+  assert(!palette.open && category.value === "Island Rank Up" && countCards() === 2, "nested category selection applies the toolbar filter");
+  paletteQuery("Availability"); keyPress("Enter");
+  assert(palette.open && textOf(paletteResults).includes("Available now") && textOf(paletteResults).includes("Missing one"), "Availability opens its option palette");
+  paletteInput.value = "Available now"; paletteInput.dispatch("input"); keyPress("Enter");
+  assert(available.value === "available" && countCards() === 1, "nested availability selection combines with category");
+  paletteQuery("Category"); keyPress("Enter"); keyPress("Escape");
+  assert(palette.open && paletteInput.value === "Category" && textOf(paletteResults).includes("Category"), "Escape returns to parent palette and restores its search");
+  keyPress("Escape"); assert(!palette.open, "second Escape closes the root palette");
+  paletteQuery("Availability"); keyPress("Enter"); getEl("command-back").dispatch("click");
+  assert(palette.open && paletteInput.value === "Availability", "Back button returns from nested options"); keyPress("Escape");
+  paletteQuery("Data - Import data"); promptReturn = JSON.stringify({plan: {[r1]:true}}); keyPress("Enter");
+  assert(getState().plan[r1] && !getState().xedraEnabled, "palette Import data uses existing import behavior");
+  paletteQuery("Data - Reset"); global.confirm = () => false; keyPress("Enter");
+  assert(getState().plan[r1], "palette Reset retains the existing confirmation guard"); global.confirm = () => true;
+  paletteQuery("Data - Reset"); keyPress("Enter");
+  assert(!getState().plan[r1], "palette Reset uses the existing state reset");
+  paletteQuery("Undo"); keyPress("Enter"); assert(getState().plan[r1], "palette Reset remains undoable");
+  category.value = ""; available.value = ""; category.dispatch("change");
+  getEl("vim-navigation").checked = false; getEl("vim-navigation").dispatch("change");
 
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;

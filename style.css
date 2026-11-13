@@ -604,3 +604,7 @@ select { max-width: 100%; min-width: 0; color: var(--text); background: var(--pa
   .commands-trigger kbd { display: none; }
   .command-box { padding: 12px; }
 }
+
+.command-head h2 { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.command-option { position: relative; padding-right: 30px; }
+.command-next { position: absolute; right: 12px; top: 8px; font-size: 22px; color: var(--muted); }

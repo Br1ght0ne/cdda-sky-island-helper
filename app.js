@@ -245,6 +245,11 @@
 	}
 
 	// ---- helpers -------------------------------------------------------------
+	function setXedraEnabled(enabled) {
+		checkpoint("Changed optional content");
+		state.xedraEnabled = enabled;
+		render();
+	}
 	function contentEnabled(u) {
 		return u.mod !== "xedra_evolved" || state.xedraEnabled === true;
 	}
@@ -1767,9 +1772,7 @@
 		});
 	});
 	els.showXedra.addEventListener("change", () => {
-		checkpoint("Changed optional content");
-		state.xedraEnabled = els.showXedra.checked;
-		render();
+		setXedraEnabled(els.showXedra.checked);
 	});
 	els.clearPlan.addEventListener("click", () => {
 		if (
@@ -1879,15 +1882,21 @@
 		const trigger = document.querySelector("#open-commands");
 		const close = document.querySelector("#close-commands");
 		const vim = document.querySelector("#vim-navigation");
+		const back = document.querySelector("#command-back");
+		const title = document.querySelector("#command-title");
+		const instructions = document.querySelector("#command-instructions");
+		const pages = [];
 		const preferenceKey = "skyisland.vim-keys";
 		let opener = null;
 		let contextId = null;
 		let entries = [];
 		let active = 0;
 		try { vim.checked = localStorage.getItem(preferenceKey) === "true"; } catch (e) { vim.checked = false; }
-		vim.addEventListener("change", () => {
-			try { localStorage.setItem(preferenceKey, String(vim.checked)); } catch (e) {}
-		});
+		function setVimEnabled(enabled) {
+			vim.checked = enabled;
+			try { localStorage.setItem(preferenceKey, String(enabled)); } catch (e) {}
+		}
+		vim.addEventListener("change", () => setVimEnabled(vim.checked));
 
 		function restoreFocus() {
 			const key = opener && opener.dataset && opener.dataset.focus;
@@ -1917,8 +1926,27 @@
 			else state.plan[u.id] = true;
 			render(); revealUpgrade(u.id);
 		}
+		function selectCommands(select) {
+			return [...select.children].map(option => ({
+				label: option.textContent,
+				detail: select.value === option.value ? "Current selection" : "",
+				run: () => { select.value = option.value; render(); select.focus(); },
+			}));
+		}
+		function backOrClose() {
+			const parent = pages.pop();
+			if (!parent) { closePalette(); return; }
+			input.value = parent.query;
+			renderResults(parent.active);
+			input.focus();
+		}
 		function commands() {
 			const list = [
+				{ label: "Category", detail: "Choose a category", children: () => selectCommands(els.category) },
+				{ label: "Availability", detail: "Choose availability", children: () => selectCommands(els.availability) },
+				...[...els.mainActions.querySelectorAll("button")].map(button => ({ label: "Data - " + button.textContent, detail: button.title, run: () => button.click() })),
+				{ label: "Settings - Display Xedra Evolved content", detail: state.xedraEnabled ? "On — select to turn off" : "Off — select to turn on", run: () => setXedraEnabled(!state.xedraEnabled) },
+				{ label: "Settings - Use Vim j/k navigation", detail: vim.checked ? "On — select to turn off" : "Off — select to turn on", run: () => setVimEnabled(!vim.checked) },
 				{ label: "Show Next raid", run: () => showPlan("raid") },
 				{ label: "Show All planned", run: () => showPlan("all") },
 				{ label: "Toggle Hide done", run: () => { setFilter(els.hideDone, !filterOn(els.hideDone)); render(); els.hideDone.focus(); } },
@@ -1955,11 +1983,24 @@
 		function execute(index) {
 			const command = entries[index];
 			if (!command) return;
+			if (command.children) {
+				pages.push({ command, query: input.value, active: index });
+				input.value = "";
+				renderResults(); input.focus();
+				return;
+			}
 			closePalette(); command.run();
 		}
-		function renderResults() {
+		function renderResults(selectedIndex = 0) {
+			const page = pages.at(-1);
+			back.hidden = !page;
+			title.textContent = page ? "Commands / " + page.command.label : "Commands";
+			instructions.textContent = page ? "↑/↓ select · Enter applies · Esc back" : "↑/↓ select · Enter runs · Esc closes";
+			input.placeholder = page ? "Search " + page.command.label.toLowerCase() + " options…" : "Find an upgrade or action…";
+			results.setAttribute("aria-label", page ? page.command.label + " options" : "Commands and upgrades");
+			const source = page ? page.command.children() : commands();
 			const query = input.value.trim().toLowerCase();
-			entries = commands().filter(command => command.label.toLowerCase().includes(query) || (command.upgrade && matches(command.upgrade, query)));
+			entries = source.filter(command => command.label.toLowerCase().includes(query) || (command.upgrade && matches(command.upgrade, query)));
 			const total = entries.length;
 			entries = entries.slice(0, 60);
 			results.replaceChildren();
@@ -1969,14 +2010,16 @@
 				option.className = "command-option";
 				option.setAttribute("role", "option");
 				const label = document.createElement("span"); label.textContent = command.label; option.append(label);
+				if (command.children) { const arrow = document.createElement("span"); arrow.className = "command-next"; arrow.textContent = "›"; arrow.setAttribute("aria-hidden", "true"); option.append(arrow); }
 				if (command.detail) { const detail = document.createElement("span"); detail.className = "command-detail"; detail.textContent = command.detail; option.append(detail); }
 				option.addEventListener("mousedown", e => e.preventDefault());
 				option.addEventListener("click", () => execute(index));
 				results.append(option);
 			});
-			if (!total) { const empty = document.createElement("p"); empty.className = "hint"; empty.textContent = "No commands or upgrades match your search."; results.append(empty); }
-			status.textContent = total > 60 ? "Showing 60 results. Type to narrow your search." : total + " results";
-			selectResult(0);
+			if (!total) { const empty = document.createElement("p"); empty.className = "hint"; empty.textContent = page ? "No options match your search." : "No commands or upgrades match your search."; results.append(empty); }
+			const countLabel = total === 1 ? "1 result" : total + " results";
+			status.textContent = total > 60 ? "Showing 60 results. Type to narrow your search." : countLabel;
+			selectResult(selectedIndex);
 		}
 		function openPalette() {
 			if (dialog.open) return;
@@ -1984,6 +2027,7 @@
 			const card = opener && opener.closest && opener.closest("[data-upgrade]");
 			contextId = card ? card.getAttribute("data-upgrade") : null;
 			closeItemDetails(); closePlanSheet();
+			pages.length = 0;
 			input.value = "";
 			dialog.showModal();
 			trigger.setAttribute("aria-expanded", "true");
@@ -1991,9 +2035,10 @@
 		}
 		trigger.addEventListener("click", openPalette);
 		close.addEventListener("click", closePalette);
-		dialog.addEventListener("cancel", e => { e.preventDefault(); closePalette(); });
+		back.addEventListener("click", backOrClose);
+		dialog.addEventListener("cancel", e => { e.preventDefault(); backOrClose(); });
 		dialog.addEventListener("click", e => { if (e.target === dialog) closePalette(); });
-		input.addEventListener("input", renderResults);
+		input.addEventListener("input", () => renderResults());
 		document.addEventListener("keydown", e => {
 			if (e.defaultPrevented || e.isComposing) return;
 			if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === "k") {
@@ -2002,8 +2047,9 @@
 				return;
 			}
 			if (dialog.open) {
-				if (e.key === "Escape") { e.preventDefault(); closePalette(); }
+				if (e.key === "Escape") { e.preventDefault(); backOrClose(); return; }
 				if (document.activeElement !== input) return;
+				if (e.key === "Backspace" && !input.value && pages.length) { e.preventDefault(); backOrClose(); return; }
 				if (e.key === "ArrowDown") { e.preventDefault(); selectResult(active + 1); }
 				if (e.key === "ArrowUp") { e.preventDefault(); selectResult(active - 1); }
 				if (e.key === "Enter") { e.preventDefault(); execute(active); }

@@ -109,7 +109,12 @@ is scoped to focused card disclosures and respects filtered/collapsed content;
 Vim aliases are active only when enabled. Editable controls/modifiers are ignored.
 Commands / Cmd-Ctrl-K opens a native dialog with combobox/listbox results for
 upgrades and actions. Palette actions reuse tracker history and reveal helpers;
-closing must not restore focus into a closed/inert Plan sheet. Getting-started guidance is
+closing must not restore focus into a closed/inert Plan sheet.
+All Data buttons are exposed in the palette through their existing click handlers;
+Settings toggles share the Xedra setter and Vim preference setter. Category and
+Availability use nested palette pages populated from the corresponding selects.
+Each page retains its parent query/active selection for Back/Escape; empty-search
+Backspace also goes back. Close/backdrop always closes the entire palette. Getting-started guidance is
 first-run only, with no Settings action to reopen it. Onboarding dismissal uses `skyisland.welcome-dismissed`,
 a separate UI preference excluded from tracker exports/imports/reset.
 

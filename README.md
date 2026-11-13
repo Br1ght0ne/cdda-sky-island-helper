@@ -41,7 +41,11 @@ Just open `index.html` in a browser. No server, no build step, no internet.
   tracked progress as JSON.
 - **Commands** or **Cmd/Ctrl+K** searches upgrades and actions. Use Up/Down to
   select, Enter to run, Escape to close. Open from a card to plan it or its
-  prerequisites. Hidden Xedra content stays excluded.
+  prerequisites. Hidden Xedra content stays excluded. Data and Settings actions
+  are available with prefixes such as **Data - Import data**. **Category** and
+  **Availability** open searchable option lists; Enter applies a value, while
+  Back/Escape returns to the parent palette with its search restored. Backspace
+  on an empty option search also returns to the parent.
 - On focused card titles, **Up/Down** moves between visible cards and **Enter**
   expands/collapses. **Settings → Use Vim j/k navigation** optionally enables
   j/k aliases; typing fields and other controls keep their normal keys.
