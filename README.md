@@ -39,6 +39,12 @@ Just open `index.html` in a browser. No server, no build step, no internet.
   with expandable tooltips for grouped/alternative requirements.
 - Import your save file to auto-mark completed upgrades, or export/import your
   tracked progress as JSON.
+- **Commands** or **Cmd/Ctrl+K** searches upgrades and actions. Use Up/Down to
+  select, Enter to run, Escape to close. Open from a card to plan it or its
+  prerequisites. Hidden Xedra content stays excluded.
+- On focused card titles, **Up/Down** moves between visible cards and **Enter**
+  expands/collapses. **Settings → Use Vim j/k navigation** optionally enables
+  j/k aliases; typing fields and other controls keep their normal keys.
 - Keyboard-operable cards, sections and item details; larger mobile touch targets.
 - Responsive layout with a mobile-friendly Plan sheet; works fully offline,
   even from a `file://` path, with progress saved in your browser.

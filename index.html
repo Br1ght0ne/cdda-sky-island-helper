@@ -216,6 +216,7 @@
                 </svg>
               </button>
             </div>
+            <button id="open-commands" class="btn commands-trigger" type="button" aria-haspopup="dialog" aria-controls="command-palette" aria-expanded="false" title="Open commands (Cmd/Ctrl+K)">Commands <kbd>⌘/Ctrl K</kbd></button>
           </div>
           <div class="toolbar toolbar-actions" id="toolbar-actions">
             <div class="toolbar-group">
@@ -241,6 +242,8 @@
               <summary>Settings</summary>
               <div class="menu-content">
                 <label class="chk"><input type="checkbox" id="show-xedra" />Display Xedra Evolved content</label>
+                <label class="chk"><input type="checkbox" id="vim-navigation" />Use Vim j/k navigation</label>
+                <p class="hint keyboard-help">On card titles: ↑/↓ move between cards; Enter expands or collapses. Enable j/k to use those keys for down/up.</p>
               </div>
             </details>
           </div>
@@ -319,6 +322,15 @@
       >
     </footer>
 
+    <dialog id="command-palette" aria-labelledby="command-title">
+      <div class="command-box">
+        <div class="command-head"><h2 id="command-title">Commands</h2><button id="close-commands" class="btn tiny" type="button">Close</button></div>
+        <label class="sr-only" for="command-search">Search commands and upgrades</label>
+        <input id="command-search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="true" aria-controls="command-results" aria-describedby="command-instructions" autocomplete="off" placeholder="Find an upgrade or action…" />
+        <div id="command-results" role="listbox" aria-label="Commands and upgrades"></div>
+        <div class="command-footer"><span id="command-status" role="status" aria-live="polite"></span><span id="command-instructions">↑/↓ select · Enter runs · Esc closes</span></div>
+      </div>
+    </dialog>
     <div id="toast" hidden role="status" aria-live="polite"></div>
 
     <script src="data.js"></script>

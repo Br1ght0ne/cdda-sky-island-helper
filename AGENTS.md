@@ -102,7 +102,14 @@ mise exec bun -- bun -e 'new Bun.Transpiler({loader:"js"}).transformSync(await B
 
 Export/Import copies this object as JSON via the clipboard; Reset = `blankState()`.
 Import/export/reset live in the Data disclosure; Undo is a top-level toolbar button.
-Settings contains **Display Xedra Evolved content**. Getting-started guidance is
+Settings contains **Display Xedra Evolved content** and **Use Vim j/k navigation**.
+The Vim preference uses its own `skyisland.vim-keys` localStorage key, defaults
+false, and is excluded from progress export/import/reset. Arrow/Enter navigation
+is scoped to focused card disclosures and respects filtered/collapsed content;
+Vim aliases are active only when enabled. Editable controls/modifiers are ignored.
+Commands / Cmd-Ctrl-K opens a native dialog with combobox/listbox results for
+upgrades and actions. Palette actions reuse tracker history and reveal helpers;
+closing must not restore focus into a closed/inert Plan sheet. Getting-started guidance is
 first-run only, with no Settings action to reopen it. Onboarding dismissal uses `skyisland.welcome-dismissed`,
 a separate UI preference excluded from tracker exports/imports/reset.
 

@@ -581,3 +581,26 @@ select { max-width: 100%; min-width: 0; color: var(--text); background: var(--pa
   .toolbar-actions .btn { padding-inline: 6px; font-size: 13px; }
   .filter-help { margin-top: 10px; }
 }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.commands-trigger { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; }
+.commands-trigger kbd { font: inherit; color: var(--muted); font-size: 11px; }
+.keyboard-help { max-width: 270px; margin: 0; line-height: 1.5; font-size: 12px; }
+#command-palette { padding: 0; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); color: var(--text); width: min(600px, calc(100vw - 28px)); max-height: 80dvh; box-shadow: 0 20px 70px var(--shadow); }
+#command-palette::backdrop { background: rgba(0,0,0,.65); }
+.command-box { display: flex; flex-direction: column; padding: 16px; max-height: 78dvh; }
+.command-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.command-head h2 { font-size: 18px; margin: 0; }
+#command-search { flex: none; min-width: 0; width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); font-size: 16px; }
+#command-results { overflow-y: auto; min-height: 60px; margin: 10px 0; }
+.command-option { padding: 10px; border: 1px solid transparent; border-radius: var(--radius); cursor: pointer; overflow-wrap: anywhere; }
+.command-option[aria-selected="true"] { border-color: var(--accent); background: rgba(var(--accent-rgb),.1); }
+.command-option:hover { background: var(--panel2); }
+.command-detail { display: block; color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 3px; }
+.command-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; color: var(--muted); font-size: 11px; }
+@media (max-width: 600px) {
+  .toolbar > .search-wrap { flex-basis: 180px; }
+  .commands-trigger { min-height: 44px; padding: 8px; font-size: 12px; }
+  .commands-trigger kbd { display: none; }
+  .command-box { padding: 12px; }
+}

@@ -150,6 +150,7 @@
 	let planView = "all";
 	let closePlanSheet = () => {};
 	let closeItemDetails = () => {};
+	let openPlanSheet = () => {};
 	const history = [];
 	let pendingChange = null;
 
@@ -1810,6 +1811,7 @@
 			else if (wasOpen && media.matches) (returnFocus || els.planHandle).focus();
 		}
 		closePlanSheet = () => setOpen(false);
+		openPlanSheet = () => setOpen(true);
 		els.planHandle.addEventListener("click", () => setOpen(!open));
 		backdrop.addEventListener("click", () => setOpen(false));
 		media.addEventListener("change", () => {
@@ -1868,10 +1870,169 @@
 		apply(current());
 	}
 
+	// ---- command palette and scoped card navigation --------------------------
+	function setupKeyboardNavigation() {
+		const dialog = document.querySelector("#command-palette");
+		const input = document.querySelector("#command-search");
+		const results = document.querySelector("#command-results");
+		const status = document.querySelector("#command-status");
+		const trigger = document.querySelector("#open-commands");
+		const close = document.querySelector("#close-commands");
+		const vim = document.querySelector("#vim-navigation");
+		const preferenceKey = "skyisland.vim-keys";
+		let opener = null;
+		let contextId = null;
+		let entries = [];
+		let active = 0;
+		try { vim.checked = localStorage.getItem(preferenceKey) === "true"; } catch (e) { vim.checked = false; }
+		vim.addEventListener("change", () => {
+			try { localStorage.setItem(preferenceKey, String(vim.checked)); } catch (e) {}
+		});
+
+		function restoreFocus() {
+			const key = opener && opener.dataset && opener.dataset.focus;
+			const replacement = key && [...document.querySelectorAll("[data-focus]")].find(n => n.dataset.focus === key && !n.disabled && !n.closest("[hidden]") && !n.closest("[inert]") && n.getClientRects().length);
+			if (replacement) { replacement.focus({ preventScroll: true }); return; }
+			if (contextId) {
+				const card = document.querySelector('[data-upgrade="' + contextId + '"]');
+				if (card) { card.querySelector(".card-disclosure").focus({ preventScroll: true }); return; }
+			}
+			trigger.focus();
+		}
+		function closePalette() {
+			if (!dialog.open) return;
+			dialog.close();
+			trigger.setAttribute("aria-expanded", "false");
+			restoreFocus();
+		}
+		function showPlan(view) {
+			planView = view; render();
+			const control = view === "raid" ? els.planRaid : els.planAll;
+			control.focus(); openPlanSheet();
+		}
+		function changePlan(u) {
+			if (state.done[u.id]) return;
+			checkpoint("Changed plan");
+			if (state.plan[u.id]) { delete state.plan[u.id]; delete state.raid[u.id]; }
+			else state.plan[u.id] = true;
+			render(); revealUpgrade(u.id);
+		}
+		function commands() {
+			const list = [
+				{ label: "Show Next raid", run: () => showPlan("raid") },
+				{ label: "Show All planned", run: () => showPlan("all") },
+				{ label: "Toggle Hide done", run: () => { setFilter(els.hideDone, !filterOn(els.hideDone)); render(); els.hideDone.focus(); } },
+				{ label: "Toggle Only in plan", run: () => { setFilter(els.onlyPlan, !filterOn(els.onlyPlan)); render(); els.onlyPlan.focus(); } },
+				{ label: "Expand all", run: () => { setAllOpen(true); els.search.focus(); } },
+				{ label: "Collapse all", run: () => { setAllOpen(false); els.search.focus(); } },
+			];
+			if (history.length) list.unshift({ label: "Undo: " + history.at(-1).label, run: () => { undoProgress(); els.search.focus(); } });
+			const u = byId[contextId];
+			if (u && contentEnabled(u) && !state.done[u.id]) {
+				const planLabel = state.plan[u.id] ? "Remove from Plan: " : "Plan: ";
+				list.unshift({ label: planLabel + u.name, run: () => changePlan(u) });
+				const raidLabel = state.raid[u.id] ? "Remove from Next raid: " : "Add to Next raid: ";
+				list.push({ label: raidLabel + u.name, run: () => { toggleRaid(u); revealUpgrade(u.id); } });
+				if (lockedBy(u).length) list.push({ label: "Add missing prerequisites: " + u.name, run: () => { addPrerequisites(u); revealUpgrade(u.id); } });
+			}
+			UP.filter(contentEnabled).forEach(u => list.push({
+				label: "Open: " + u.name,
+				detail: (u.effect || u.category).replace(/^EFFECT:\s*/i, ""),
+				upgrade: u,
+				run: () => revealUpgrade(u.id),
+			}));
+			return list;
+		}
+		function selectResult(index) {
+			active = Math.max(0, Math.min(entries.length - 1, index));
+			const options = [...results.querySelectorAll("[role=\"option\"]")];
+			options.forEach((option, i) => option.setAttribute("aria-selected", String(i === active)));
+			if (options[active]) {
+				input.setAttribute("aria-activedescendant", options[active].id);
+				options[active].scrollIntoView({ block: "nearest" });
+			} else input.removeAttribute("aria-activedescendant");
+		}
+		function execute(index) {
+			const command = entries[index];
+			if (!command) return;
+			closePalette(); command.run();
+		}
+		function renderResults() {
+			const query = input.value.trim().toLowerCase();
+			entries = commands().filter(command => command.label.toLowerCase().includes(query) || (command.upgrade && matches(command.upgrade, query)));
+			const total = entries.length;
+			entries = entries.slice(0, 60);
+			results.replaceChildren();
+			entries.forEach((command, index) => {
+				const option = document.createElement("div");
+				option.id = "command-option-" + index;
+				option.className = "command-option";
+				option.setAttribute("role", "option");
+				const label = document.createElement("span"); label.textContent = command.label; option.append(label);
+				if (command.detail) { const detail = document.createElement("span"); detail.className = "command-detail"; detail.textContent = command.detail; option.append(detail); }
+				option.addEventListener("mousedown", e => e.preventDefault());
+				option.addEventListener("click", () => execute(index));
+				results.append(option);
+			});
+			if (!total) { const empty = document.createElement("p"); empty.className = "hint"; empty.textContent = "No commands or upgrades match your search."; results.append(empty); }
+			status.textContent = total > 60 ? "Showing 60 results. Type to narrow your search." : total + " results";
+			selectResult(0);
+		}
+		function openPalette() {
+			if (dialog.open) return;
+			opener = document.activeElement;
+			const card = opener && opener.closest && opener.closest("[data-upgrade]");
+			contextId = card ? card.getAttribute("data-upgrade") : null;
+			closeItemDetails(); closePlanSheet();
+			input.value = "";
+			dialog.showModal();
+			trigger.setAttribute("aria-expanded", "true");
+			renderResults(); input.focus();
+		}
+		trigger.addEventListener("click", openPalette);
+		close.addEventListener("click", closePalette);
+		dialog.addEventListener("cancel", e => { e.preventDefault(); closePalette(); });
+		dialog.addEventListener("click", e => { if (e.target === dialog) closePalette(); });
+		input.addEventListener("input", renderResults);
+		document.addEventListener("keydown", e => {
+			if (e.defaultPrevented || e.isComposing) return;
+			if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === "k") {
+				e.preventDefault();
+				if (dialog.open) closePalette(); else openPalette();
+				return;
+			}
+			if (dialog.open) {
+				if (e.key === "Escape") { e.preventDefault(); closePalette(); }
+				if (document.activeElement !== input) return;
+				if (e.key === "ArrowDown") { e.preventDefault(); selectResult(active + 1); }
+				if (e.key === "ArrowUp") { e.preventDefault(); selectResult(active - 1); }
+				if (e.key === "Enter") { e.preventDefault(); execute(active); }
+				return;
+			}
+			if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+			const target = e.target;
+			if (!target || !target.closest || target.isContentEditable || target.closest("input,textarea,select,[contenteditable=\"true\"]")) return;
+			const disclosure = target.closest(".card-disclosure");
+			if (!disclosure || disclosure.closest("[inert]")) return;
+			if (e.key === "Enter") { e.preventDefault(); disclosure.click(); return; }
+			let direction = 0;
+			if (e.key === "ArrowDown" || (vim.checked && e.key === "j")) direction = 1;
+			if (e.key === "ArrowUp" || (vim.checked && e.key === "k")) direction = -1;
+			if (!direction) return;
+			const cards = [...els.list.querySelectorAll(".card-disclosure")].filter(n => !n.closest("[hidden]") && n.getClientRects().length);
+			const index = cards.indexOf(disclosure);
+			if (index < 0) return;
+			e.preventDefault();
+			const next = cards[Math.max(0, Math.min(cards.length - 1, index + direction))];
+			next.focus({ preventScroll: true }); next.scrollIntoView({ block: "nearest" });
+		});
+	}
+
 	addToolbarButtons();
 	setupTooltips();
 	setupPlanSheet();
 	setupThemeToggle();
 	setupDiscovery();
+	setupKeyboardNavigation();
 	render();
 })();

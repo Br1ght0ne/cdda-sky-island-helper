@@ -39,7 +39,7 @@ function mkEl(tag) {
     dispatch(ev, e) { (this._listeners[ev] || []).forEach(fn => fn(e || { stopPropagation() {} })); },
     setAttribute(k, v) { this._attrs[k] = String(v); if (k.startsWith("data-")) this.dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = String(v); },
     removeAttribute(k) { delete this._attrs[k]; },
-    getAttribute(k) { return k in this._attrs ? this._attrs[k] : null; },
+    getAttribute(k) { if ((k === "inert" && this.inert) || (k === "hidden" && this.hidden)) return ""; return k in this._attrs ? this._attrs[k] : null; },
     get classList() {
       const el = this;
       return {
@@ -56,6 +56,8 @@ function mkEl(tag) {
     scrollIntoView() { this.scrolled = true; },
     getClientRects() { return [{}]; },
     getBoundingClientRect() { return { left: 0, top: 0, right: 0, bottom: 0 }; },
+    showModal() { this.open = true; },
+    close() { this.open = false; this.dispatch("close"); },
     select() {},
     focus() { global.document.activeElement = this; },
     click() { this.dispatch("click"); },
@@ -82,6 +84,10 @@ function getEl(id) { return registry[id] || (registry[id] = mkEl("div")); }
     registry[id].value = "";
     registry[id].checked = false;
   });
+for (const id of ["plan-view-all", "plan-view-raid", "plan-handle", "open-commands", "close-commands", "undo-progress"]) getEl(id).tagName = "button";
+getEl("command-search").tagName = "input";
+getEl("vim-navigation").tagName = "input";
+getEl("command-palette").tagName = "dialog";
 const toolbar = mkEl("div");
 
 // Static #toolbar-actions layout from index.html: a checkbox group placeholder
@@ -788,6 +794,56 @@ setTimeout(() => {
   assert(planButton.getAttribute("aria-pressed") === "true" && countCards() === 1 && !!findCardByName("Island Rank Up 2"), "Only in plan button filters to planned cards");
   planButton.dispatch("click");
   assert(planButton.getAttribute("aria-pressed") === "false" && countCards() > 1, "Only in plan button toggles off");
+
+  // Palette and scoped card navigation.
+  importFixture({}); mobileMedia.change(false);
+  const palette = getEl("command-palette"), paletteInput = getEl("command-search"), paletteResults = getEl("command-results");
+  const keyPress = (key, extra = {}) => document.dispatch("keydown", { key, target: document.activeElement, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }, ...extra });
+  searchEl.focus(); keyPress("k", { ctrlKey: true });
+  assert(palette.open && document.activeElement === paletteInput, "Ctrl-K opens the palette and focuses command search");
+  paletteInput.value = "Island Rank Up 2"; paletteInput.dispatch("input");
+  assert(textOf(paletteResults).includes("Island Rank Up 2"), "palette finds upgrades by name");
+  keyPress("Enter");
+  assert(!palette.open && getState().open[r2] && document.activeElement?.className === "card-disclosure", "Enter reveals the chosen upgrade and focuses its card");
+  getEl("open-commands").dispatch("click");
+  paletteInput.value = "nonsense-nothing-xyz"; paletteInput.dispatch("input"); keyPress("Enter");
+  assert(palette.open && textOf(paletteResults).includes("No commands or upgrades"), "empty palette results keep Enter inert");
+  keyPress("Escape");
+  assert(!palette.open, "Escape closes the command palette");
+  getEl("open-commands").focus(); getEl("open-commands").dispatch("click"); keyPress("Escape");
+  assert(document.activeElement === getEl("open-commands"), "closing palette returns focus to its opener");
+  getEl("open-commands").dispatch("click"); paletteInput.value = "Vampiric Amplificator"; paletteInput.dispatch("input");
+  assert(!textOf(paletteResults).includes("Open:"), "disabled Xedra upgrades do not appear in palette results"); keyPress("Escape");
+  const navFirst = findCardByName("Island Rank Up 1").querySelector(".card-disclosure"); navFirst.focus();
+  keyPress("ArrowDown");
+  assert(document.activeElement?.closest("[data-upgrade]")?.getAttribute("data-upgrade") === r2, "Down moves focus to the next card");
+  keyPress("ArrowUp"); keyPress("Enter");
+  assert(getState().open[r1], "Enter expands the focused card");
+  keyPress("j"); assert(document.activeElement?.closest("[data-upgrade]")?.getAttribute("data-upgrade") === r1, "Vim aliases are disabled by default");
+  getEl("vim-navigation").checked = true; getEl("vim-navigation").dispatch("change");
+  keyPress("j"); assert(document.activeElement?.closest("[data-upgrade]")?.getAttribute("data-upgrade") === r2, "enabled j moves to the next card");
+  keyPress("k"); assert(document.activeElement?.closest("[data-upgrade]")?.getAttribute("data-upgrade") === r1, "enabled k moves to the previous card");
+  assert(storeBacking["skyisland.vim-keys"] === "true" && !("vimKeys" in getState()), "Vim preference persists separately from tracker progress");
+  searchEl.focus(); keyPress("j"); keyPress("ArrowDown");
+  assert(document.activeElement === searchEl, "navigation leaves text input keys alone");
+  navFirst.focus(); keyPress("k", { metaKey: true });
+  assert(palette.open, "Cmd-K opens palette instead of moving cards with Vim enabled");
+  paletteInput.value = "Plan: Island Rank Up 1"; paletteInput.dispatch("input"); keyPress("Enter");
+  assert(getState().plan[r1], "palette can plan its focused upgrade");
+  getEl("open-commands").dispatch("click"); paletteInput.value = "Undo"; paletteInput.dispatch("input"); keyPress("Enter");
+  assert(!getState().plan[r1], "palette Undo uses the same progress history");
+  getEl("vim-navigation").checked = false; getEl("vim-navigation").dispatch("change");
+
+  category.value = "Island Rank Up"; category.dispatch("change");
+  findCardByName("Island Rank Up 2").querySelector(".card-disclosure").focus(); keyPress("ArrowDown");
+  assert(document.activeElement?.closest("[data-upgrade]")?.getAttribute("data-upgrade") === r2, "card navigation stops at the filtered list boundary");
+  keyPress("ArrowUp", { altKey: true });
+  assert(document.activeElement?.closest("[data-upgrade]")?.getAttribute("data-upgrade") === r2, "modified arrows keep browser shortcuts intact");
+  category.value = ""; category.dispatch("change");
+  mobileMedia.change(true); planHandle.focus(); planHandle.dispatch("click");
+  keyPress("k", { ctrlKey: true }); keyPress("Escape");
+  assert(document.activeElement === getEl("open-commands"), "closing palette opened from mobile Plan restores focus outside its closed inert content");
+  mobileMedia.change(false);
 
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;
