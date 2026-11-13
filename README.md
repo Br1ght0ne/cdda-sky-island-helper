@@ -11,6 +11,11 @@ Just open `index.html` in a browser. No server, no build step, no internet.
 
 - Collapsible, searchable, filterable list of upgrades and repeatable crafts,
   grouped by category, each with live progress toward its materials.
+- Three optional Xedra Evolved one-time upgrades under Mod Upgrades, with
+  tier 5 vampirism and blood-gift research unlocked after tier 4 vampirism.
+  Enable them with the **Xedra Evolved** checkbox (off by default). Turning
+  it off hides their cards and Plan requirements while preserving progress;
+  the choice is saved and included in progress exports.
 - Flexible material tracking — mark a requirement as gathered as a whole, or
   count individual alternatives toward it.
 - Tool qualities are tracked globally: own a tool once, and it's satisfied
@@ -77,3 +82,5 @@ The extractor:
 
 Point `CDDA_PATH` at your own Cataclysm-DDA checkout (e.g. in `mise.local.toml`
 or `export CDDA_PATH=…`); the script errors out if it isn't set.
+For sparse checkouts, include `data/json`, `data/mods/Sky_Island`, and
+`data/mods/Xedra_Evolved` so optional upgrade ingredients resolve correctly.

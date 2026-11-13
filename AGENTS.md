@@ -9,7 +9,7 @@ tracker for the upgrades in the Cataclysm: DDA *Sky Island* mod.
 A dependency-free, single-page web app (vanilla HTML/CSS/JS, no build step, no
 framework) that helps a player track the items needed to unlock the mod's
 one-time upgrades (Island Rank Up, constructions, raid upgrades, start-location
-& challenge unlocks — 91 total).
+& challenge unlocks — 91 mission upgrades, plus 3 optional Xedra Evolved upgrades).
 
 **Hard constraint: it must run by opening `index.html` straight from a `file://`
 path.** That rules out `fetch()` (blocked on `file://`) and any CDN/remote
@@ -71,7 +71,7 @@ node --check app.js
 
 ## State model (localStorage key `skyisland.tracker.v1`)
 
-`{ done, plan, have, qty, tools, open, groupsCollapsed, crafted }` — see
+`{ done, plan, have, qty, tools, open, groupsCollapsed, crafted, xedraEnabled }` — see
 `blankState()`.
 
 - `done[upgradeId]` — a one-shot upgrade marked complete.
@@ -86,6 +86,11 @@ node --check app.js
 - `tools[key]` — **GLOBAL** tool-quality ownership, keyed `${qualityId}::${level}`
   (NOT per-upgrade — see below).
 - `open[upgradeId]` — card expanded. `groupsCollapsed[groupName]` — section collapsed.
+- `xedraEnabled` — optional Xedra Evolved content toggle, false by default.
+  Upgrades tagged `mod: "xedra_evolved"` are excluded from cards, search,
+  Plan aggregation, and counts when off, but their progress is retained.
+  This choice is exported/imported/reset with tracker state; save-file import
+  does not change it.
 
 Export/Import copies this object as JSON via the clipboard; Reset = `blankState()`.
 
@@ -219,7 +224,3 @@ devtools (e.g. at 375px) when you touch layout. When adding a DOM API in
 - In Node scripts (`build/smoke.js`) use **`process.stdout.write()`** for
   informational output — `console.log/debug/warn` is reserved for actual
   errors or is banned outright by the linter rule `no-console-except-error-js`.
-
-### Version control
-
-- Use Jujutsu (`jj`) instead of `git` for version control manipulation where possible

@@ -52,7 +52,7 @@ const registry = {};
 function getEl(id) { return registry[id] || (registry[id] = mkEl("div")); }
 
 // Pre-create the elements index.html references by id.
-["list","search","search-clear","hide-done","only-plan","clear-plan","shopping","plan-hint","stats","foot","toast"]
+["list","search","search-clear","hide-done","only-plan","show-xedra","clear-plan","shopping","plan-hint","stats","foot","toast"]
   .forEach(id => {
     let tag;
     if (id === "search") tag = "input";
@@ -132,6 +132,8 @@ const list = registry["list"];
 const actions = registry["toolbar-actions"]; // Expand/Collapse live here
 const headerActions = registry["main-actions"]; // Export/Import/Import Save/Reset live here (sticky toolbar)
 assert(list.children.length > 0, "list rendered group/category/card nodes");
+const xedraToggle = registry["show-xedra"];
+assert(xedraToggle.checked === false, "optional Xedra content starts off");
 
 // find first upgrade card's plan button and click it (Island Rank Up 1)
 // locate a card by walking children
@@ -528,6 +530,65 @@ setTimeout(() => {
   searchEl.dispatch("input");
   westSideDone = doneCbOf(findCardByName(westSide.name));
   assert(westSideDone.disabled === false, "West Side Rooms unlocks once both Main Room 3 and West Room 3 are done");
+
+  // Xedra upgrades are permanent unlocks, not repeatable crafts. Tier 4
+  // unlocks both tier 5 and blood-gift research in the game.
+  const xedra = ["upgradekey_vampire4", "upgradekey_vampire5", "upgradekey_bloodgift_research"]
+    .map(id => window.SKYISLAND_DATA.upgrades.find(u => u.id === id));
+  assert(xedra.every(Boolean), "all three Xedra Evolved upgrades extracted");
+  if (xedra.every(Boolean)) {
+    searchEl.value = ""; searchEl.dispatch("input");
+    assert(!findCardByName(xedra[0].name), "Xedra cards are hidden with the toggle off");
+    xedraToggle.checked = true; xedraToggle.dispatch("change");
+    assert(!!findCardByName(xedra[0].name), "turning Xedra on reveals its cards");
+    assert(getState().xedraEnabled === true, "Xedra choice persists in tracker state");
+    assert(xedra.every(u => u.repeatable === false), "Xedra upgrades are one-shot unlocks");
+    promptReturn = JSON.stringify({ xedraEnabled: true, done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: {}, crafted: {} });
+    impBtn2.dispatch("click");
+    const [tier4, tier5, research] = xedra;
+    assert(doneCbOf(findCardByName(tier5.name)).disabled === true, "vampire tier 5 requires tier 4");
+    assert(doneCbOf(findCardByName(research.name)).disabled === true, "blood-gift research requires tier 4");
+    const tier4Done = doneCbOf(findCardByName(tier4.name));
+    tier4Done.checked = true; tier4Done.dispatch("change");
+    for (const upgrade of [tier5, research]) {
+      assert(doneCbOf(findCardByName(upgrade.name)).disabled === false, upgrade.name + " unlocks after tier 4");
+    }
+    for (const upgrade of xedra) {
+      const have = {};
+      upgrade.components.forEach((_alts, gi) => { have[upgrade.id + "::comp::" + gi] = true; });
+      const prerequisites = upgrade === tier4 ? {} : { [tier4.id]: true };
+      promptReturn = JSON.stringify({ xedraEnabled: true, done: prerequisites, plan: { [upgrade.id]: true }, have, qty: {}, tools: {}, open: {}, crafted: {} });
+      impBtn2.dispatch("click");
+      assert(!!findByText(planReadyList, upgrade.name), upgrade.name + " appears ready in the Plan");
+      const done = doneCbOf(findCardByName(upgrade.name));
+      done.checked = true; done.dispatch("change");
+      const saved = getState();
+      assert(saved.done[upgrade.id] && !saved.plan[upgrade.id] && !saved.crafted[upgrade.id],
+        upgrade.name + " completes once and leaves the Plan without a craft tally");
+    }
+    const have = { [tier4.id + "::comp::0"]: true };
+    promptReturn = JSON.stringify({ xedraEnabled: true, done: { [tier4.id]: true }, plan: { [research.id]: true }, have, qty: {}, tools: {}, open: {}, crafted: {} });
+    impBtn2.dispatch("click");
+    assert(textOf(registry.shopping).includes(research.name), "enabled Xedra requirements appear in the Plan");
+    const enabledCount = countCards();
+    xedraToggle.checked = false; xedraToggle.dispatch("change");
+    assert(countCards() === enabledCount - 3, "disabling Xedra hides exactly its three cards");
+    assert(!textOf(registry.shopping).includes(research.name) && !textOf(planReadyList).includes(research.name),
+      "disabled Xedra content is excluded from Plan materials and ready upgrades");
+    assert(registry["plan-summary"].textContent === "nothing planned yet", "disabled Xedra plans do not count in the Plan summary");
+    assert(textOf(registry.foot).includes("114 upgrades tracked"), "tracked count excludes disabled Xedra content");
+    assert(getState().done[tier4.id] && getState().plan[research.id] && getState().have[tier4.id + "::comp::0"],
+      "disabling Xedra preserves its completion, plan, and gathered materials");
+    searchEl.value = research.name; searchEl.dispatch("input");
+    assert(!findCardByName(research.name), "search does not reveal disabled Xedra content");
+    searchEl.value = ""; searchEl.dispatch("input");
+    xedraToggle.checked = true; xedraToggle.dispatch("change");
+    assert(textOf(registry.shopping).includes(research.name), "re-enabling Xedra restores its Plan requirements");
+    assert(textOf(registry.foot).includes("117 upgrades tracked"), "tracked count includes enabled Xedra content");
+    promptReturn = JSON.stringify({ plan: {}, done: {} });
+    impBtn2.dispatch("click");
+    assert(xedraToggle.checked === false && !findCardByName(tier4.name), "old tracker imports default optional Xedra content to off");
+  }
 
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;

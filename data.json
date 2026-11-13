@@ -1,8 +1,8 @@
 {
   "generated_from": "CleverRaven/cataclysm-dda data/mods/Sky_Island",
-  "source_commit": "eb9ad68756bbdae216ffb240fe7cf8c71855c1f3",
+  "source_commit": "975c96c26dd274571ca62eb83ee6c25d22de5db0",
   "guide_base": "https://cdda-guide.nornagon.net",
-  "count": 114,
+  "count": 117,
   "upgrades": [
     {
       "id": "SKYISLAND_UPGRADE_rankup1",
@@ -809,7 +809,7 @@
           {
             "id": "frame",
             "count": 10,
-            "name": "steel frame",
+            "name": "steel unibody frame",
             "list": false
           }
         ],
@@ -1025,7 +1025,7 @@
           {
             "id": "stick",
             "count": 4,
-            "name": "stick",
+            "name": "straight stick",
             "list": false
           },
           {
@@ -1240,7 +1240,7 @@
           {
             "id": "frame",
             "count": 2,
-            "name": "steel frame",
+            "name": "steel unibody frame",
             "list": false
           }
         ],
@@ -1330,7 +1330,7 @@
           {
             "id": "frame",
             "count": 2,
-            "name": "steel frame",
+            "name": "steel unibody frame",
             "list": false
           }
         ],
@@ -1802,7 +1802,7 @@
           {
             "id": "frame",
             "count": 4,
-            "name": "steel frame",
+            "name": "steel unibody frame",
             "list": false
           }
         ],
@@ -2638,7 +2638,7 @@
           {
             "id": "frame",
             "count": 2,
-            "name": "steel frame",
+            "name": "steel unibody frame",
             "list": false
           }
         ],
@@ -2728,7 +2728,7 @@
           {
             "id": "frame",
             "count": 2,
-            "name": "steel frame",
+            "name": "steel unibody frame",
             "list": false
           }
         ],
@@ -3244,7 +3244,7 @@
           {
             "id": "frame",
             "count": 2,
-            "name": "steel frame",
+            "name": "steel unibody frame",
             "list": false
           }
         ],
@@ -3312,7 +3312,7 @@
       "id": "SKYISLAND_BUILD_northroom3",
       "repeatable": false,
       "key_item": "buildkey_northroom3",
-      "name": "Construct: north Room 3",
+      "name": "Construct: North Room 3",
       "key_name": "Warped Reinforcement (north)",
       "group": "Island Construction",
       "category": "North Wing",
@@ -3339,7 +3339,7 @@
           {
             "id": "frame",
             "count": 2,
-            "name": "steel frame",
+            "name": "steel unibody frame",
             "list": false
           }
         ],
@@ -3702,8 +3702,8 @@
       "key_name": "Miner's Cameo (East)",
       "group": "Island Construction",
       "category": "East Wing",
-      "effect": "New Structure: east Room 1.  A hollow chamber east of the island's center to serve as a multipurpose space, with tons of room to expand.",
-      "description": "Completing this mission will instantly build a new structure on your home island.\n\nCraft a Miner's Cameo from simple tools and common building materials.  The Heart of the Island has already placed the recipe inside your mind.\n\nNew Structure: east Room 1.  A hollow chamber east of the island's center to serve as a multipurpose space, with tons of room to expand.",
+      "effect": "New Structure: East Room 1.  A hollow chamber east of the island's center to serve as a multipurpose space, with tons of room to expand.",
+      "description": "Completing this mission will instantly build a new structure on your home island.\n\nCraft a Miner's Cameo from simple tools and common building materials.  The Heart of the Island has already placed the recipe inside your mind.\n\nNew Structure: East Room 1.  A hollow chamber east of the island's center to serve as a multipurpose space, with tons of room to expand.",
       "components": [
         [
           {
@@ -3849,7 +3849,7 @@
           {
             "id": "frame",
             "count": 2,
-            "name": "steel frame",
+            "name": "steel unibody frame",
             "list": false
           }
         ],
@@ -3939,7 +3939,7 @@
           {
             "id": "frame",
             "count": 2,
-            "name": "steel frame",
+            "name": "steel unibody frame",
             "list": false
           }
         ],
@@ -4044,12 +4044,12 @@
       "id": "SKYISLAND_BUILD_eastroom4",
       "repeatable": false,
       "key_item": "buildkey_eastroom4",
-      "name": "Construct: east Room Gallery",
+      "name": "Construct: East Room Gallery",
       "key_name": "Crystalline Glass (East)",
       "group": "Island Construction",
       "category": "East Wing",
-      "effect": "New Structure: east Room Gallery.  Add an enclosed gallery to the eastern room to allow viewing off the side of the island.",
-      "description": "Completing this mission will instantly build a new structure on your home island.\n\nCraft a Crystalline Glass from simple tools and common building materials.  The Heart of the Island has already placed the recipe inside your mind.\n\nNew Structure: east Room Gallery.  Add an enclosed gallery to the eastern room to allow viewing off the side of the island.",
+      "effect": "New Structure: East Room Gallery.  Add an enclosed gallery to the eastern room to allow viewing off the side of the island.",
+      "description": "Completing this mission will instantly build a new structure on your home island.\n\nCraft a Crystalline Glass from simple tools and common building materials.  The Heart of the Island has already placed the recipe inside your mind.\n\nNew Structure: East Room Gallery.  Add an enclosed gallery to the eastern room to allow viewing off the side of the island.",
       "components": [
         [
           {
@@ -4529,7 +4529,7 @@
           {
             "id": "down_feather",
             "count": 40,
-            "name": "down feather",
+            "name": "handful of down feathers",
             "list": false
           }
         ],
@@ -5407,7 +5407,7 @@
           {
             "id": "down_feather",
             "count": 100,
-            "name": "down feather",
+            "name": "handful of down feathers",
             "list": false
           }
         ],
@@ -8249,7 +8249,7 @@
           {
             "id": "down_feather",
             "count": 40,
-            "name": "down feather",
+            "name": "handful of down feathers",
             "list": false
           }
         ],
@@ -8651,6 +8651,306 @@
             "id": "lab_file_sec",
             "count": 2,
             "name": "security protocol",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "upgradekey_vampire4",
+      "repeatable": false,
+      "key_item": "upgradekey_vampire4",
+      "name": "Vampiric Amplificator",
+      "key_name": "Vampiric Amplificator",
+      "group": "Mod Upgrades",
+      "category": "Xedra Evolved",
+      "mod": "xedra_evolved",
+      "effect": "This strange metaphysical artifact will push your vampirism beyond the point of no return when you will use it.",
+      "description": "This strange metaphysical artifact will push your vampirism beyond the point of no return when you will use it.\n\nUnlike most things you can craft out of warp shards, this item won't be used automatically after you made it, so you can create it then take your time to decide if you really want to do this.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 25,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "blood",
+            "count": 10,
+            "name": "blood",
+            "list": false
+          },
+          {
+            "id": "demihuman_blood",
+            "count": 10,
+            "name": "demihuman blood",
+            "list": false
+          },
+          {
+            "id": "mutant_human_blood",
+            "count": 10,
+            "name": "mutant human blood",
+            "list": false
+          },
+          {
+            "id": "fae_blood",
+            "count": 10,
+            "name": "fae blood",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "vacutainer",
+            "count": 5,
+            "name": "blood draw kit",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "sinister_cane",
+            "count": 1,
+            "name": "sinister cane",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "cloak_vampire_red",
+            "count": 1,
+            "name": "sinister cloak (red)",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "cloak_vampire",
+            "count": 1,
+            "name": "sinister cloak (black)",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "upgradekey_vampire5",
+      "repeatable": false,
+      "key_item": "upgradekey_vampire5",
+      "name": "Superior Vampiric Amplificator",
+      "key_name": "Superior Vampiric Amplificator",
+      "group": "Mod Upgrades",
+      "category": "Xedra Evolved",
+      "mod": "xedra_evolved",
+      "effect": "This strange metaphysical artifact will push your vampirism to its absolute limit.",
+      "description": "This strange metaphysical artifact will push your vampirism to its absolute limit.\n\nAs per the previous vampiric amplificator, you have to decide to use the crafted item for its effect to apply.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 50,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "blood",
+            "count": 10,
+            "name": "blood",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "demihuman_blood",
+            "count": 10,
+            "name": "demihuman blood",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "mutant_human_blood",
+            "count": 10,
+            "name": "mutant human blood",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "fae_blood",
+            "count": 10,
+            "name": "fae blood",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "vampire_fangs",
+            "count": 1,
+            "name": "vampire fangs",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "ruby_silver_ring",
+            "count": 1,
+            "name": "ruby and silver ring",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "ruby_silver_tiara",
+            "count": 1,
+            "name": "ruby and silver tiara",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "ruby_silver_earring",
+            "count": 1,
+            "name": "ruby and silver earrings (pair)",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "ruby_silver_bracelet",
+            "count": 1,
+            "name": "ruby and silver bracelet",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "ruby_silver_pendant_necklace",
+            "count": 1,
+            "name": "ruby and silver pendant necklace",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "ruby_silver_cufflinks",
+            "count": 1,
+            "name": "ruby and silver cufflinks",
+            "list": false
+          }
+        ]
+      ],
+      "qualities": [],
+      "tools": []
+    },
+    {
+      "id": "upgradekey_bloodgift_research",
+      "repeatable": false,
+      "key_item": "upgradekey_bloodgift_research",
+      "name": "Key of Vampiric Knowledge",
+      "key_name": "Key of Vampiric Knowledge",
+      "group": "Mod Upgrades",
+      "category": "Xedra Evolved",
+      "mod": "xedra_evolved",
+      "effect": "This strange metaphysical artifact will allow you to spend your blood to obtain new blood gifts and reshuffle your weaknesses.",
+      "description": "This strange metaphysical artifact will allow you to spend your blood to obtain new blood gifts and reshuffle your weaknesses.\n\nAs per the previous vampiric amplificator, you have to decide to use the crafted item for its effect to apply.",
+      "components": [
+        [
+          {
+            "id": "warptoken",
+            "count": 20,
+            "name": "warp shards",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "blood",
+            "count": 10,
+            "name": "blood",
+            "list": false
+          },
+          {
+            "id": "demihuman_blood",
+            "count": 10,
+            "name": "demihuman blood",
+            "list": false
+          },
+          {
+            "id": "mutant_human_blood",
+            "count": 10,
+            "name": "mutant human blood",
+            "list": false
+          },
+          {
+            "id": "fae_blood",
+            "count": 10,
+            "name": "fae blood",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "paperback_romance_diodes",
+            "count": 1,
+            "name": "Blood Diodes",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "cookbook_bloodforgood",
+            "count": 1,
+            "name": "Blood for the Greater Good",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "blood_pancakes",
+            "count": 1,
+            "name": "blodplättar",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "blood_rice_pudding",
+            "count": 1,
+            "name": "blood rice pudding",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "blutwurst_sausage",
+            "count": 1,
+            "name": "blutwurst",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "drink_bloody_mary_blood",
+            "count": 1,
+            "name": "'very' Bloody Mary cocktail",
+            "list": false
+          }
+        ],
+        [
+          {
+            "id": "soup_blood",
+            "count": 1,
+            "name": "blood soup",
             "list": false
           }
         ]
@@ -9413,7 +9713,7 @@
           {
             "id": "stick",
             "count": 2,
-            "name": "stick",
+            "name": "straight stick",
             "list": false
           },
           {
@@ -9849,7 +10149,7 @@
           "name": "aluminum pot"
         }
       ],
-      "total": 61
+      "total": 62
     },
     "BUTCHER::16": {
       "examples": [
@@ -9960,7 +10260,7 @@
           "name": "eclipse glasses"
         }
       ],
-      "total": 8
+      "total": 9
     },
     "HAMMER::2": {
       "examples": [

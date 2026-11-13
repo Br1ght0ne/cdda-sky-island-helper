@@ -100,12 +100,11 @@ def norm_name(name):
 # Index: id -> {n: name, p: plural}, requirement bodies for LIST expansion,
 # copy-from parents, per-id tool qualities, and the set of concrete item ids.
 # ---------------------------------------------------------------------------
-def build_index():
+def build_index(extra_roots=()):
     idx = {"names": {}, "reqs": {}, "parents": {}, "own_qual": {}, "concrete": set()}
-    for o in iter_json_objects(BASE):
-        _register(o, idx)
-    for o in iter_json_objects(MOD):
-        _register(o, idx)
+    for root in (BASE, *extra_roots, MOD):
+        for o in iter_json_objects(root):
+            _register(o, idx)
     # Resolve copy-from inheritance for entries still missing a name.
     names, parents = idx["names"], idx["parents"]
     for cid, parent in list(parents.items()):
@@ -377,6 +376,43 @@ def parse_repeatable_crafts(idx):
     return out
 
 
+def parse_xedra_upgrades():
+    """One-time item-activated upgrades; their effects forget the recipes.
+
+    These have no mission_definition, so use the upgrade-key item id as the
+    stable tracker id. Their names/descriptions and requirements stay sourced
+    from the mod, just like mission upgrades.
+    """
+    # Resolve Xedra-only ingredients without adding optional-mod tools to the
+    # base game's shared quality examples.
+    idx = build_index(extra_roots=(os.path.join(CDDA, "data/mods/Xedra_Evolved"),))
+    data = load_json(os.path.join(MOD, "mod_interactions/xedra_evolved/recipes.json"))
+    items = {o["id"]: o for o in data if o.get("type") == "ITEM"}
+    out = []
+    for recipe in data:
+        if recipe.get("type") != "recipe":
+            continue
+        key = recipe["result"]
+        item = items[key]
+        description = item.get("description", "")
+        out.append({
+            "id": key,
+            "repeatable": False,
+            "key_item": key,
+            "name": norm_name(item.get("name"))[0] or prettify(key),
+            "key_name": norm_name(item.get("name"))[0] or prettify(key),
+            "group": "Mod Upgrades",
+            "category": "Xedra Evolved",
+            "mod": "xedra_evolved",
+            "effect": description.split("\n")[0],
+            "description": description,
+            "components": parse_components(recipe.get("components"), idx),
+            "qualities": parse_qualities(recipe.get("qualities"), idx),
+            "tools": parse_tools(recipe.get("tools"), idx),
+        })
+    return out
+
+
 def main():
     idx = build_index()
     upgrades = []
@@ -413,6 +449,7 @@ def main():
                 "tools": parse_tools(r.get("tools"), idx) if r else [],
             })
 
+    upgrades.extend(parse_xedra_upgrades())
     upgrades.extend(parse_repeatable_crafts(idx))
 
     # Example items that satisfy each required tool quality, from the game source.

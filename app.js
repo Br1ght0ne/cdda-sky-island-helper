@@ -44,6 +44,8 @@
 	// untracked here) are deliberately omitted — this tracker has no checkbox
 	// for either, so gating on them would just look permanently locked.
 	const EXTRA_REQUIRES = {
+		// Xedra unlocks blood-gift research alongside tier 5 after tier 4.
+		upgradekey_bloodgift_research: ["upgradekey_vampire4"],
 		SKYISLAND_UPGRADE_personal_temperature_adaptation: [
 			"SKYISLAND_bunker_temperature_adaptation",
 		],
@@ -114,6 +116,7 @@
 		searchClear: document.querySelector("#search-clear"),
 		hideDone: document.querySelector("#hide-done"),
 		onlyPlan: document.querySelector("#only-plan"),
+		showXedra: document.querySelector("#show-xedra"),
 		clearPlan: document.querySelector("#clear-plan"),
 		planActions: document.querySelector("#plan-actions"),
 		planPanel: document.querySelector("#plan-panel"),
@@ -139,6 +142,7 @@
 		// Tool qualities are permanent island gear, so ownership is shared across
 		// every upgrade rather than tracked per-upgrade like materials.
 		return {
+			xedraEnabled: false,
 			done: {},
 			plan: {},
 			have: {},
@@ -165,6 +169,10 @@
 	}
 
 	// ---- helpers -------------------------------------------------------------
+	function contentEnabled(u) {
+		return u.mod !== "xedra_evolved" || state.xedraEnabled === true;
+	}
+
 	// A requirement group is "met" when the upgrade is done, OR its checkbox is
 	// ticked (state.have -> "I have one of these, doesn't matter which"), OR any
 	// one alternative's tracked quantity (state.qty) has reached its required
@@ -255,6 +263,7 @@
 	}
 	// ---- rendering -----------------------------------------------------------
 	function render() {
+		els.showXedra.checked = state.xedraEnabled === true;
 		const q = els.search.value.trim().toLowerCase();
 		const hideDone = els.hideDone.checked;
 		const onlyPlan = els.onlyPlan.checked;
@@ -263,6 +272,7 @@
 		const groups = {}; // group -> category -> [upgrades]
 		let shown = 0;
 		UP.forEach((u) => {
+			if (!contentEnabled(u)) return;
 			if (hideDone && state.done[u.id]) return;
 			if (onlyPlan && !state.plan[u.id]) return;
 			if (q && !matches(u, q)) return;
@@ -787,7 +797,7 @@
 
 	// ---- shopping list -------------------------------------------------------
 	function renderShopping() {
-		const planned = UP.filter((u) => state.plan[u.id]);
+		const planned = UP.filter((u) => contentEnabled(u) && state.plan[u.id]);
 		els.planHint.style.display = planned.length ? "none" : "block";
 		els.planActions.style.display = planned.length ? "flex" : "none";
 		els.shopping.replaceChildren();
@@ -973,9 +983,10 @@
 	}
 
 	function renderStats() {
-		const total = UP.length;
-		const crafted = Object.values(state.crafted || {}).reduce(
-			(a, b) => a + (b || 0),
+		const enabled = UP.filter(contentEnabled);
+		const total = enabled.length;
+		const crafted = enabled.reduce(
+			(a, u) => a + (state.crafted[u.id] || 0),
 			0,
 		);
 		els.stats.replaceChildren();
@@ -1379,6 +1390,10 @@
 	});
 	els.hideDone.addEventListener("change", render);
 	els.onlyPlan.addEventListener("change", render);
+	els.showXedra.addEventListener("change", () => {
+		state.xedraEnabled = els.showXedra.checked;
+		render();
+	});
 	els.clearPlan.addEventListener("click", () => {
 		if (
 			Object.keys(state.plan).length &&
