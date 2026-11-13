@@ -1538,19 +1538,19 @@
 		const exp = document.createElement("button");
 		exp.type = "button";
 		exp.className = "btn";
-		exp.textContent = "Export";
+		exp.textContent = "Export data";
 		exp.title = "Copy your progress to the clipboard as JSON";
 		exp.addEventListener("click", exportState);
 		const imp = document.createElement("button");
 		imp.type = "button";
 		imp.className = "btn";
-		imp.textContent = "Import";
+		imp.textContent = "Import data";
 		imp.title = "Paste previously exported JSON progress";
 		imp.addEventListener("click", importState);
 		const impSave = document.createElement("button");
 		impSave.type = "button";
 		impSave.className = "btn";
-		impSave.textContent = "Import Save";
+		impSave.textContent = "Import game save";
 		impSave.title =
 			"Read completed upgrades from your Cataclysm master.gsav save file";
 		impSave.addEventListener("click", () => els.importSaveFile.click());

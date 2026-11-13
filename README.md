@@ -33,7 +33,7 @@ Just open `index.html` in a browser. No server, no build step, no internet.
   imports, resets, and clearing the Plan. Undo history lasts for this page session;
   it does not change theme, filters, or expanded sections.
 - First-run guidance offers save import or a first upgrade. **Settings → Getting
-  started** reopens it. Progress contains import/export/reset; Settings contains
+  started** reopens it. Progress contains Export data, Import data, Import game save, and Reset; Settings contains
   the optional Xedra toggle.
 - Every item and tool quality links out to the [CDDA Guide](https://cdda-guide.nornagon.net),
   with expandable tooltips for grouped/alternative requirements.

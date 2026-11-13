@@ -315,20 +315,20 @@ planHandle.dispatch("click");
 assert(!/\bopen\b/.test(planPanel.className), "tapping again closes the plan sheet");
 
 // Export copies JSON to clipboard
-const expBtn = headerActions.children.find(c => c._text === "Export");
+const expBtn = headerActions.children.find(c => c._text === "Export data");
 assert(!!expBtn, "Export button added to toolbar");
 expBtn.dispatch("click");
 setTimeout(() => {
   assert(clipboard.length > 0 && JSON.parse(clipboard), "export wrote valid JSON to clipboard");
   // Import
   promptReturn = JSON.stringify({ plan: { "SKYISLAND_UPGRADE_landing1": true }, done: {}, have: {}, open: {} });
-  const impBtn = headerActions.children.find(c => c._text === "Import");
+  const impBtn = headerActions.children.find(c => c._text === "Import data");
   impBtn.dispatch("click");
   const after = getState();
   assert(after.plan["SKYISLAND_UPGRADE_landing1"] === true, "import replaced state from JSON");
 
   // Import Save reads a master.gsav, matching mission type_id -> upgrade id
-  const impSaveBtn = headerActions.children.find(c => c._text === "Import Save");
+  const impSaveBtn = headerActions.children.find(c => c._text === "Import game save");
   assert(!!impSaveBtn, "Import Save button added to toolbar");
   const gsav = "# version 39\n" + JSON.stringify({
     active_missions: [
@@ -365,7 +365,7 @@ setTimeout(() => {
   // points (Import replaces `state` via Object.assign(blankState(), parsed) then
   // renders+saves) — writing straight to the mock localStorage backing store
   // would NOT reach the in-memory `state` object app.js actually reads from.
-  const impBtn2 = headerActions.children.find(c => c._text === "Import");
+  const impBtn2 = headerActions.children.find(c => c._text === "Import data");
   promptReturn = JSON.stringify({ done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: { [tree.id]: true }, crafted: {} });
   impBtn2.dispatch("click");
   searchEl.value = ""; searchEl.dispatch("input");
