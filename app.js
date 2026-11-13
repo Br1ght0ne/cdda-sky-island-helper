@@ -337,6 +337,18 @@
 		return { met, total: groups.length };
 	}
 
+	function stampFocusKeys() {
+		const counts = new Map();
+		for (const node of document.querySelectorAll("button,input,a,select")) {
+			if (node.dataset.focus) continue;
+			const context = node.closest("[data-upgrade]") || node.closest("[data-row]");
+			const scope = context ? context.getAttribute("data-upgrade") || context.getAttribute("data-row") : "page";
+			const label = node.getAttribute("aria-label") || node.title || node.textContent || node.href || node.id || "control";
+			const base = scope + "|" + node.tagName + "|" + label;
+			const count = counts.get(base) || 0; counts.set(base, count + 1);
+			node.setAttribute("data-focus", base + "|" + count);
+		}
+	}
 	function clearFilters() {
 		els.search.value = ""; els.hideDone.checked = false; els.onlyPlan.checked = false;
 		els.availability.value = ""; els.category.value = "";
@@ -404,6 +416,13 @@
 
 	// ---- rendering -----------------------------------------------------------
 	function render() {
+		const active = document.activeElement;
+		const focusKey = active && active.dataset && active.dataset.focus;
+		const activeCard = active && active.closest && active.closest("[data-upgrade]");
+		const cardId = activeCard && activeCard.getAttribute("data-upgrade");
+		const inPlan = active && els.planPanel.contains(active);
+		const scroll = document.querySelector("#plan-scroll");
+		const scrollTop = scroll.scrollTop;
 		finishChange();
 		els.showXedra.checked = state.xedraEnabled === true;
 		const q = els.search.value.trim().toLowerCase();
@@ -440,7 +459,10 @@
 			const searching = !!q;
 			for (const group of Object.keys(groups)) {
 				const collapsed = !searching && !!state.groupsCollapsed[group];
-				const gh = document.createElement("div");
+				const gh = document.createElement("button");
+				gh.type = "button";
+				gh.setAttribute("aria-expanded", String(!collapsed));
+				gh.setAttribute("data-focus", "group:" + group);
 				gh.className = "group-head" + (collapsed ? " collapsed" : "");
 				const caret = document.createElement("span");
 				caret.className = "caret";
@@ -462,14 +484,16 @@
 					else state.groupsCollapsed[group] = true;
 					render();
 				});
-				els.list.append(gh);
+				const section = document.createElement("div"); section.id = "section-" + GROUPS.indexOf(group);
+				gh.setAttribute("aria-controls", section.id); section.hidden = collapsed;
+				els.list.append(gh, section);
 				if (collapsed) continue;
 				for (const cat of Object.keys(groups[group])) {
 					const ch = document.createElement("div");
 					ch.className = "cat-head";
 					ch.textContent = cat;
-					els.list.append(ch);
-					groups[group][cat].forEach((u) => els.list.append(card(u)));
+					section.append(ch);
+					groups[group][cat].forEach((u) => section.append(card(u)));
 				}
 			}
 		}
@@ -477,6 +501,17 @@
 		renderWelcome();
 		renderStats();
 		renderShopping();
+		stampFocusKeys();
+		scroll.scrollTop = scrollTop;
+		if (focusKey) {
+			let target = [...document.querySelectorAll("[data-focus]")].find(n => n.dataset.focus === focusKey && !n.disabled && !n.closest("[hidden]"));
+			if (!target && cardId) {
+				const card = document.querySelector('[data-upgrade="' + cardId + '"]');
+				target = card && card.querySelector(".card-disclosure");
+			}
+			if (!target) target = inPlan ? els.planHandle : els.search;
+			target.focus({ preventScroll: true });
+		}
 		save();
 	}
 
@@ -577,11 +612,22 @@
 		const chevron = document.createElement("span");
 		chevron.className = "card-chevron";
 		chevron.setAttribute("aria-hidden", "true");
-		doneWrap.append(chevron);
+
 
 		const main = document.createElement("div");
 		main.className = "card-main";
-		const title = document.createElement("div");
+		const disclosure = document.createElement("button");
+		disclosure.type = "button"; disclosure.className = "card-disclosure";
+		disclosure.setAttribute("aria-expanded", String(open));
+		disclosure.setAttribute("aria-controls", "body-" + u.id);
+		disclosure.setAttribute("data-focus", "disclosure:" + u.id);
+		disclosure.setAttribute("aria-label", (open ? "Collapse " : "Expand ") + u.name);
+		disclosure.addEventListener("click", () => {
+			if (state.open[u.id]) delete state.open[u.id]; else state.open[u.id] = true;
+			render();
+		});
+		disclosure.append(chevron);
+		const title = document.createElement("span");
 		title.className = "card-title";
 		title.textContent = u.name;
 		if (u.key_name && u.key_name !== u.name) {
@@ -592,7 +638,8 @@
 		}
 		const craftedN = state.crafted[u.id] || 0;
 		if (craftedN > 0) {
-			const tag = document.createElement("span");
+			const tag = document.createElement("button");
+			tag.type = "button";
 			tag.className = "crafted-tag";
 			tag.textContent = "Crafted: " + craftedN;
 			tag.title = "Click to reset this craft count to 0";
@@ -604,9 +651,10 @@
 					render();
 				}
 			});
-			title.append(tag);
+			main.append(tag);
 		}
-		main.append(title);
+		disclosure.append(title);
+		main.append(disclosure);
 		if (u.effect) {
 			const effect = document.createElement("p"); effect.className = "card-effect";
 			effect.textContent = u.effect.replace(/^EFFECT:\s*/i, ""); main.append(effect);
@@ -638,6 +686,7 @@
 		else badge.textContent = prog.met + "/" + prog.total + " requirements met";
 		const planBtn = document.createElement("button");
 		planBtn.type = "button";
+		planBtn.setAttribute("data-focus", "plan:" + u.id);
 		planBtn.className = "plan-btn" + (planned ? " on" : "");
 		planBtn.textContent = planned ? "✓ Planned" : "＋ Plan";
 		planBtn.disabled = done;
@@ -653,6 +702,7 @@
 		if (planned && !done) {
 			const raid = document.createElement("button");
 			raid.type = "button";
+			raid.setAttribute("data-focus", "raid:" + u.id);
 			raid.className = "raid-btn btn tiny";
 			raid.textContent = "Next raid";
 			raid.setAttribute("aria-pressed", String(!!state.raid[u.id]));
@@ -665,16 +715,14 @@
 		top.append(doneWrap);
 		top.append(main);
 		top.append(side);
-		top.addEventListener("click", () => {
-			if (open) delete state.open[u.id];
-			else state.open[u.id] = true;
-			render();
-		});
+
 		card.append(top);
 
 		// body
 		const body = document.createElement("div");
 		body.className = "card-body";
+		body.id = "body-" + u.id;
+		body.hidden = !open;
 		if (u.effect) { const effect = document.createElement("p"); effect.className = "effect-full"; effect.textContent = u.effect.replace(/^EFFECT:\s*/i, ""); body.append(effect); }
 
 		if (u.components.length) {
@@ -739,7 +787,11 @@
 	// hoverable span whose tooltip expands the requirement.
 	function itemLink(id, text, isList, tip, expand) {
 		if (!isList) return guideLink("item", id, text, tip);
-		const s = document.createElement("span");
+		const s = document.createElement("button");
+		s.type = "button";
+		s.setAttribute("aria-label", "Show alternatives for " + text);
+		s.setAttribute("aria-expanded", "false");
+		s.setAttribute("aria-controls", "item-tooltip");
 		s.className = "list-ref";
 		s.textContent = text;
 		if (tip) s.setAttribute("data-tip", tip); // detector + plain-text fallback
@@ -760,6 +812,7 @@
 		cb.checked = met;
 		cb.disabled = locked;
 		cb.title = "I have one of these (any alternative)";
+		cb.setAttribute("aria-label", "Gathered " + alts.map(a => a.name).join(" or ") + " for " + u.name);
 		cb.addEventListener("change", () => setCompGroup(u, gi, cb.checked));
 
 		const text = document.createElement("span");
@@ -793,6 +846,7 @@
 		minus.textContent = "−";
 		minus.disabled = locked || have <= 0;
 		minus.title = "Have one fewer";
+		minus.setAttribute("aria-label", "One fewer " + a.name);
 		minus.addEventListener("click", (e) => {
 			e.stopPropagation();
 			setQty(u, gi, a, have - 1);
@@ -805,6 +859,7 @@
 		qty.value = have;
 		qty.disabled = locked;
 		qty.title = "How many you have";
+		qty.setAttribute("aria-label", "Gathered " + a.name + " for " + u.name);
 		qty.addEventListener("click", (e) => e.stopPropagation());
 		qty.addEventListener("change", () =>
 			setQty(u, gi, a, parseInt(qty.value, 10) || 0),
@@ -820,6 +875,7 @@
 		plus.textContent = "+";
 		plus.disabled = locked || have >= a.count;
 		plus.title = "Have one more";
+		plus.setAttribute("aria-label", "One more " + a.name);
 		plus.addEventListener("click", (e) => {
 			e.stopPropagation();
 			setQty(u, gi, a, have + 1);
@@ -840,6 +896,7 @@
 		cb.type = "checkbox";
 		cb.checked = have;
 		cb.disabled = !!state.done[u.id]; // done ⇒ everything implicitly had
+		cb.setAttribute("aria-label", "Own " + u.tools[idx].name + " for " + u.name);
 		cb.addEventListener("change", () => {
 			checkpoint("Changed owned tool");
 			const k = haveKey(u, section, idx);
@@ -895,6 +952,7 @@
 		cb.type = "checkbox";
 		cb.checked = owned;
 		cb.title = "You own a tool with this quality — shared across all upgrades";
+		cb.setAttribute("aria-label", "Own " + q.name + " level " + q.level);
 		cb.addEventListener("change", () => setQualOwned(q, cb.checked));
 		const text = document.createElement("span");
 		text.className = "req-text";
@@ -916,6 +974,7 @@
 		cb.className = "shop-check";
 		cb.checked = met;
 		cb.title = "You own a tool with this quality — shared across all upgrades";
+		cb.setAttribute("aria-label", "Own " + rec.qual.name + " level " + rec.qual.level);
 		cb.addEventListener("change", () => setQualOwned(rec.qual, cb.checked));
 
 		const name = document.createElement("div");
@@ -957,6 +1016,7 @@
 			cb.type = "checkbox";
 			cb.className = "plan-ready-check";
 			cb.title = "Mark upgrade completed";
+			cb.setAttribute("aria-label", "Complete " + u.name);
 			cb.addEventListener("change", () => {
 				checkpoint("Completed upgrade");
 				if (cb.checked) {
@@ -988,6 +1048,7 @@
 		allPlanned.forEach(u => {
 			const row = document.createElement("div");
 			row.className = "plan-goal";
+			row.setAttribute("data-row", "goal:" + u.id);
 			const name = document.createElement("button"); name.type = "button"; name.className = "text-button plan-goal-name"; name.textContent = u.name;
 			name.addEventListener("click", () => revealUpgrade(u.id));
 			const focus = document.createElement("button"); focus.type = "button";
@@ -1067,6 +1128,7 @@
 			);
 
 			const row = document.createElement("div");
+			row.setAttribute("data-row", "materials:" + rec.groups.map(g => g.u.id + ":" + g.gi).join("|"));
 			row.className =
 				"shop-item" +
 				(allMet ? " have" : "") +
@@ -1075,6 +1137,7 @@
 			const cb = document.createElement("input");
 			cb.type = "checkbox";
 			cb.className = "shop-check";
+			cb.setAttribute("aria-label", "Gathered " + rec.alts.map(a => a.name).join(" or "));
 			cb.checked = allMet;
 			cb.indeterminate = !allMet && unmet.length < rec.groups.length;
 			cb.title =
@@ -1096,7 +1159,10 @@
 				}
 				const c = document.createElement("span");
 				c.className = "count";
-				c.textContent = (counts[a.id] || 0) + "× ";
+				const remaining = Math.max(0, a.count - getQty(rec.groups[0].u, rec.groups[0].gi, a.id));
+				const alternativeCount = allMet ? a.count : remaining;
+				const count = rec.alts.length === 1 ? counts[a.id] || 0 : alternativeCount;
+				c.textContent = count + "× ";
 				name.append(c);
 				name.append(itemLink(a.id, a.name, a.list, a.tip, a.expand));
 			});
@@ -1491,11 +1557,14 @@
 	function setupTooltips() {
 		const tip = document.createElement("div");
 		tip.className = "tooltip";
+		tip.id = "item-tooltip";
+		tip.setAttribute("aria-label", "Item alternatives");
 		tip.style.display = "none";
 		tip.style.pointerEvents = "none";
 		document.body.append(tip);
 		let current = null,
 			frozen = false,
+			pinned = false,
 			freezeTimer = null,
 			hideTimer = null;
 
@@ -1516,12 +1585,16 @@
 			tip.className = "tooltip" + (on ? " frozen" : "");
 			tip.style.pointerEvents = on ? "auto" : "none";
 		}
-		function hide() {
+		function hide(restore = false) {
+			const trigger = current;
+			if (trigger) trigger.setAttribute("aria-expanded", "false");
+			pinned = false;
 			clearFreeze();
 			clearHide();
 			tip.style.display = "none";
 			setFrozen(false);
 			current = null;
+			if (restore && trigger) trigger.focus();
 		}
 		function place(target) {
 			if (!target.getBoundingClientRect) return;
@@ -1564,11 +1637,14 @@
 			}
 		}
 		function show(target) {
+			if (current && current !== target) hide();
 			current = target;
 			clearFreeze();
 			clearHide();
 			setFrozen(false);
 			fill(target);
+			const close = document.createElement("button"); close.type = "button"; close.className = "btn tiny tooltip-close"; close.textContent = "Close";
+			close.addEventListener("click", () => hide(true)); tip.append(close);
 			place(target);
 			freezeTimer = setTimeout(() => {
 				if (current === target) setFrozen(true);
@@ -1576,7 +1652,7 @@
 		}
 		document.addEventListener("mouseover", (e) => {
 			const t = e.target.closest && e.target.closest("[data-tip]");
-			if (!t) return;
+			if (!t || pinned) return;
 			if (t === current) {
 				clearHide();
 				return;
@@ -1585,7 +1661,7 @@
 		});
 		document.addEventListener("mouseout", (e) => {
 			const t = e.target.closest && e.target.closest("[data-tip]");
-			if (!t || t !== current) return;
+			if (!t || t !== current || pinned) return;
 			if (frozen)
 				hideTimer = setTimeout(hide, BRIDGE_MS); // allow travel to tooltip
 			else hide();
@@ -1593,15 +1669,24 @@
 		// Clicking an item-group (not a real-item link) freezes the tooltip at once.
 		document.addEventListener("click", (e) => {
 			const t = e.target.closest && e.target.closest("[data-tip]");
-			if (!t || t.tagName === "A") return; // let real-item links navigate
+			if (!t || t.tagName.toLowerCase() === "a") {
+				if (pinned && !tip.contains(e.target)) hide();
+				return;
+			} // let real-item links navigate
 			if (current !== t) show(t);
-			clearFreeze();
+			clearFreeze(); clearHide(); pinned = true;
+			t.setAttribute("aria-expanded", "true");
+			tip.setAttribute("role", "dialog");
 			setFrozen(true);
+			tip.querySelector("button").focus();
+		});
+		document.addEventListener("keydown", e => {
+			if (e.key === "Escape" && current) { e.preventDefault(); hide(true); }
 		});
 		// Once frozen, entering the tooltip cancels the pending hide; leaving closes.
 		tip.addEventListener("mouseenter", clearHide);
 		tip.addEventListener("mouseleave", () => {
-			if (frozen) hide();
+			if (frozen && !pinned) hide();
 		});
 	}
 
@@ -1634,20 +1719,51 @@
 	});
 	// ---- mobile Plan bottom sheet -------------------------------------------
 	function setupPlanSheet() {
-		const backdrop = document.createElement("div");
-		backdrop.className = "plan-backdrop";
+		const backdrop = document.createElement("div"); backdrop.className = "plan-backdrop";
 		document.body.append(backdrop);
-		let open = false;
-		function setOpen(v) {
-			open = v;
-			els.planPanel.className = "panel sticky" + (open ? " open" : "");
-			backdrop.className = "plan-backdrop" + (open ? " show" : "");
-			els.planHandle.setAttribute("aria-expanded", open ? "true" : "false");
+		const media = window.matchMedia("(max-width: 900px)");
+		const contents = ["plan-views", "plan-heading", "plan-scroll"].map(id => document.querySelector("#" + id));
+		const background = ["main-content", "site-header", "site-footer", "toast"].map(id => document.querySelector("#" + id));
+		let open = false; let returnFocus = null;
+		function sync() {
+			const modal = media.matches && open;
+			contents.forEach(n => { n.inert = media.matches && !open; });
+			background.forEach(n => { n.inert = modal; });
+			document.body.style.overflow = modal ? "hidden" : "";
+			els.planPanel.className = "panel sticky" + (modal ? " open" : "");
+			backdrop.className = "plan-backdrop" + (modal ? " show" : "");
+			els.planHandle.setAttribute("aria-expanded", String(modal));
+			if (modal) { els.planPanel.setAttribute("role", "dialog"); els.planPanel.setAttribute("aria-modal", "true"); els.planPanel.setAttribute("aria-label", "Plan"); }
+			else { els.planPanel.removeAttribute("role"); els.planPanel.removeAttribute("aria-modal"); els.planPanel.removeAttribute("aria-label"); }
 		}
+		function setOpen(value) {
+			const wasOpen = open;
+			open = value && media.matches;
+			if (open && !wasOpen) returnFocus = document.activeElement;
+			sync();
+			if (open) els.planAll.focus();
+			else if (wasOpen && media.matches) (returnFocus || els.planHandle).focus();
+		}
+		closePlanSheet = () => setOpen(false);
 		els.planHandle.addEventListener("click", () => setOpen(!open));
 		backdrop.addEventListener("click", () => setOpen(false));
-		// Opening a card action or planning shouldn't force the sheet, but tapping
-		// "Only in plan" while filtering feels natural to peek — left to the user.
+		media.addEventListener("change", () => {
+			open = false; sync();
+			if (els.planPanel.contains(document.activeElement)) {
+				const target = media.matches ? els.planHandle : els.planAll; target.focus();
+			}
+		});
+		document.addEventListener("keydown", e => {
+			if (!open || !media.matches || e.defaultPrevented) return;
+			if (e.key === "Escape") { e.preventDefault(); setOpen(false); }
+			if (e.key === "Tab") {
+				const nodes = [...els.planPanel.querySelectorAll("button,input,a,select")].filter(n => !n.disabled && !n.hidden && !n.closest("[hidden]") && n.getClientRects().length);
+				const first = nodes[0], last = nodes.at(-1);
+				if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+				else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+			}
+		});
+		sync();
 	}
 
 	// ---- theme toggle (Auto / Light / Dark) ---------------------------------

@@ -101,7 +101,7 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header>
+    <header id="site-header">
       <div class="wrap header-inner">
         <div class="header-text">
           <h1>
@@ -184,7 +184,7 @@
     </header>
 
     <div class="wrap layout">
-      <main>
+      <main id="main-content">
         <div class="controls-sticky">
           <div class="toolbar">
             <div class="search-wrap">
@@ -284,11 +284,11 @@
               <span class="plan-caret" aria-hidden="true">⌃</span>
             </span>
           </button>
-          <div class="plan-views" role="group" aria-label="Plan view">
+          <div class="plan-views" id="plan-views" role="group" aria-label="Plan view">
             <button id="plan-view-all" class="btn" type="button">All planned</button>
             <button id="plan-view-raid" class="btn" type="button">Next raid</button>
           </div>
-          <div class="panel-head">
+          <div class="panel-head" id="plan-heading">
             <h2>Plan</h2>
             <span class="plan-ready-badge" id="plan-footer-summary"></span>
             <div class="panel-actions" id="plan-actions">
@@ -310,7 +310,7 @@
       </aside>
     </div>
 
-    <footer class="wrap">
+    <footer class="wrap" id="site-footer">
       <span id="foot"></span> · Data generated from
       <a
         href="https://github.com/CleverRaven/Cataclysm-DDA"

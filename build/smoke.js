@@ -3,6 +3,17 @@
 const path = require("path");
 const ROOT = path.dirname(__dirname);
 
+function descendants(root) { return (root.children || []).flatMap(n => [n, ...descendants(n)]); }
+function matchesSelector(n, selector) {
+  return selector.split(",").some(part => {
+    const sel = part.trim();
+    if (sel.startsWith("#")) return n.id === sel.slice(1);
+    if (sel.startsWith(".")) return (n.className || "").split(" ").includes(sel.slice(1));
+    const attr = /^\[([^=\]]+)(?:="([^"\]]*)")?\]$/.exec(sel);
+    if (attr) return n.getAttribute && n.getAttribute(attr[1]) !== null && (attr[2] === undefined || n.getAttribute(attr[1]) === attr[2]);
+    return n.tagName === sel;
+  });
+}
 function mkEl(tag) {
   return {
     tagName: tag, children: [], _listeners: {}, style: {}, dataset: {}, _attrs: {},
@@ -12,8 +23,8 @@ function mkEl(tag) {
     set innerHTML(v) { this._html = v; this.children = []; },
     get innerHTML() { return this._html; },
     appendChild(c) { this.children.push(c); return c; },
-    append(...args) { args.forEach(c => this.children.push(c)); },
-    replaceChildren(...args) { this.children = [...args]; },
+    append(...args) { args.forEach(c => { this.children.push(c); if (typeof c === "object") c.parentElement = this; }); },
+    replaceChildren(...args) { this.children.forEach(c => { c.parentElement = null; }); this.children = []; this.append(...args); },
     insertBefore(c, ref) {
       const i = this.children.indexOf(ref);
       if (i === -1) this.children.push(c); else this.children.splice(i, 0, c);
@@ -23,7 +34,8 @@ function mkEl(tag) {
     remove() { /* no-op in shim — elements aren't parented */ },
     addEventListener(ev, fn) { (this._listeners[ev] = this._listeners[ev] || []).push(fn); },
     dispatch(ev, e) { (this._listeners[ev] || []).forEach(fn => fn(e || { stopPropagation() {} })); },
-    setAttribute(k, v) { this._attrs[k] = String(v); },
+    setAttribute(k, v) { this._attrs[k] = String(v); if (k.startsWith("data-")) this.dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = String(v); },
+    removeAttribute(k) { delete this._attrs[k]; },
     getAttribute(k) { return k in this._attrs ? this._attrs[k] : null; },
     get classList() {
       const el = this;
@@ -34,10 +46,15 @@ function mkEl(tag) {
         contains(cls) { return el.className.split(" ").includes(cls); },
       };
     },
-    closest() { return null; },
+    closest(sel) { let n = this; while (n) { if (matchesSelector(n, sel)) return n; n = n.parentElement; } return null; },
+    contains(n) { return n === this || descendants(this).includes(n); },
+    querySelectorAll(sel) { return descendants(this).filter(n => matchesSelector(n, sel)); },
+    querySelector(sel) { return this.querySelectorAll(sel)[0] || null; },
+    scrollIntoView() { this.scrolled = true; },
+    getClientRects() { return [{}]; },
     getBoundingClientRect() { return { left: 0, top: 0, right: 0, bottom: 0 }; },
     select() {},
-    focus() {},
+    focus() { global.document.activeElement = this; },
     click() { this.dispatch("click"); },
   };
 }
@@ -92,14 +109,17 @@ global.document = {
   querySelector: sel => {
     if (sel === ".toolbar") return toolbar;
     if (sel.startsWith("#")) return getEl(sel.slice(1));
+    return Object.values(registry).flatMap(n => [n, ...descendants(n)]).find(n => matchesSelector(n, sel)) || null;
     return null;
   },
-  querySelectorAll: sel => sel === "#theme-toggle .theme-btn" ? themeButtons : [],
+  querySelectorAll: sel => sel === "#theme-toggle .theme-btn" ? themeButtons : [...new Set([...Object.values(registry).flatMap(n => [n, ...descendants(n)]), ...descendants(global.document.body)])].filter(n => matchesSelector(n, sel)),
   createElement: mkEl,
   createTextNode: t => ({ nodeType: 3, textContent: t, _text: t }),
   body: mkEl("body"),
   documentElement: { clientWidth: 1000, dataset: {} },
-  addEventListener: () => {},
+  _listeners: {},
+  addEventListener(ev, fn) { (this._listeners[ev] ||= []).push(fn); },
+  dispatch(ev, e) { (this._listeners[ev] || []).forEach(fn => fn(e)); },
   execCommand: () => true,
 };
 const storeBacking = {};
@@ -122,7 +142,11 @@ global.alert = () => {};
 global.confirm = () => true;
 let promptReturn = null;
 global.prompt = () => promptReturn;
-global.window = { scrollX: 0, scrollY: 0 };
+const mobileMedia = { matches: true, listeners: [], addEventListener(_ev, fn) { this.listeners.push(fn); }, change(value) { this.matches = value; this.listeners.forEach(fn => fn(this)); } };
+global.window = { scrollX: 0, scrollY: 0, matchMedia: q => q.includes("max-width") ? mobileMedia : { matches: false, addEventListener() {} } };
+getEl("plan-panel").append(getEl("plan-handle"), getEl("plan-views"), getEl("plan-heading"), getEl("plan-scroll"));
+getEl("plan-views").append(getEl("plan-view-all"), getEl("plan-view-raid"));
+getEl("plan-scroll").append(getEl("plan-goals"), getEl("plan-ready-list"), getEl("shopping"));
 
 require(path.join(ROOT, "data.js"));
 require(path.join(ROOT, "app.js"));
@@ -263,7 +287,7 @@ assert(labels === 0, "requirement rows no longer use click-to-toggle labels");
 // Tooltips: only item-group (LIST) refs carry a data-tip, and it's the expansion.
 const tipped = [];
 (function walk(n){ const t=n.getAttribute&&n.getAttribute("data-tip"); if(t) tipped.push(n); (n.children||[]).forEach(walk); })(list);
-assert(tipped.length > 0 && tipped.every(n => n.tagName==="span"), "only LIST refs carry tooltips (no item/quality descriptions)");
+assert(tipped.length > 0 && tipped.every(n => n.tagName==="button"), "only LIST refs carry tooltips (no item/quality descriptions)");
 assert(tipped.some(n => /OR/.test(n.getAttribute("data-tip"))), "LIST refs render an expansion tooltip");
 assert(tipped.some(n => Array.isArray(n._tipItems) && n._tipItems[0] && n._tipItems[0].id && n._tipItems[0].label),
   "LIST refs carry structured expansion for in-tooltip links");
@@ -649,6 +673,55 @@ setTimeout(() => {
   searchEl.value = ""; searchEl.dispatch("input");
   const firstCard = findCardByName("Island Rank Up 1");
   assert(textOf(firstCard).includes("Reach Rank 1"), "collapsed card includes its extracted benefit");
+
+  // Keyboard and focus regressions.
+  importFixture({ plan: { [r1]: true }, open: { [r1]: true } });
+  const cardForFocus = findCardByName("Island Rank Up 1");
+  const disclosure = cardForFocus.querySelector(".card-disclosure");
+  assert(disclosure?.tagName === "button" && disclosure.getAttribute("aria-expanded") === "true", "card uses a keyboard-native disclosure with expanded state");
+  assert(list.querySelector(".group-head")?.tagName === "button", "section collapse uses a native button");
+  const focusPlus = cardForFocus.querySelectorAll("button").find(n => n._text === "+");
+  focusPlus.focus(); focusPlus.dispatch("click");
+  assert(document.activeElement !== focusPlus && document.activeElement?._text === "+", "stepper focus follows the rebuilt control after gathering");
+  assert(getEl("plan-scroll").inert === true, "closed mobile Plan excludes its content from keyboard navigation");
+  planHandle.focus(); planHandle.dispatch("click");
+  assert(getEl("main-content").inert === true && planPanel.getAttribute("aria-modal") === "true", "open mobile Plan makes background inert and declares a modal");
+  document.dispatch("keydown", { key: "Escape", preventDefault() {} });
+  assert(!/\bopen\b/.test(planPanel.className) && document.activeElement === planHandle, "Escape closes sheet and restores its handle focus");
+  planHandle.dispatch("click"); mobileMedia.change(false);
+  assert(!getEl("main-content").inert && !getEl("plan-scroll").inert && planPanel.getAttribute("aria-modal") === null, "desktop breakpoint releases modal restrictions");
+  mobileMedia.change(true);
+  const groupDetails = list.querySelector("[data-tip]");
+  assert(groupDetails?.tagName === "button", "item groups have an explicit keyboard control");
+  if (groupDetails) {
+    groupDetails.focus(); document.dispatch("click", { target: groupDetails });
+    const tip = document.body.querySelector(".tooltip");
+    assert(tip.classList.contains("frozen") && tip.querySelector("button"), "clicked item details pin with a Close button");
+    document.dispatch("keydown", { key: "Escape", preventDefault() {} });
+    assert(tip.style.display === "none" && document.activeElement === groupDetails, "Escape closes details and restores trigger focus");
+  }
+
+  // Independent alternatives and bounded recovery history.
+  importFixture({ plan: { SKYISLAND_bunker_temperature_adaptation: true, SKYISLAND_UPGRADE_sunblock: true } });
+  const umbrellaRows = shopping.children.filter(n => textOf(n).includes("telescoping umbrella"));
+  assert(umbrellaRows.length === 2, "independent umbrella alternatives remain separate Plan choices");
+  importFixture({ plan: { SKYISLAND_UPGRADE_scouting2: true } });
+  const batteryRow = shopping.children.find(n => textOf(n).includes("light battery"));
+  assert(!!batteryRow && ["5×", "10×", "15×"].every(t => textOf(batteryRow).includes(t)), "same-ID alternatives preserve their distinct required counts");
+  const rad = "SKYISLAND_UPGRADE_radblock";
+  importFixture({ plan: { [rad]: true }, qty: { [rad + "::comp::0::bleach"]: 15, [rad + "::comp::0::ammonia_hydroxide"]: 15 } });
+  const chemicalRow = shopping.children.find(n => textOf(n).includes("bleach"));
+  assert(chemicalRow && textOf(chemicalRow).includes("15×") && !chemicalRow.children[0].checked, "half of each alternative does not satisfy an OR group");
+  importFixture({ plan: { [r1]: true }, raid: { [r1]: true }, open: { [r1]: true } });
+  const clearButton = getEl("clear-plan"); clearButton.dispatch("click");
+  assert(!getState().plan[r1] && !getState().raid[r1], "Clear empties both plan and raid goals");
+  getEl("undo-progress").dispatch("click");
+  assert(getState().plan[r1] && getState().raid[r1], "Undo restores a cleared plan and focus");
+  for (let i = 0; i < 25; i++) {
+    const next = findByText(findCardByName("Island Rank Up 1"), "Next raid"); next.dispatch("click");
+  }
+  for (let i = 0; i < 20; i++) getEl("undo-progress").dispatch("click");
+  assert(getEl("undo-progress").disabled && !getState().raid[r1], "Undo retains only the last 20 progress changes");
 
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;
