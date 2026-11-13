@@ -1167,7 +1167,7 @@
 				name.append(c);
 				name.append(itemLink(a.id, a.name, a.list, a.tip, a.expand));
 			});
-			name.append(textNode(allMet ? " · gathered" : " · still needed"));
+			if (allMet) name.append(textNode(" · gathered"));
 			const from = document.createElement("div");
 			from.className = "shop-from";
 			from.textContent = [...rec.from].join(", ");
