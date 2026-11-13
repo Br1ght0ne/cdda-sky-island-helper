@@ -101,8 +101,9 @@ mise exec bun -- bun -e 'new Bun.Transpiler({loader:"js"}).transformSync(await B
   does not change it.
 
 Export/Import copies this object as JSON via the clipboard; Reset = `blankState()`.
-Import/export/reset live in the Data disclosure; Undo is a top-level toolbar button. Xedra and Getting
-started live in Settings. Onboarding dismissal uses `skyisland.welcome-dismissed`,
+Import/export/reset live in the Data disclosure; Undo is a top-level toolbar button.
+Settings contains **Display Xedra Evolved content**. Getting-started guidance is
+first-run only, with no Settings action to reopen it. Onboarding dismissal uses `skyisland.welcome-dismissed`,
 a separate UI preference excluded from tracker exports/imports/reset.
 
 **Theme preference** lives in its own key, `skyisland.theme` (`"light"` / `"dark"`,

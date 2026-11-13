@@ -13,7 +13,7 @@ Just open `index.html` in a browser. No server, no build step, no internet.
   grouped by category, each with live progress toward its materials.
 - Three optional Xedra Evolved one-time upgrades under Mod Upgrades, with
   tier 5 vampirism and blood-gift research unlocked after tier 4 vampirism.
-  Enable them with the **Xedra Evolved** checkbox (off by default). Turning
+  Enable them with the **Display Xedra Evolved content** checkbox (off by default). Turning
   it off hides their cards and Plan requirements while preserving progress;
   the choice is saved and included in progress exports.
 - Flexible material tracking — mark a requirement as gathered as a whole, or
@@ -32,9 +32,9 @@ Just open `index.html` in a browser. No server, no build step, no internet.
 - Recover the last 20 progress changes with **Undo**, including crafts,
   imports, resets, and clearing the Plan. Undo history lasts for this page session;
   it does not change theme, filters, or expanded sections.
-- First-run guidance offers save import or a first upgrade. **Settings → Getting
-  started** reopens it. Data contains Export data, Import data, Import game save, and Reset; Settings contains
-  the optional Xedra toggle.
+- First-run guidance offers save import or a first upgrade. Data contains Export
+  data, Import data, Import game save, and Reset. Settings contains the optional
+  **Display Xedra Evolved content** toggle.
 - Every item and tool quality links out to the [CDDA Guide](https://cdda-guide.nornagon.net),
   with expandable tooltips for grouped/alternative requirements.
 - Import your save file to auto-mark completed upgrades, or export/import your

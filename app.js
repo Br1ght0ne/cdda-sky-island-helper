@@ -142,14 +142,12 @@
 		welcomeStart: document.querySelector("#welcome-start"),
 		welcomeImport: document.querySelector("#welcome-import"),
 		welcomeDismiss: document.querySelector("#welcome-dismiss"),
-		help: document.querySelector("#show-help"),
 		results: document.querySelector("#result-count"),
 	};
 
 	// ---- state ---------------------------------------------------------------
 	let state = load();
 	let planView = "all";
-	let forceHelp = false;
 	let closePlanSheet = () => {};
 	let closeItemDetails = () => {};
 	const history = [];
@@ -416,7 +414,7 @@
 		const meaningful = ["done", "plan", "have", "qty", "tools", "crafted"].some(key => Object.values(state[key]).some(Boolean));
 		let dismissed = false;
 		try { dismissed = localStorage.getItem("skyisland.welcome-dismissed") === "true"; } catch (e) {}
-		els.welcome.hidden = !forceHelp && (meaningful || dismissed);
+		els.welcome.hidden = meaningful || dismissed;
 	}
 	function setupDiscovery() {
 		els.availability.addEventListener("change", render);
@@ -427,11 +425,9 @@
 		});
 		els.welcomeImport.addEventListener("click", () => els.importSaveFile.click());
 		els.welcomeDismiss.addEventListener("click", () => {
-			forceHelp = false;
 			try { localStorage.setItem("skyisland.welcome-dismissed", "true"); } catch (e) {}
 			render(); els.search.focus();
 		});
-		els.help.addEventListener("click", () => { forceHelp = true; render(); els.welcome.scrollIntoView({ block: "center" }); els.welcomeStart.focus(); });
 	}
 
 	// ---- rendering -----------------------------------------------------------
