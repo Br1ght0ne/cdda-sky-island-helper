@@ -1908,7 +1908,7 @@
 		function showPlan(view) {
 			planView = view; render();
 			const control = view === "raid" ? els.planRaid : els.planAll;
-			control.focus(); openPlanSheet();
+			openPlanSheet(); control.focus();
 		}
 		function changePlan(u) {
 			if (state.done[u.id]) return;

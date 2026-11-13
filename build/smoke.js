@@ -845,6 +845,12 @@ setTimeout(() => {
   assert(document.activeElement === getEl("open-commands"), "closing palette opened from mobile Plan restores focus outside its closed inert content");
   mobileMedia.change(false);
 
+  mobileMedia.change(true);
+  getEl("open-commands").focus(); getEl("open-commands").dispatch("click");
+  paletteInput.value = "Show Next raid"; paletteInput.dispatch("input"); keyPress("Enter");
+  assert(planPanel.classList.contains("open") && document.activeElement === getEl("plan-view-raid"), "palette Show Next raid focuses the selected view after opening the mobile sheet");
+  keyPress("Escape"); mobileMedia.change(false);
+
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;
   assert(autoBtn.getAttribute("aria-pressed") === "true", "theme toggle starts on Auto");
