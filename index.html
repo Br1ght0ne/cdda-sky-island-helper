@@ -101,7 +101,11 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header>
+    <nav id="skip-navigation" class="skip-links" aria-label="Skip navigation">
+      <a id="skip-upgrades" href="#list">Skip to upgrades</a>
+      <a id="skip-plan" href="#plan-panel">Skip to Plan</a>
+    </nav>
+    <header id="site-header">
       <div class="wrap header-inner">
         <div class="header-text">
           <h1>
@@ -184,13 +188,14 @@
     </header>
 
     <div class="wrap layout">
-      <main>
+      <main id="main-content">
         <div class="controls-sticky">
           <div class="toolbar">
             <div class="search-wrap">
               <input
                 type="search"
                 id="search"
+                aria-label="Search upgrades, materials, and tools"
                 placeholder="Search upgrades or items…"
                 autocomplete="off"
               />
@@ -215,30 +220,51 @@
                 </svg>
               </button>
             </div>
+            <button id="open-commands" class="btn commands-trigger" type="button" aria-haspopup="dialog" aria-controls="command-palette" aria-expanded="false" title="Open commands (Cmd/Ctrl+K)">Commands <kbd>⌘/Ctrl K</kbd></button>
           </div>
           <div class="toolbar toolbar-actions" id="toolbar-actions">
             <div class="toolbar-group">
-              <label class="chk"
-                ><input type="checkbox" id="hide-done" /><span
-                  >Hide done</span
-                ></label
-              >
-              <label class="chk"
-                ><input type="checkbox" id="only-plan" /><span
-                  >Only in plan</span
-                ></label
-              >
-              <label class="chk" title="Show optional Xedra Evolved upgrades"
-                ><input type="checkbox" id="show-xedra" /><span
-                  >Xedra Evolved</span
-                ></label
-              >
+              <button id="hide-done" class="btn filter-toggle" type="button" aria-pressed="false">Hide done</button>
+              <button id="only-plan" class="btn filter-toggle" type="button" aria-pressed="false">Only in plan</button>
+              <label class="filter-label"><span class="filter-caption">Category</span>
+                <select id="category-filter"><option value="">All categories</option></select>
+              </label>
+              <label class="filter-label"><span class="filter-caption">Availability</span>
+                <select id="availability" aria-describedby="availability-help">
+                  <option value="">All upgrades</option>
+                  <option value="available">Available now</option>
+                  <option value="one">Missing one</option>
+                </select>
+              </label>
             </div>
-            <div class="toolbar-group" id="main-actions"></div>
+            <button id="undo-progress" class="btn" type="button" disabled>Undo</button>
+            <details class="control-menu" id="progress-menu">
+              <summary>Data</summary>
+              <div class="menu-content"><div id="main-actions"></div></div>
+            </details>
+            <details class="control-menu" id="settings-menu">
+              <summary>Settings</summary>
+              <div class="menu-content">
+                <label class="chk"><input type="checkbox" id="show-xedra" />Display Xedra Evolved content</label>
+                <label class="chk"><input type="checkbox" id="vim-navigation" />Use Vim j/k navigation</label>
+                <p class="hint keyboard-help">On card titles: ↑/↓ move between cards; Enter expands or collapses. Enable j/k to use those keys for down/up.</p>
+              </div>
+            </details>
           </div>
         </div>
-        <div id="stats" class="stats"></div>
-        <div id="list"></div>
+        <p class="hint filter-help" id="availability-help">Availability uses tracked prerequisites; other in-game conditions may apply.</p>
+        <section id="welcome" class="welcome" aria-label="Getting started">
+          <h2>Plan your next trip home</h2>
+          <p>Choose an upgrade, gather its materials, and mark it complete. Your progress is saved in this browser.</p>
+          <div class="welcome-actions">
+            <button id="welcome-import" class="btn primary" type="button">Import game save</button>
+            <button id="welcome-start" class="btn" type="button">Choose your first upgrade</button>
+            <button id="welcome-dismiss" class="text-button" type="button">Dismiss</button>
+          </div>
+          <p class="hint">Choose master.gsav from your world's save folder. This imports completed upgrades, not gathered inventory or owned tools.</p>
+        </section>
+        <div class="summary-row"><div id="stats" class="stats"></div><span id="result-count" class="hint"></span></div>
+        <div id="list" tabindex="-1" role="region" aria-label="Upgrades"></div>
       </main>
 
       <aside>
@@ -257,7 +283,11 @@
               <span class="plan-caret" aria-hidden="true">⌃</span>
             </span>
           </button>
-          <div class="panel-head">
+          <div class="plan-views" id="plan-views" role="group" aria-label="Plan view">
+            <button id="plan-view-all" class="btn" type="button">All planned</button>
+            <button id="plan-view-raid" class="btn" type="button">Next raid</button>
+          </div>
+          <div class="panel-head" id="plan-heading">
             <h2>Plan</h2>
             <span class="plan-ready-badge" id="plan-footer-summary"></span>
             <div class="panel-actions" id="plan-actions">
@@ -271,6 +301,7 @@
               Click <strong>＋ Plan</strong> on any upgrade to add its materials
               here.
             </p>
+            <div id="plan-goals"></div>
             <div id="plan-ready-list"></div>
             <div id="shopping"></div>
           </div>
@@ -278,7 +309,7 @@
       </aside>
     </div>
 
-    <footer class="wrap">
+    <footer class="wrap" id="site-footer">
       <span id="foot"></span> · Data generated from
       <a
         href="https://github.com/CleverRaven/Cataclysm-DDA"
@@ -295,7 +326,50 @@
       >
     </footer>
 
-    <div id="toast" role="status" aria-live="polite"></div>
+    <dialog id="keyboard-shortcuts" class="utility-dialog" aria-labelledby="shortcuts-title">
+      <div class="utility-box">
+        <div class="command-head"><h2 id="shortcuts-title">Keyboard shortcuts</h2><button id="close-shortcuts" class="btn tiny" type="button">Close</button></div>
+        <h3>On the page</h3>
+        <dl class="shortcut-list">
+          <dt><kbd>?</kbd></dt><dd>Open this help, outside text fields.</dd>
+          <dt><kbd>Cmd/Ctrl K</kbd></dt><dd>Open Commands while the page has focus. The Commands button also works.</dd>
+          <dt><kbd>Tab</kbd> / <kbd>Shift Tab</kbd></dt><dd>Move between controls. Skip links appear at the start of the page.</dd>
+          <dt><kbd>Enter</kbd> / <kbd>Space</kbd></dt><dd>Activate focused buttons; Space toggles checkboxes.</dd>
+        </dl>
+        <h3>In Commands</h3>
+        <dl class="shortcut-list">
+          <dt><kbd>↑</kbd> / <kbd>↓</kbd></dt><dd>Select a result.</dd>
+          <dt><kbd>Enter</kbd></dt><dd>Run a command or open its options.</dd>
+          <dt><kbd>Esc</kbd></dt><dd>Return from options; close at the top level.</dd>
+          <dt><kbd>Backspace</kbd></dt><dd>Return from options when the search field is empty.</dd>
+        </dl>
+        <h3>On an upgrade title</h3>
+        <dl class="shortcut-list">
+          <dt><kbd>↑</kbd> / <kbd>↓</kbd></dt><dd>Move between visible upgrade titles.</dd>
+          <dt><kbd>Enter</kbd> / <kbd>Space</kbd></dt><dd>Expand or collapse the upgrade.</dd>
+          <dt><kbd>j</kbd> / <kbd>k</kbd></dt><dd>Move down / up when “Use Vim j/k navigation” is enabled in Settings.</dd>
+        </dl>
+        <p class="hint">Commands also includes Focus search, Go to upgrades, and Go to Plan. Escape closes Help, Export data, item details, and the mobile Plan sheet, returning focus to the opener.</p>
+      </div>
+    </dialog>
+    <dialog id="export-dialog" class="utility-dialog" aria-labelledby="export-title" aria-describedby="export-description">
+      <div class="utility-box">
+        <div class="command-head"><h2 id="export-title">Export data</h2><button id="close-export" class="btn tiny" type="button">Close</button></div>
+        <p id="export-description">Couldn't copy to clipboard — copy the selected data and paste it somewhere safe.</p>
+        <label class="sr-only" for="export-text">Exported tracker data</label>
+        <textarea id="export-text" class="export-ta" readonly></textarea>
+      </div>
+    </dialog>
+    <dialog id="command-palette" aria-labelledby="command-title">
+      <div class="command-box">
+        <div class="command-head"><button id="command-back" class="btn tiny" type="button" hidden aria-label="Back to previous command list">Back</button><h2 id="command-title">Commands</h2><button id="close-commands" class="btn tiny" type="button">Close</button></div>
+        <label class="sr-only" for="command-search">Search commands and upgrades</label>
+        <input id="command-search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="true" aria-controls="command-results" aria-describedby="command-instructions" autocomplete="off" placeholder="Find an upgrade or action…" />
+        <div id="command-results" role="listbox" aria-label="Commands and upgrades"></div>
+        <div class="command-footer"><span id="command-status" role="status" aria-live="polite"></span><span id="command-instructions">↑/↓ select · Enter runs · Esc closes</span></div>
+      </div>
+    </dialog>
+    <div id="toast" hidden role="status" aria-live="polite"></div>
 
     <script src="data.js"></script>
     <script src="app.js"></script>

@@ -1,8 +1,22 @@
 // @ts-nocheck
 // Minimal DOM shim to smoke-test app.js under node (no jsdom).
 const path = require("path");
+const originalTimeout = global.setTimeout;
+let toastExpiry;
+global.setTimeout = (fn, ms, ...args) => { if (ms === 3500) toastExpiry = fn; return originalTimeout(fn, ms, ...args); };
 const ROOT = path.dirname(__dirname);
 
+function descendants(root) { return (root.children || []).flatMap(n => [n, ...descendants(n)]); }
+function matchesSelector(n, selector) {
+  return selector.split(",").some(part => {
+    const sel = part.trim();
+    if (sel.startsWith("#")) return n.id === sel.slice(1);
+    if (sel.startsWith(".")) return (n.className || "").split(" ").includes(sel.slice(1));
+    const attr = /^\[([^=\]]+)(?:="([^"\]]*)")?\]$/.exec(sel);
+    if (attr) return n.getAttribute && n.getAttribute(attr[1]) !== null && (attr[2] === undefined || n.getAttribute(attr[1]) === attr[2]);
+    return n.tagName === sel;
+  });
+}
 function mkEl(tag) {
   return {
     tagName: tag, children: [], _listeners: {}, style: {}, dataset: {}, _attrs: {},
@@ -12,8 +26,8 @@ function mkEl(tag) {
     set innerHTML(v) { this._html = v; this.children = []; },
     get innerHTML() { return this._html; },
     appendChild(c) { this.children.push(c); return c; },
-    append(...args) { args.forEach(c => this.children.push(c)); },
-    replaceChildren(...args) { this.children = [...args]; },
+    append(...args) { args.forEach(c => { if (c.parentElement) c.parentElement.removeChild(c); this.children.push(c); if (typeof c === "object") c.parentElement = this; }); },
+    replaceChildren(...args) { this.children.forEach(c => { c.parentElement = null; }); this.children = []; this.append(...args); },
     insertBefore(c, ref) {
       const i = this.children.indexOf(ref);
       if (i === -1) this.children.push(c); else this.children.splice(i, 0, c);
@@ -23,8 +37,9 @@ function mkEl(tag) {
     remove() { /* no-op in shim — elements aren't parented */ },
     addEventListener(ev, fn) { (this._listeners[ev] = this._listeners[ev] || []).push(fn); },
     dispatch(ev, e) { (this._listeners[ev] || []).forEach(fn => fn(e || { stopPropagation() {} })); },
-    setAttribute(k, v) { this._attrs[k] = String(v); },
-    getAttribute(k) { return k in this._attrs ? this._attrs[k] : null; },
+    setAttribute(k, v) { this._attrs[k] = String(v); if (k.startsWith("data-")) this.dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = String(v); },
+    removeAttribute(k) { delete this._attrs[k]; },
+    getAttribute(k) { if ((k === "inert" && this.inert) || (k === "hidden" && this.hidden)) return ""; return k in this._attrs ? this._attrs[k] : null; },
     get classList() {
       const el = this;
       return {
@@ -34,10 +49,17 @@ function mkEl(tag) {
         contains(cls) { return el.className.split(" ").includes(cls); },
       };
     },
-    closest() { return null; },
+    closest(sel) { let n = this; while (n) { if (matchesSelector(n, sel)) return n; n = n.parentElement; } return null; },
+    contains(n) { return n === this || descendants(this).includes(n); },
+    querySelectorAll(sel) { return descendants(this).filter(n => matchesSelector(n, sel)); },
+    querySelector(sel) { return this.querySelectorAll(sel)[0] || null; },
+    scrollIntoView() { this.scrolled = true; },
+    getClientRects() { return [{}]; },
     getBoundingClientRect() { return { left: 0, top: 0, right: 0, bottom: 0 }; },
+    showModal() { this.open = true; },
+    close() { this.open = false; this.dispatch("close"); },
     select() {},
-    focus() {},
+    focus() { global.document.activeElement = this; },
     click() { this.dispatch("click"); },
   };
 }
@@ -56,12 +78,23 @@ function getEl(id) { return registry[id] || (registry[id] = mkEl("div")); }
   .forEach(id => {
     let tag;
     if (id === "search") tag = "input";
-    else if (id === "search-clear") tag = "button";
+    else if (["search-clear", "hide-done", "only-plan"].includes(id)) tag = "button";
     else tag = "div";
     registry[id] = mkEl(tag);
     registry[id].value = "";
     registry[id].checked = false;
   });
+for (const id of ["plan-view-all", "plan-view-raid", "plan-handle", "open-commands", "close-commands", "close-shortcuts", "close-export", "undo-progress"]) getEl(id).tagName = "button";
+getEl("command-search").tagName = "input";
+getEl("export-text").tagName = "textarea";
+getEl("keyboard-shortcuts").append(getEl("close-shortcuts"));
+getEl("export-dialog").append(getEl("close-export"), getEl("export-text"));
+getEl("vim-navigation").tagName = "input";
+getEl("command-palette").tagName = "dialog";
+for (const id of ["keyboard-shortcuts", "export-dialog"]) getEl(id).tagName = "dialog";
+for (const [value, label] of [["", "All upgrades"], ["available", "Available now"], ["one", "Missing one"]]) {
+  const option = mkEl("option"); option.value = value; option.textContent = label; getEl("availability").append(option);
+}
 const toolbar = mkEl("div");
 
 // Static #toolbar-actions layout from index.html: a checkbox group placeholder
@@ -70,7 +103,9 @@ const toolbar = mkEl("div");
 // the real DOM.
 const toolbarActionsEl = mkEl("div");
 const mainActionsEl = mkEl("div");
-toolbarActionsEl.children = [mkEl("div"), mainActionsEl];
+const progressMenu = mkEl("details"); progressMenu.append(mainActionsEl);
+registry["progress-menu"] = progressMenu;
+toolbarActionsEl.children = [mkEl("div"), getEl("undo-progress"), progressMenu];
 registry["toolbar-actions"] = toolbarActionsEl;
 registry["main-actions"] = mainActionsEl;
 
@@ -90,14 +125,17 @@ global.document = {
   querySelector: sel => {
     if (sel === ".toolbar") return toolbar;
     if (sel.startsWith("#")) return getEl(sel.slice(1));
+    return Object.values(registry).flatMap(n => [n, ...descendants(n)]).find(n => matchesSelector(n, sel)) || null;
     return null;
   },
-  querySelectorAll: sel => sel === "#theme-toggle .theme-btn" ? themeButtons : [],
+  querySelectorAll: sel => sel === "#theme-toggle .theme-btn" ? themeButtons : [...new Set([...Object.values(registry).flatMap(n => [n, ...descendants(n)]), ...descendants(global.document.body)])].filter(n => matchesSelector(n, sel)),
   createElement: mkEl,
   createTextNode: t => ({ nodeType: 3, textContent: t, _text: t }),
   body: mkEl("body"),
   documentElement: { clientWidth: 1000, dataset: {} },
-  addEventListener: () => {},
+  _listeners: {},
+  addEventListener(ev, fn) { (this._listeners[ev] ||= []).push(fn); },
+  dispatch(ev, e) { (this._listeners[ev] || []).forEach(fn => fn(e)); },
   execCommand: () => true,
 };
 const storeBacking = {};
@@ -120,7 +158,11 @@ global.alert = () => {};
 global.confirm = () => true;
 let promptReturn = null;
 global.prompt = () => promptReturn;
-global.window = { scrollX: 0, scrollY: 0 };
+const mobileMedia = { matches: true, listeners: [], addEventListener(_ev, fn) { this.listeners.push(fn); }, change(value) { this.matches = value; this.listeners.forEach(fn => fn(this)); } };
+global.window = { scrollX: 0, scrollY: 0, matchMedia: q => q.includes("max-width") ? mobileMedia : { matches: false, addEventListener() {} } };
+getEl("plan-panel").append(getEl("plan-handle"), getEl("plan-views"), getEl("plan-heading"), getEl("plan-scroll"));
+getEl("plan-views").append(getEl("plan-view-all"), getEl("plan-view-raid"));
+getEl("plan-scroll").append(getEl("plan-goals"), getEl("plan-ready-list"), getEl("shopping"));
 
 require(path.join(ROOT, "data.js"));
 require(path.join(ROOT, "app.js"));
@@ -162,7 +204,7 @@ assert(planFooterSummary.textContent === "0/" + plannedCount + " ready",
 // Toolbar order: checkboxes, then Expand/Collapse, then the main action
 // buttons (pushed right), with Reset last of those.
 const viewGroupIdx = actions.children.findIndex(c => findByText(c, "Expand all"));
-const mainActionsIdx = actions.children.indexOf(registry["main-actions"]);
+const mainActionsIdx = actions.children.indexOf(registry["progress-menu"]);
 assert(viewGroupIdx !== -1 && viewGroupIdx < mainActionsIdx,
   "Expand/Collapse group sits to the left of the main action buttons");
 assert(registry["main-actions"].children.at(-1)._text === "Reset",
@@ -209,8 +251,10 @@ assert(Object.keys(st.plan).length === planBeforeReq - 1,
 assert(Object.keys(st.done).length >= 1, "sanity: rank-up #1 is currently done");
 planButtons[0].dispatch("click");
 const afterReplan = getState();
-assert(Object.keys(afterReplan.done).length === 0, "re-planning a done upgrade clears its done status");
-assert(Object.keys(afterReplan.plan).length === planBeforeReq, "and adds it back to the plan");
+assert(Object.keys(afterReplan.done).length === 1, "planning cannot silently reopen a completed upgrade");
+assert(Object.keys(afterReplan.plan).length === planBeforeReq - 1, "completed upgrade remains out of plan");
+reqCb.checked = false; reqCb.dispatch("change");
+planButtons[0].dispatch("click");
 
 // Per-alternative +/- steppers track quantities in state.qty
 const stepPlus = [];
@@ -259,7 +303,7 @@ assert(labels === 0, "requirement rows no longer use click-to-toggle labels");
 // Tooltips: only item-group (LIST) refs carry a data-tip, and it's the expansion.
 const tipped = [];
 (function walk(n){ const t=n.getAttribute&&n.getAttribute("data-tip"); if(t) tipped.push(n); (n.children||[]).forEach(walk); })(list);
-assert(tipped.length > 0 && tipped.every(n => n.tagName==="span"), "only LIST refs carry tooltips (no item/quality descriptions)");
+assert(tipped.length > 0 && tipped.every(n => n.tagName==="button"), "only LIST refs carry tooltips (no item/quality descriptions)");
 assert(tipped.some(n => /OR/.test(n.getAttribute("data-tip"))), "LIST refs render an expansion tooltip");
 assert(tipped.some(n => Array.isArray(n._tipItems) && n._tipItems[0] && n._tipItems[0].id && n._tipItems[0].label),
   "LIST refs carry structured expansion for in-tooltip links");
@@ -284,20 +328,20 @@ planHandle.dispatch("click");
 assert(!/\bopen\b/.test(planPanel.className), "tapping again closes the plan sheet");
 
 // Export copies JSON to clipboard
-const expBtn = headerActions.children.find(c => c._text === "Export");
+const expBtn = headerActions.children.find(c => c._text === "Export data");
 assert(!!expBtn, "Export button added to toolbar");
 expBtn.dispatch("click");
-setTimeout(() => {
+setTimeout(async () => {
   assert(clipboard.length > 0 && JSON.parse(clipboard), "export wrote valid JSON to clipboard");
   // Import
   promptReturn = JSON.stringify({ plan: { "SKYISLAND_UPGRADE_landing1": true }, done: {}, have: {}, open: {} });
-  const impBtn = headerActions.children.find(c => c._text === "Import");
+  const impBtn = headerActions.children.find(c => c._text === "Import data");
   impBtn.dispatch("click");
   const after = getState();
   assert(after.plan["SKYISLAND_UPGRADE_landing1"] === true, "import replaced state from JSON");
 
   // Import Save reads a master.gsav, matching mission type_id -> upgrade id
-  const impSaveBtn = headerActions.children.find(c => c._text === "Import Save");
+  const impSaveBtn = headerActions.children.find(c => c._text === "Import game save");
   assert(!!impSaveBtn, "Import Save button added to toolbar");
   const gsav = "# version 39\n" + JSON.stringify({
     active_missions: [
@@ -334,7 +378,7 @@ setTimeout(() => {
   // points (Import replaces `state` via Object.assign(blankState(), parsed) then
   // renders+saves) — writing straight to the mock localStorage backing store
   // would NOT reach the in-memory `state` object app.js actually reads from.
-  const impBtn2 = headerActions.children.find(c => c._text === "Import");
+  const impBtn2 = headerActions.children.find(c => c._text === "Import data");
   promptReturn = JSON.stringify({ done: {}, plan: {}, have: {}, qty: {}, tools: {}, open: { [tree.id]: true }, crafted: {} });
   impBtn2.dispatch("click");
   searchEl.value = ""; searchEl.dispatch("input");
@@ -344,7 +388,7 @@ setTimeout(() => {
     const cards = [];
     (function walk(n){ if (typeof n.className === "string" && (n.className === "card" || n.className.startsWith("card "))) cards.push(n); (n.children || []).forEach(walk); })(list);
     return cards.find(c => (function walk2(n){
-      if (n._text && n._text.includes(name)) return true;
+      if (n.className === "card-title" && n._text === name) return true;
       for (const ch of n.children || []) if (walk2(ch)) return true;
       return false;
     })(c));
@@ -589,6 +633,307 @@ setTimeout(() => {
     impBtn2.dispatch("click");
     assert(xedraToggle.checked === false && !findCardByName(tier4.name), "old tracker imports default optional Xedra content to off");
   }
+
+  // Usability regressions: partial counts, subset actions and undo.
+  const importFixture = value => { promptReturn = JSON.stringify(value); impBtn2.dispatch("click"); };
+  const r1 = "SKYISLAND_UPGRADE_rankup1", r2 = "SKYISLAND_UPGRADE_rankup2";
+  const key1 = r1 + "::comp::0::warptoken";
+  importFixture({ plan: { [r1]: true, [r2]: true }, qty: { [key1]: 1 }, raid: { [r1]: true } });
+  assert(textOf(shopping).includes("5×"), "Plan subtracts partial quantities from remaining shards");
+  getEl("plan-view-raid").dispatch("click");
+  assert(textOf(shopping).includes("1×") && !textOf(shopping).includes("Island Rank Up 2"), "Next raid limits material totals and sources to focused goals");
+  const raidCheck = (shopping.children[0]?.children || []).find(n => n.className === "shop-check");
+  if (raidCheck) { raidCheck.checked = true; raidCheck.dispatch("change"); }
+  assert(getState().have[r1 + "::comp::0"] && !getState().have[r2 + "::comp::0"], "raid gathering affects only selected upgrades");
+  getEl("undo-progress").dispatch("click");
+  assert(!getState().have[r1 + "::comp::0"] && getState().qty[key1] === 1, "Undo restores quantity and flags before gathering");
+  getEl("plan-view-all").dispatch("click");
+  importFixture({ plan: { [r1]: true }, raid: { [r1]: true, bogus: true, [r2]: true } });
+  assert(Object.keys(getState().raid || {}).join() === r1, "import removes orphaned or unplanned raid selections");
+  const completeFocused = doneCbOf(findCardByName("Island Rank Up 1"));
+  completeFocused.checked = true; completeFocused.dispatch("change");
+  assert(!getState().raid?.[r1] && !getState().plan[r1], "completion removes raid focus and plan membership");
+  getEl("undo-progress").dispatch("click");
+  assert(getState().raid?.[r1] && getState().plan[r1] && !getState().done[r1], "Undo completion restores plan and raid focus");
+  importFixture({plan: null, qty: [], raid: null});
+  assert(getState().plan && getState().raid && !Array.isArray(getState().qty), "malformed state maps normalize safely");
+
+  // Discovery and prerequisite navigation.
+  importFixture({});
+  assert(getEl("welcome").hidden === false, "welcome appears for an empty tracker");
+  const available = getEl("availability"), category = getEl("category-filter");
+  available.value = "available"; available.dispatch("change");
+  assert(!!findCardByName("Island Rank Up 1") && !findCardByName("Island Rank Up 2"), "Available now excludes tracked prerequisite blockers");
+  category.value = "Island Rank Up"; category.dispatch("change");
+  assert(countCards() === 1, "category and availability filters intersect");
+  const rankTools = Object.fromEntries(window.SKYISLAND_DATA.upgrades.find(u => u.id === r1).qualities.map(q => [q.id + "::" + q.level, true]));
+  importFixture({ tools: rankTools });
+  available.value = "one"; available.dispatch("change");
+  assert(countCards() === 1, "Missing one requirement selects an unblocked single-requirement upgrade");
+  available.value = ""; category.value = ""; available.dispatch("change");
+  importFixture({ plan: { [r2]: true }, have: { [r2 + "::comp::0"]: true }, tools: rankTools });
+  assert(getEl("welcome").hidden === true, "welcome hides when meaningful progress exists");
+  assert(!textOf(findCardByName("Island Rank Up 2")).includes("✓ ready"), "a locked card with gathered requirements never says ready");
+  const prereqBtn = findByText(findCardByName("Island Rank Up 2"), "Add missing prerequisites to Plan");
+  assert(!!prereqBtn, "blocked upgrades offer prerequisite planning");
+  if (prereqBtn) prereqBtn.dispatch("click");
+  assert(getState().plan[r1] && getState().plan[r2], "prerequisite planning includes target and missing ancestors");
+  getEl("undo-progress").dispatch("click");
+  assert(!getState().plan[r1] && getState().plan[r2], "prerequisite batch is one undo step");
+  const totalOneShot = window.SKYISLAND_DATA.upgrades.filter(u => !u.repeatable && !u.mod).length;
+  assert(textOf(registry.stats).includes("0/" + totalOneShot + " upgrades completed"), "completion summary excludes repeatable recipes");
+  searchEl.value = "Island Rank Up 2"; searchEl.dispatch("input");
+  const prereqLink = findByText(findCardByName("Island Rank Up 2"), "Island Rank Up 1");
+  if (prereqLink) prereqLink.dispatch("click");
+  assert(searchEl.value === "" && getState().open[r1], "prerequisite navigation clears hiding search and reveals target");
+  searchEl.value = ""; searchEl.dispatch("input");
+  const firstCard = findCardByName("Island Rank Up 1");
+  assert(textOf(firstCard).includes("Reach Rank 1"), "collapsed card includes its extracted benefit");
+
+  // Keyboard and focus regressions.
+  importFixture({ plan: { [r1]: true }, open: { [r1]: true } });
+  const cardForFocus = findCardByName("Island Rank Up 1");
+  const disclosure = cardForFocus.querySelector(".card-disclosure");
+  assert(disclosure?.tagName === "button" && disclosure.getAttribute("aria-expanded") === "true", "card uses a keyboard-native disclosure with expanded state");
+  assert(list.querySelector(".group-head")?.tagName === "button", "section collapse uses a native button");
+  const focusPlus = cardForFocus.querySelectorAll("button").find(n => n._text === "+");
+  focusPlus.focus(); focusPlus.dispatch("click");
+  assert(document.activeElement !== focusPlus && document.activeElement?._text === "+", "stepper focus follows the rebuilt control after gathering");
+  assert(getEl("plan-scroll").inert === true, "closed mobile Plan excludes its content from keyboard navigation");
+  planHandle.focus(); planHandle.dispatch("click");
+  assert(getEl("main-content").inert === true && planPanel.getAttribute("aria-modal") === "true", "open mobile Plan makes background inert and declares a modal");
+  document.dispatch("keydown", { key: "Escape", preventDefault() {} });
+  assert(!/\bopen\b/.test(planPanel.className) && document.activeElement === planHandle, "Escape closes sheet and restores its handle focus");
+  planHandle.dispatch("click"); mobileMedia.change(false);
+  assert(!getEl("main-content").inert && !getEl("plan-scroll").inert && planPanel.getAttribute("aria-modal") === null, "desktop breakpoint releases modal restrictions");
+  mobileMedia.change(true);
+  const groupDetails = list.querySelector("[data-tip]");
+  assert(groupDetails?.tagName === "button", "item groups have an explicit keyboard control");
+  if (groupDetails) {
+    groupDetails.focus(); document.dispatch("click", { target: groupDetails });
+    const tip = document.body.querySelector(".tooltip");
+    assert(tip.classList.contains("frozen") && tip.querySelector("button"), "clicked item details pin with a Close button");
+    document.dispatch("keydown", { key: "Escape", preventDefault() {} });
+    assert(tip.style.display === "none" && document.activeElement === groupDetails, "Escape closes details and restores trigger focus");
+  }
+
+  // Independent alternatives and bounded recovery history.
+  importFixture({ plan: { SKYISLAND_bunker_temperature_adaptation: true, SKYISLAND_UPGRADE_sunblock: true } });
+  const umbrellaRows = shopping.children.filter(n => textOf(n).includes("telescoping umbrella"));
+  assert(umbrellaRows.length === 2, "independent umbrella alternatives remain separate Plan choices");
+  importFixture({ plan: { SKYISLAND_UPGRADE_scouting2: true } });
+  const batteryRow = shopping.children.find(n => textOf(n).includes("light battery"));
+  assert(!!batteryRow && ["5×", "10×", "15×"].every(t => textOf(batteryRow).includes(t)), "same-ID alternatives preserve their distinct required counts");
+  const rad = "SKYISLAND_UPGRADE_radblock";
+  importFixture({ plan: { [rad]: true }, qty: { [rad + "::comp::0::bleach"]: 15, [rad + "::comp::0::ammonia_hydroxide"]: 15 } });
+  const chemicalRow = shopping.children.find(n => textOf(n).includes("bleach"));
+  assert(chemicalRow && textOf(chemicalRow).includes("15×") && !chemicalRow.children[0].checked, "half of each alternative does not satisfy an OR group");
+  importFixture({ plan: { [r1]: true }, raid: { [r1]: true }, open: { [r1]: true } });
+  const clearButton = getEl("clear-plan"); clearButton.dispatch("click");
+  assert(!getState().plan[r1] && !getState().raid[r1], "Clear empties both plan and raid goals");
+  getEl("undo-progress").dispatch("click");
+  assert(getState().plan[r1] && getState().raid[r1], "Undo restores a cleared plan and focus");
+  for (let i = 0; i < 25; i++) {
+    const next = findByText(findCardByName("Island Rank Up 1"), "Next raid"); next.dispatch("click");
+  }
+  for (let i = 0; i < 20; i++) getEl("undo-progress").dispatch("click");
+  assert(getEl("undo-progress").disabled && !getState().raid[r1], "Undo retains only the last 20 progress changes");
+
+  // Review regressions: visible focus and truthful, reachable Undo actions.
+  importFixture({ plan: { [r1]: true }, raid: { [r1]: true }, open: { [r1]: true } });
+  mobileMedia.change(false); getEl("plan-view-raid").dispatch("click");
+  const disappearing = shopping.children.find(n => n.className?.includes("shard")).children[0];
+  disappearing.focus(); disappearing.checked = true; disappearing.dispatch("change");
+  assert(document.activeElement === getEl("plan-view-raid"), "desktop removed-row focus falls back to the visible Plan view");
+  getEl("plan-view-all").dispatch("click");
+  importFixture({ plan: { [r1]: true }, open: { [r1]: true } });
+  findByText(findCardByName("Island Rank Up 1"), "Next raid").dispatch("click");
+  const oldToastUndo = findByText(getEl("toast"), "Undo");
+  const quietPlus = findCardByName("Island Rank Up 1").querySelectorAll("button").find(n => n._text === "+");
+  quietPlus.dispatch("click");
+  assert(getEl("toast").hidden || getEl("toast").inert || !findByText(getEl("toast"), "Undo"), "quiet quantity changes retire the prior action's toast Undo");
+  if (oldToastUndo) oldToastUndo.dispatch("click");
+  assert(getState().qty[key1] === 1, "a stale toast Undo cannot undo a different later action");
+  const identicalState = getState(); importFixture(identicalState);
+  const noOpUndo = findByText(getEl("toast"), "Undo");
+  assert(!noOpUndo, "an unchanged import does not offer Undo for an unrelated older change");
+  findByText(findCardByName("Island Rank Up 1"), "Next raid").dispatch("click");
+  const expiringUndo = findByText(getEl("toast"), "Undo");
+  expiringUndo.focus(); if (toastExpiry) toastExpiry();
+  assert(!getEl("toast").hidden && getEl("toast").classList.contains("show"), "toast remains available while its Undo has keyboard focus");
+  searchEl.focus(); if (toastExpiry) toastExpiry();
+  assert(getEl("toast").hidden || getEl("toast").inert, "expired toast Undo is excluded from keyboard navigation");
+  const detailTrigger = list.querySelector("[data-tip]");
+  detailTrigger.focus(); document.dispatch("click", { target: detailTrigger });
+  const detailPanel = document.body.querySelector(".tooltip");
+  const detailClose = detailPanel.querySelector("button"); detailClose.focus();
+  document.dispatch("keydown", { key: "Tab", defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } });
+  assert(document.activeElement === detailPanel.querySelector("a"), "Tab from item details Close wraps to its alternatives");
+  document.dispatch("keydown", { key: "Escape", preventDefault() {} });
+
+  category.value = "Island Rank Up"; registry["hide-done"].setAttribute("aria-pressed", "true");
+  searchEl.value = "Island Rank Up 2"; searchEl.dispatch("input");
+  findByText(findCardByName("Island Rank Up 2"), "Island Rank Up 1").dispatch("click");
+  assert(category.value === "Island Rank Up" && registry["hide-done"].getAttribute("aria-pressed") === "true" && searchEl.value === "", "prerequisite navigation preserves compatible filters");
+  category.value = ""; registry["hide-done"].setAttribute("aria-pressed", "false"); category.dispatch("change");
+  const listUpgrade = window.SKYISLAND_DATA.upgrades.find(u => u.components.some(g => g.some(a => a.list)));
+  importFixture({ plan: { [listUpgrade.id]: true } });
+  mobileMedia.change(true); planHandle.focus(); planHandle.dispatch("click");
+  const sheetDetails = shopping.querySelector("[data-tip]");
+  sheetDetails.focus(); document.dispatch("click", { target: sheetDetails });
+  assert(planPanel.contains(detailPanel) && document.activeElement === detailPanel.querySelector("a"), "mobile item details remain inside the modal and focus the first alternative");
+  document.dispatch("keydown", { key: "Tab", shiftKey: true, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } });
+  assert(document.activeElement === detailPanel.querySelector("button"), "reverse Tab stays within pinned item details");
+  document.dispatch("keydown", { key: "Escape", defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } });
+  assert(planPanel.classList.contains("open") && document.activeElement === sheetDetails, "Escape closes nested item details without closing the Plan");
+  document.dispatch("keydown", { key: "Escape", preventDefault() {} });
+
+  importFixture({plan: { SKYISLAND_UPGRADE_bonusmissions5: true }});
+  assert(textOf(getEl("plan-summary")).includes("4 tools"), "Plan handle includes explicit tools in its missing requirements");
+
+  importFixture({done: { [r1]: true }, plan: { [r2]: true }});
+  const hideButton = getEl("hide-done"), planButton = getEl("only-plan");
+  hideButton.dispatch("click");
+  assert(hideButton.getAttribute("aria-pressed") === "true" && !findCardByName("Island Rank Up 1"), "Hide done button stays pressed and filters completed cards");
+  hideButton.dispatch("click");
+  assert(hideButton.getAttribute("aria-pressed") === "false" && !!findCardByName("Island Rank Up 1"), "Hide done button toggles off and restores completed cards");
+  planButton.dispatch("click");
+  assert(planButton.getAttribute("aria-pressed") === "true" && countCards() === 1 && !!findCardByName("Island Rank Up 2"), "Only in plan button filters to planned cards");
+  planButton.dispatch("click");
+  assert(planButton.getAttribute("aria-pressed") === "false" && countCards() > 1, "Only in plan button toggles off");
+
+  // Palette and scoped card navigation.
+  importFixture({}); mobileMedia.change(false);
+  const palette = getEl("command-palette"), paletteInput = getEl("command-search"), paletteResults = getEl("command-results");
+  const keyPress = (key, extra = {}) => document.dispatch("keydown", { key, target: document.activeElement, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }, ...extra });
+  searchEl.focus(); keyPress("k", { ctrlKey: true });
+  assert(palette.open && document.activeElement === paletteInput, "Ctrl-K opens the palette and focuses command search");
+  paletteInput.value = "Island Rank Up 2"; paletteInput.dispatch("input");
+  assert(textOf(paletteResults).includes("Island Rank Up 2"), "palette finds upgrades by name");
+  keyPress("Enter");
+  assert(!palette.open && getState().open[r2] && document.activeElement?.className === "card-disclosure", "Enter reveals the chosen upgrade and focuses its card");
+  getEl("open-commands").dispatch("click");
+  paletteInput.value = "nonsense-nothing-xyz"; paletteInput.dispatch("input"); keyPress("Enter");
+  assert(palette.open && textOf(paletteResults).includes("No commands or upgrades"), "empty palette results keep Enter inert");
+  keyPress("Escape");
+  assert(!palette.open, "Escape closes the command palette");
+  getEl("open-commands").focus(); getEl("open-commands").dispatch("click"); keyPress("Escape");
+  assert(document.activeElement === getEl("open-commands"), "closing palette returns focus to its opener");
+  getEl("open-commands").dispatch("click"); paletteInput.value = "Vampiric Amplificator"; paletteInput.dispatch("input");
+  assert(!textOf(paletteResults).includes("Open:"), "disabled Xedra upgrades do not appear in palette results"); keyPress("Escape");
+  const navFirst = findCardByName("Island Rank Up 1").querySelector(".card-disclosure"); navFirst.focus();
+  keyPress("ArrowDown");
+  assert(document.activeElement?.closest("[data-upgrade]")?.getAttribute("data-upgrade") === r2, "Down moves focus to the next card");
+  keyPress("ArrowUp"); keyPress("Enter");
+  assert(getState().open[r1], "Enter expands the focused card");
+  keyPress("j"); assert(document.activeElement?.closest("[data-upgrade]")?.getAttribute("data-upgrade") === r1, "Vim aliases are disabled by default");
+  getEl("vim-navigation").checked = true; getEl("vim-navigation").dispatch("change");
+  keyPress("j"); assert(document.activeElement?.closest("[data-upgrade]")?.getAttribute("data-upgrade") === r2, "enabled j moves to the next card");
+  keyPress("k"); assert(document.activeElement?.closest("[data-upgrade]")?.getAttribute("data-upgrade") === r1, "enabled k moves to the previous card");
+  assert(storeBacking["skyisland.vim-keys"] === "true" && !("vimKeys" in getState()), "Vim preference persists separately from tracker progress");
+  searchEl.focus(); keyPress("j"); keyPress("ArrowDown");
+  assert(document.activeElement === searchEl, "navigation leaves text input keys alone");
+  navFirst.focus(); keyPress("k", { metaKey: true });
+  assert(palette.open, "Cmd-K opens palette instead of moving cards with Vim enabled");
+  paletteInput.value = "Plan: Island Rank Up 1"; paletteInput.dispatch("input"); keyPress("Enter");
+  assert(getState().plan[r1], "palette can plan its focused upgrade");
+  getEl("open-commands").dispatch("click"); paletteInput.value = "Undo"; paletteInput.dispatch("input"); keyPress("Enter");
+  assert(!getState().plan[r1], "palette Undo uses the same progress history");
+  getEl("vim-navigation").checked = false; getEl("vim-navigation").dispatch("change");
+
+  category.value = "Island Rank Up"; category.dispatch("change");
+  findCardByName("Island Rank Up 2").querySelector(".card-disclosure").focus(); keyPress("ArrowDown");
+  assert(document.activeElement?.closest("[data-upgrade]")?.getAttribute("data-upgrade") === r2, "card navigation stops at the filtered list boundary");
+  keyPress("ArrowUp", { altKey: true });
+  assert(document.activeElement?.closest("[data-upgrade]")?.getAttribute("data-upgrade") === r2, "modified arrows keep browser shortcuts intact");
+  category.value = ""; category.dispatch("change");
+  mobileMedia.change(true); planHandle.focus(); planHandle.dispatch("click");
+  keyPress("k", { ctrlKey: true }); keyPress("Escape");
+  assert(document.activeElement === getEl("open-commands"), "closing palette opened from mobile Plan restores focus outside its closed inert content");
+  mobileMedia.change(false);
+
+  mobileMedia.change(true);
+  getEl("open-commands").focus(); getEl("open-commands").dispatch("click");
+  paletteInput.value = "Show Next raid"; paletteInput.dispatch("input"); keyPress("Enter");
+  assert(planPanel.classList.contains("open") && document.activeElement === getEl("plan-view-raid"), "palette Show Next raid focuses the selected view after opening the mobile sheet");
+  keyPress("Escape"); mobileMedia.change(false);
+
+  const paletteQuery = query => { getEl("open-commands").dispatch("click"); paletteInput.value = query; paletteInput.dispatch("input"); };
+  importFixture({});
+  paletteQuery("Data -");
+  assert(["Data - Export data", "Data - Import data", "Data - Import game save", "Data - Reset"].every(label => textOf(paletteResults).includes(label)), "palette exposes every Data action"); keyPress("Escape");
+  paletteQuery("Settings - Display Xedra Evolved content"); keyPress("Enter");
+  assert(getState().xedraEnabled && xedraToggle.checked, "palette Xedra toggle updates tracker and Settings");
+  paletteQuery("Settings - Use Vim j/k navigation"); keyPress("Enter");
+  assert(getEl("vim-navigation").checked && storeBacking["skyisland.vim-keys"] === "true", "palette Vim toggle shares the Settings preference");
+  paletteQuery("Category"); keyPress("Enter");
+  assert(palette.open && textOf(paletteResults).includes("All categories") && textOf(paletteResults).includes("Xedra Evolved"), "Category opens a nested palette with enabled options");
+  paletteInput.value = "Island Rank Up"; paletteInput.dispatch("input"); keyPress("Enter");
+  assert(!palette.open && category.value === "Island Rank Up" && countCards() === 2, "nested category selection applies the toolbar filter");
+  paletteQuery("Availability"); keyPress("Enter");
+  assert(palette.open && textOf(paletteResults).includes("Available now") && textOf(paletteResults).includes("Missing one"), "Availability opens its option palette");
+  paletteInput.value = "Available now"; paletteInput.dispatch("input"); keyPress("Enter");
+  assert(available.value === "available" && countCards() === 1, "nested availability selection combines with category");
+  paletteQuery("Category"); keyPress("Enter"); keyPress("Escape");
+  assert(palette.open && paletteInput.value === "Category" && textOf(paletteResults).includes("Category"), "Escape returns to parent palette and restores its search");
+  keyPress("Escape"); assert(!palette.open, "second Escape closes the root palette");
+  paletteQuery("Availability"); keyPress("Enter"); getEl("command-back").dispatch("click");
+  assert(palette.open && paletteInput.value === "Availability", "Back button returns from nested options"); keyPress("Escape");
+  paletteQuery("Data - Import data"); promptReturn = JSON.stringify({plan: {[r1]:true}}); keyPress("Enter");
+  assert(getState().plan[r1] && !getState().xedraEnabled, "palette Import data uses existing import behavior");
+  paletteQuery("Data - Reset"); global.confirm = () => false; keyPress("Enter");
+  assert(getState().plan[r1], "palette Reset retains the existing confirmation guard"); global.confirm = () => true;
+  paletteQuery("Data - Reset"); keyPress("Enter");
+  assert(!getState().plan[r1], "palette Reset uses the existing state reset");
+  paletteQuery("Undo"); keyPress("Enter"); assert(getState().plan[r1], "palette Reset remains undoable");
+  category.value = ""; available.value = ""; category.dispatch("change");
+  getEl("vim-navigation").checked = false; getEl("vim-navigation").dispatch("change");
+
+  // Shortcut discovery and fast navigation.
+  const help = getEl("keyboard-shortcuts");
+  getEl("open-commands").focus(); keyPress("?", { shiftKey: true });
+  assert(help.open && document.activeElement === getEl("close-shortcuts"), "Shift-? opens shortcut help and focuses Close");
+  let helpTabWrapped = false;
+  help.dispatch("keydown", { key: "Tab", preventDefault() { helpTabWrapped = true; } });
+  assert(helpTabWrapped && document.activeElement === getEl("close-shortcuts"), "Tab wraps within shortcut help");
+  help.dispatch("cancel", { preventDefault() {} });
+  assert(!help.open && document.activeElement === getEl("open-commands"), "help Escape restores the opener");
+  searchEl.focus(); keyPress("?", { shiftKey: true });
+  assert(!help.open, "question marks in text inputs do not open help");
+  paletteQuery("Keyboard shortcuts"); keyPress("Enter");
+  assert(help.open && !palette.open, "help command replaces the palette with shortcut help");
+  keyPress("k", { ctrlKey: true });
+  assert(!palette.open, "palette shortcut does not interrupt shortcut help");
+  getEl("close-shortcuts").dispatch("click");
+  paletteQuery("Focus search"); keyPress("Enter");
+  assert(document.activeElement === searchEl, "Focus search command moves to the search field");
+  paletteQuery("Go to upgrades"); keyPress("Enter");
+  assert(document.activeElement === list, "Go to upgrades focuses the upgrades region");
+  getEl("skip-upgrades").dispatch("click", { preventDefault() {} });
+  assert(document.activeElement === list, "Skip to upgrades moves keyboard focus");
+  getEl("plan-view-all").click();
+  mobileMedia.change(true);
+  getEl("skip-plan").dispatch("click", { preventDefault() {} });
+  assert(planPanel.classList.contains("open") && document.activeElement === getEl("plan-view-all"), "Skip to Plan opens and focuses the mobile Plan");
+  assert(getEl("skip-navigation").inert, "mobile Plan makes skip navigation inert");
+  keyPress("Escape");
+  paletteQuery("Go to Plan"); keyPress("Enter");
+  assert(planPanel.classList.contains("open") && document.activeElement === getEl("plan-view-all"), "Go to Plan command opens the mobile sheet");
+  keyPress("Escape"); mobileMedia.change(false);
+  const savedClipboard = navigator.clipboard.writeText;
+  const savedExecCommand = document.execCommand; document.execCommand = () => false;
+  navigator.clipboard.writeText = () => Promise.reject(new Error("clipboard denied"));
+  const exportButton = mainActionsEl.children.find(n => n.textContent === "Export data");
+  document.body.append(mainActionsEl);
+  exportButton.focus(); exportButton.click();
+  await new Promise(resolve => originalTimeout(resolve, 0));
+  const exportDialog = getEl("export-dialog");
+  assert(exportDialog.open && document.activeElement === getEl("export-text") && getEl("export-text").value.includes('"done"'), "clipboard failure opens a native export dialog with focused data");
+  keyPress("?", { shiftKey: true });
+  assert(!help.open, "help shortcut leaves export text entry alone");
+  exportDialog.dispatch("cancel", { preventDefault() {} });
+  assert(!exportDialog.open && document.activeElement === exportButton, "export Escape closes and restores focus");
+  navigator.clipboard.writeText = savedClipboard; document.execCommand = savedExecCommand;
 
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;
