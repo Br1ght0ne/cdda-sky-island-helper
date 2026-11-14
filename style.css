@@ -239,7 +239,7 @@ h1 .accent { color: var(--accent); }
 .req-section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 10px 0 6px; }
 .req { display: flex; align-items: baseline; gap: 9px; padding: 4px 0; border-bottom: 1px solid var(--hairline); }
 .req:last-child { border-bottom: none; }
-.req input { margin-top: 1px; accent-color: var(--good); width: 16px; height: 16px; cursor: pointer; flex: none; }
+.req input[type="checkbox"] { margin-top: 1px; accent-color: var(--good); width: 16px; height: 16px; cursor: pointer; flex: none; }
 .req-text { flex: 1; }
 .quality-egs { color: var(--muted); font-size: 12px; }
 .quality-egs .item-link { color: var(--muted); border-bottom-color: var(--border); }
@@ -255,7 +255,7 @@ h1 .accent { color: var(--accent); }
 .stepper .step:disabled { opacity: .35; cursor: default; }
 .stepper .qty { width: 3ch; min-width: 3ch; border: none; background: transparent; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; font-size: 12.5px; padding: 2px 1px; }
 .stepper .qty:focus { outline: none; background: rgba(var(--accent2-rgb),.15); }
-.stepper .of { color: var(--muted); font-size: 12px; padding: 2px 4px 0 1px; white-space: nowrap; }
+.stepper .of { align-self: center; color: var(--muted); font-size: 12px; padding: 0 4px 0 1px; white-space: nowrap; }
 .stepper.full .qty { color: var(--good); }
 .stepper.full .of { color: var(--good); }
 .req.have .req-text .item-link { color: var(--muted); }
@@ -486,10 +486,9 @@ select { max-width: 100%; min-width: 0; color: var(--text); background: var(--pa
   .stepper .step, .search-clear, .theme-btn { min-height: 44px; }
   .stepper .step { width: 44px; }
   .stepper .qty { width: 4ch; font-size: 16px; }
-  .stepper .of { align-self: center; }
   .req.comp { padding: 8px 0; }
   .req-text { line-height: 2; }
-  .req input, .shop-check, .plan-ready-check, .card-done input { width: 24px; height: 24px; }
+  .req input[type="checkbox"], .shop-check, .plan-ready-check, .card-done input { width: 24px; height: 24px; }
   .list-ref, .text-button { min-height: 32px; }
   .card-disclosure { min-height: 44px; align-items: center; }
   .card-disclosure .card-chevron { align-self: center; margin-top: 0; }
