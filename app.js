@@ -1354,39 +1354,53 @@
 		t._notifyTimer = setTimeout(expireToast, 3500);
 	}
 
-	// Shown when the clipboard API is unavailable — lets the user copy manually.
+	// Native dialogs contain Tab navigation and make the background inert.
+	function setupUtilityDialog(id, closeId, focusId) {
+		const dialog = document.querySelector("#" + id);
+		let opener = null;
+		function close() { if (dialog.open) dialog.close(); }
+		document.querySelector("#" + closeId).addEventListener("click", close);
+		dialog.addEventListener("cancel", e => { e.preventDefault(); close(); });
+		dialog.addEventListener("click", e => { if (e.target === dialog) close(); });
+		dialog.addEventListener("keydown", e => {
+			if (e.key !== "Tab") return;
+			const controls = [...dialog.querySelectorAll("button,input,textarea,select,a")].filter(n => !n.disabled && !n.closest("[hidden],[inert]") && n.getClientRects().length);
+			const first = controls[0], last = controls.at(-1);
+			if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+			else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+		});
+		dialog.addEventListener("close", () => {
+			const key = opener && opener.dataset.focus;
+			const replacement = key && [...document.querySelectorAll("[data-focus]")].find(n => n.dataset.focus === key);
+			const target = replacement || opener;
+			if (target && !target.disabled && !target.closest("[hidden],[inert]") && target.getClientRects().length && document.body.contains(target)) target.focus();
+			else document.querySelector("#open-commands").focus();
+		});
+		return () => {
+			if (dialog.open) return;
+			opener = document.activeElement;
+			closeItemDetails(); closePlanSheet();
+			dialog.showModal();
+			document.querySelector("#" + focusId).focus();
+		};
+	}
+	const openExportDialog = setupUtilityDialog("export-dialog", "close-export", "export-text");
 	function showExportFallback(json) {
-		const overlay = document.createElement("div");
-		overlay.className = "export-overlay";
-		const box = document.createElement("div");
-		box.className = "export-box";
-		const msg = document.createElement("p");
-		msg.textContent =
-			"Couldn't copy to clipboard — select all and copy manually:";
-		const ta = document.createElement("textarea");
-		ta.className = "export-ta";
-		ta.value = json;
-		ta.readOnly = true;
-		const btn = document.createElement("button");
-		btn.type = "button";
-		btn.className = "btn ghost tiny";
-		btn.textContent = "Close";
-		btn.addEventListener("click", () => overlay.remove());
-		box.append(msg, ta, btn);
-		overlay.append(box);
-		document.body.append(overlay);
-		ta.select();
+		const text = document.querySelector("#export-text");
+		text.value = json;
+		openExportDialog(); text.select();
 	}
 
 	// ---- import / export -----------------------------------------------------
 	function exportState() {
+		const returnFocus = document.activeElement;
 		const json = JSON.stringify(state);
 		copyToClipboard(json).then((ok) => {
 			if (ok)
 				notify(
 					"Progress copied to clipboard — paste somewhere safe to back it up.",
 				);
-			else showExportFallback(json);
+			else { returnFocus.focus(); showExportFallback(json); }
 		});
 	}
 	function importState() {
@@ -1791,7 +1805,7 @@
 		document.body.append(backdrop);
 		const media = window.matchMedia("(max-width: 900px)");
 		const contents = ["plan-views", "plan-heading", "plan-scroll"].map(id => document.querySelector("#" + id));
-		const background = ["main-content", "site-header", "site-footer", "toast"].map(id => document.querySelector("#" + id));
+		const background = ["main-content", "site-header", "site-footer", "toast", "skip-navigation"].map(id => document.querySelector("#" + id));
 		let open = false; let returnFocus = null;
 		function sync() {
 			const modal = media.matches && open;
@@ -1885,6 +1899,7 @@
 		const back = document.querySelector("#command-back");
 		const title = document.querySelector("#command-title");
 		const instructions = document.querySelector("#command-instructions");
+		const openHelp = setupUtilityDialog("keyboard-shortcuts", "close-shortcuts", "close-shortcuts");
 		const pages = [];
 		const preferenceKey = "skyisland.vim-keys";
 		let opener = null;
@@ -1919,6 +1934,11 @@
 			const control = view === "raid" ? els.planRaid : els.planAll;
 			openPlanSheet(); control.focus();
 		}
+		function goToUpgrades() {
+			closePlanSheet(); els.list.focus(); els.list.scrollIntoView({ block: "start" });
+		}
+		document.querySelector("#skip-upgrades").addEventListener("click", e => { e.preventDefault(); goToUpgrades(); });
+		document.querySelector("#skip-plan").addEventListener("click", e => { e.preventDefault(); showPlan(planView); });
 		function changePlan(u) {
 			if (state.done[u.id]) return;
 			checkpoint("Changed plan");
@@ -1942,6 +1962,10 @@
 		}
 		function commands() {
 			const list = [
+				{ label: "Keyboard shortcuts", detail: "Help · ?", run: openHelp },
+				{ label: "Focus search", run: () => { closePlanSheet(); els.search.focus(); } },
+				{ label: "Go to upgrades", run: goToUpgrades },
+				{ label: "Go to Plan", run: () => showPlan(planView) },
 				{ label: "Category", detail: "Choose a category", children: () => selectCommands(els.category) },
 				{ label: "Availability", detail: "Choose availability", children: () => selectCommands(els.availability) },
 				...[...els.mainActions.querySelectorAll("button")].map(button => ({ label: "Data - " + button.textContent, detail: button.title, run: () => button.click() })),
@@ -2041,6 +2065,14 @@
 		input.addEventListener("input", () => renderResults());
 		document.addEventListener("keydown", e => {
 			if (e.defaultPrevented || e.isComposing) return;
+			if ([...document.querySelectorAll("dialog")].some(n => n.open && n !== dialog)) return;
+			if (e.key === "?" && !e.metaKey && !e.ctrlKey && !e.altKey && !dialog.open) {
+				const target = e.target;
+				if (target && !target.isContentEditable && !target.closest("input,textarea,select,[contenteditable]")) {
+					e.preventDefault(); openHelp();
+				}
+				return;
+			}
 			if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === "k") {
 				e.preventDefault();
 				if (dialog.open) closePalette(); else openPalette();

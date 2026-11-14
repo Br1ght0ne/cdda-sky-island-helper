@@ -7,6 +7,10 @@ start-location / challenge unlocks.
 
 Just open `index.html` in a browser. No server, no build step, no internet.
 
+Press **?** outside text fields for keyboard help, or run **Keyboard shortcuts**
+in Commands. Commands also offers **Focus search**, **Go to upgrades**, and
+**Go to Plan**. Keyboard-visible skip links appear when tabbing into the page.
+
 ## Features
 
 - Collapsible, searchable, filterable list of upgrades and repeatable crafts,

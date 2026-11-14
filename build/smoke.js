@@ -84,10 +84,14 @@ function getEl(id) { return registry[id] || (registry[id] = mkEl("div")); }
     registry[id].value = "";
     registry[id].checked = false;
   });
-for (const id of ["plan-view-all", "plan-view-raid", "plan-handle", "open-commands", "close-commands", "undo-progress"]) getEl(id).tagName = "button";
+for (const id of ["plan-view-all", "plan-view-raid", "plan-handle", "open-commands", "close-commands", "close-shortcuts", "close-export", "undo-progress"]) getEl(id).tagName = "button";
 getEl("command-search").tagName = "input";
+getEl("export-text").tagName = "textarea";
+getEl("keyboard-shortcuts").append(getEl("close-shortcuts"));
+getEl("export-dialog").append(getEl("close-export"), getEl("export-text"));
 getEl("vim-navigation").tagName = "input";
 getEl("command-palette").tagName = "dialog";
+for (const id of ["keyboard-shortcuts", "export-dialog"]) getEl(id).tagName = "dialog";
 for (const [value, label] of [["", "All upgrades"], ["available", "Available now"], ["one", "Missing one"]]) {
   const option = mkEl("option"); option.value = value; option.textContent = label; getEl("availability").append(option);
 }
@@ -327,7 +331,7 @@ assert(!/\bopen\b/.test(planPanel.className), "tapping again closes the plan she
 const expBtn = headerActions.children.find(c => c._text === "Export data");
 assert(!!expBtn, "Export button added to toolbar");
 expBtn.dispatch("click");
-setTimeout(() => {
+setTimeout(async () => {
   assert(clipboard.length > 0 && JSON.parse(clipboard), "export wrote valid JSON to clipboard");
   // Import
   promptReturn = JSON.stringify({ plan: { "SKYISLAND_UPGRADE_landing1": true }, done: {}, have: {}, open: {} });
@@ -884,6 +888,52 @@ setTimeout(() => {
   paletteQuery("Undo"); keyPress("Enter"); assert(getState().plan[r1], "palette Reset remains undoable");
   category.value = ""; available.value = ""; category.dispatch("change");
   getEl("vim-navigation").checked = false; getEl("vim-navigation").dispatch("change");
+
+  // Shortcut discovery and fast navigation.
+  const help = getEl("keyboard-shortcuts");
+  getEl("open-commands").focus(); keyPress("?", { shiftKey: true });
+  assert(help.open && document.activeElement === getEl("close-shortcuts"), "Shift-? opens shortcut help and focuses Close");
+  let helpTabWrapped = false;
+  help.dispatch("keydown", { key: "Tab", preventDefault() { helpTabWrapped = true; } });
+  assert(helpTabWrapped && document.activeElement === getEl("close-shortcuts"), "Tab wraps within shortcut help");
+  help.dispatch("cancel", { preventDefault() {} });
+  assert(!help.open && document.activeElement === getEl("open-commands"), "help Escape restores the opener");
+  searchEl.focus(); keyPress("?", { shiftKey: true });
+  assert(!help.open, "question marks in text inputs do not open help");
+  paletteQuery("Keyboard shortcuts"); keyPress("Enter");
+  assert(help.open && !palette.open, "help command replaces the palette with shortcut help");
+  keyPress("k", { ctrlKey: true });
+  assert(!palette.open, "palette shortcut does not interrupt shortcut help");
+  getEl("close-shortcuts").dispatch("click");
+  paletteQuery("Focus search"); keyPress("Enter");
+  assert(document.activeElement === searchEl, "Focus search command moves to the search field");
+  paletteQuery("Go to upgrades"); keyPress("Enter");
+  assert(document.activeElement === list, "Go to upgrades focuses the upgrades region");
+  getEl("skip-upgrades").dispatch("click", { preventDefault() {} });
+  assert(document.activeElement === list, "Skip to upgrades moves keyboard focus");
+  getEl("plan-view-all").click();
+  mobileMedia.change(true);
+  getEl("skip-plan").dispatch("click", { preventDefault() {} });
+  assert(planPanel.classList.contains("open") && document.activeElement === getEl("plan-view-all"), "Skip to Plan opens and focuses the mobile Plan");
+  assert(getEl("skip-navigation").inert, "mobile Plan makes skip navigation inert");
+  keyPress("Escape");
+  paletteQuery("Go to Plan"); keyPress("Enter");
+  assert(planPanel.classList.contains("open") && document.activeElement === getEl("plan-view-all"), "Go to Plan command opens the mobile sheet");
+  keyPress("Escape"); mobileMedia.change(false);
+  const savedClipboard = navigator.clipboard.writeText;
+  const savedExecCommand = document.execCommand; document.execCommand = () => false;
+  navigator.clipboard.writeText = () => Promise.reject(new Error("clipboard denied"));
+  const exportButton = mainActionsEl.children.find(n => n.textContent === "Export data");
+  document.body.append(mainActionsEl);
+  exportButton.focus(); exportButton.click();
+  await new Promise(resolve => originalTimeout(resolve, 0));
+  const exportDialog = getEl("export-dialog");
+  assert(exportDialog.open && document.activeElement === getEl("export-text") && getEl("export-text").value.includes('"done"'), "clipboard failure opens a native export dialog with focused data");
+  keyPress("?", { shiftKey: true });
+  assert(!help.open, "help shortcut leaves export text entry alone");
+  exportDialog.dispatch("cancel", { preventDefault() {} });
+  assert(!exportDialog.open && document.activeElement === exportButton, "export Escape closes and restores focus");
+  navigator.clipboard.writeText = savedClipboard; document.execCommand = savedExecCommand;
 
   // ---- theme toggle ---------------------------------------------------
   const [autoBtn, lightBtn, darkBtn] = themeButtons;

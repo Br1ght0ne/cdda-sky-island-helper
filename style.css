@@ -411,16 +411,6 @@ code { background: var(--bg2); padding: 1px 5px; border-radius: 4px; font-size: 
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
 
 /* ---- export fallback modal ---- */
-.export-overlay {
-  position: fixed; inset: 0; z-index: 300;
-  background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center;
-}
-.export-box {
-  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 20px; display: flex; flex-direction: column; gap: 10px;
-  width: min(520px, calc(100vw - 32px));
-}
-.export-box p { margin: 0; font-size: 13px; }
 .export-ta {
   width: 100%; height: 160px; resize: vertical;
   background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
@@ -608,3 +598,16 @@ select { max-width: 100%; min-width: 0; color: var(--text); background: var(--pa
 .command-head h2 { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .command-option { position: relative; padding-right: 30px; }
 .command-next { position: absolute; right: 12px; top: 8px; font-size: 22px; color: var(--muted); }
+
+/* Keyboard entry points and native utility dialogs. */
+.skip-links { position: fixed; top: 8px; left: 8px; z-index: 500; display: flex; flex-wrap: wrap; gap: 8px; max-width: calc(100vw - 16px); }
+.skip-links:not(:focus-within) { transform: translateY(calc(-100% - 16px)); }
+.skip-links a { background: var(--panel); color: var(--text); border: 1px solid var(--accent); border-radius: var(--radius); padding: 12px; }
+.utility-dialog { padding: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); color: var(--text); width: min(580px, calc(100vw - 28px)); max-height: 85dvh; }
+.utility-dialog::backdrop { background: rgba(0,0,0,.65); }
+.utility-box { padding: 18px; overflow-wrap: anywhere; }
+.utility-box h3 { font-size: 14px; margin: 20px 0 10px; }
+.shortcut-list { display: grid; grid-template-columns: minmax(100px, 1fr) 2fr; gap: 12px; font-size: 13px; line-height: 1.5; }
+.shortcut-list dt, .shortcut-list dd { margin: 0; }
+.shortcut-list kbd { font: inherit; color: var(--accent); }
+#list:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }

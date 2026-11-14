@@ -107,6 +107,13 @@ The Vim preference uses its own `skyisland.vim-keys` localStorage key, defaults
 false, and is excluded from progress export/import/reset. Arrow/Enter navigation
 is scoped to focused card disclosures and respects filtered/collapsed content;
 Vim aliases are active only when enabled. Editable controls/modifiers are ignored.
+Keyboard help is a native dialog opened by the **Keyboard shortcuts** command or
+`?` outside editable fields. Help and export fallback contain Tab navigation,
+close with Escape, and restore focus. Other dialogs block global palette shortcuts.
+Keyboard-visible skip links focus upgrades or open/focus the mobile Plan; skip
+navigation is inert while the Plan is modal. Commands includes **Focus search**,
+**Go to upgrades**, and **Go to Plan**.
+
 Commands / Cmd-Ctrl-K opens a native dialog with combobox/listbox results for
 upgrades and actions. Palette actions reuse tracker history and reveal helpers;
 closing must not restore focus into a closed/inert Plan sheet.

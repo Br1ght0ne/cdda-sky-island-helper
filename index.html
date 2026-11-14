@@ -101,6 +101,10 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <nav id="skip-navigation" class="skip-links" aria-label="Skip navigation">
+      <a id="skip-upgrades" href="#list">Skip to upgrades</a>
+      <a id="skip-plan" href="#plan-panel">Skip to Plan</a>
+    </nav>
     <header id="site-header">
       <div class="wrap header-inner">
         <div class="header-text">
@@ -260,7 +264,7 @@
           <p class="hint">Choose master.gsav from your world's save folder. This imports completed upgrades, not gathered inventory or owned tools.</p>
         </section>
         <div class="summary-row"><div id="stats" class="stats"></div><span id="result-count" class="hint"></span></div>
-        <div id="list"></div>
+        <div id="list" tabindex="-1" role="region" aria-label="Upgrades"></div>
       </main>
 
       <aside>
@@ -322,6 +326,40 @@
       >
     </footer>
 
+    <dialog id="keyboard-shortcuts" class="utility-dialog" aria-labelledby="shortcuts-title">
+      <div class="utility-box">
+        <div class="command-head"><h2 id="shortcuts-title">Keyboard shortcuts</h2><button id="close-shortcuts" class="btn tiny" type="button">Close</button></div>
+        <h3>On the page</h3>
+        <dl class="shortcut-list">
+          <dt><kbd>?</kbd></dt><dd>Open this help, outside text fields.</dd>
+          <dt><kbd>Cmd/Ctrl K</kbd></dt><dd>Open Commands while the page has focus. The Commands button also works.</dd>
+          <dt><kbd>Tab</kbd> / <kbd>Shift Tab</kbd></dt><dd>Move between controls. Skip links appear at the start of the page.</dd>
+          <dt><kbd>Enter</kbd> / <kbd>Space</kbd></dt><dd>Activate focused buttons; Space toggles checkboxes.</dd>
+        </dl>
+        <h3>In Commands</h3>
+        <dl class="shortcut-list">
+          <dt><kbd>↑</kbd> / <kbd>↓</kbd></dt><dd>Select a result.</dd>
+          <dt><kbd>Enter</kbd></dt><dd>Run a command or open its options.</dd>
+          <dt><kbd>Esc</kbd></dt><dd>Return from options; close at the top level.</dd>
+          <dt><kbd>Backspace</kbd></dt><dd>Return from options when the search field is empty.</dd>
+        </dl>
+        <h3>On an upgrade title</h3>
+        <dl class="shortcut-list">
+          <dt><kbd>↑</kbd> / <kbd>↓</kbd></dt><dd>Move between visible upgrade titles.</dd>
+          <dt><kbd>Enter</kbd> / <kbd>Space</kbd></dt><dd>Expand or collapse the upgrade.</dd>
+          <dt><kbd>j</kbd> / <kbd>k</kbd></dt><dd>Move down / up when “Use Vim j/k navigation” is enabled in Settings.</dd>
+        </dl>
+        <p class="hint">Commands also includes Focus search, Go to upgrades, and Go to Plan. Escape closes Help, Export data, item details, and the mobile Plan sheet, returning focus to the opener.</p>
+      </div>
+    </dialog>
+    <dialog id="export-dialog" class="utility-dialog" aria-labelledby="export-title" aria-describedby="export-description">
+      <div class="utility-box">
+        <div class="command-head"><h2 id="export-title">Export data</h2><button id="close-export" class="btn tiny" type="button">Close</button></div>
+        <p id="export-description">Couldn't copy to clipboard — copy the selected data and paste it somewhere safe.</p>
+        <label class="sr-only" for="export-text">Exported tracker data</label>
+        <textarea id="export-text" class="export-ta" readonly></textarea>
+      </div>
+    </dialog>
     <dialog id="command-palette" aria-labelledby="command-title">
       <div class="command-box">
         <div class="command-head"><button id="command-back" class="btn tiny" type="button" hidden aria-label="Back to previous command list">Back</button><h2 id="command-title">Commands</h2><button id="close-commands" class="btn tiny" type="button">Close</button></div>
